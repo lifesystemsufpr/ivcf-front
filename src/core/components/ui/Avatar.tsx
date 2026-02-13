@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { cn } from "@/core/utils";
+import { User } from "lucide-react";
 
 type AvatarSize = "xs" | "sm" | "md" | "lg" | "xl";
 type AvatarVariant = "filled" | "outlined";
@@ -99,17 +100,19 @@ export function Avatar({
           aria-hidden
           className="flex h-full w-full items-center justify-center text-[hsl(var(--muted-foreground))]"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            className="h-6 w-6"
-            aria-hidden
-          >
-            <path
-              d="M12 12c2.485 0 4.5-2.015 4.5-4.5S14.485 3 12 3 7.5 5.015 7.5 7.5 9.515 12 12 12Zm0 2.25c-3.263 0-5.985 1.963-6 4.5 0 .414.336.75.75.75h10.5a.75.75 0 0 0 .75-.75c-.015-2.537-2.737-4.5-6-4.5Z"
-              fill="currentColor"
-            />
-          </svg>
+          <User
+            size={
+              size === "xs"
+                ? 12
+                : size === "sm"
+                  ? 16
+                  : size === "md"
+                    ? 20
+                    : size === "lg"
+                      ? 24
+                      : 28
+            }
+          />
         </span>
       )}
     </span>

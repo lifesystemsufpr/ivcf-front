@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { cn } from "@/core/utils";
+import { type LucideIcon } from "lucide-react";
 
 type DropdownPlacement =
   | "bottom-start"
@@ -11,7 +12,7 @@ type DropdownPlacement =
 export type DropdownItem = {
   label: string;
   description?: string;
-  icon?: ReactNode;
+  Icon?: LucideIcon;
   onSelect?: () => void;
   disabled?: boolean;
   danger?: boolean;
@@ -134,16 +135,14 @@ export function Dropdown({
                   close();
                 }}
                 className={cn(
-                  "flex w-full items-start gap-3 px-3 py-2 text-left text-sm transition",
+                  "flex w-full items-start gap-3 px-3 py-2 text-left text-sm transition cursor-pointer",
                   item.disabled
                     ? "cursor-not-allowed text-[hsl(var(--muted-foreground))] opacity-60"
                     : "text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))]",
                   item.danger && "text-[hsl(var(--destructive))]",
                 )}
               >
-                {item.icon && (
-                  <span className="mt-0.5 text-base">{item.icon}</span>
-                )}
+                {item.Icon && <item.Icon size={16} />}
                 <span className="flex flex-col">
                   <span className="font-medium">{item.label}</span>
                   {item.description && (

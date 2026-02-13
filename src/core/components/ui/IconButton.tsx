@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes } from "react";
+import { useEffect, useRef } from "react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/core/utils";
 
@@ -8,7 +9,7 @@ type IconButtonSize = "sm" | "md" | "lg";
 type IconButtonShape = "circular" | "rounded" | "square";
 
 export type IconButtonProps = {
-  icon: LucideIcon;
+  icon: LucideIcon | HTMLElement;
   ariaLabel: string;
   size?: IconButtonSize;
   variant?: IconButtonVariant;
@@ -90,6 +91,15 @@ export function IconButton({
   disabled,
   ...props
 }: IconButtonProps) {
+  const containerRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (Icon instanceof HTMLElement && containerRef.current) {
+      containerRef.current.innerHTML = "";
+      containerRef.current.appendChild(Icon);
+    }
+  }, [Icon]);
+
   return (
     <button
       type={type}
@@ -106,7 +116,11 @@ export function IconButton({
       )}
       {...props}
     >
-      <Icon size={iconSize ?? iconSizeMap[size]} />
+      {Icon instanceof HTMLElement ? (
+        <span ref={containerRef} className="flex items-center justify-center" />
+      ) : (
+        <Icon size={iconSize ?? iconSizeMap[size]} />
+      )}
     </button>
   );
 }

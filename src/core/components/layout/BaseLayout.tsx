@@ -1,12 +1,14 @@
-import { Box, IconButton } from "../ui";
-import { ThemeToggle } from "../ThemeToggle";
+import { Box, Dropdown, IconButton } from "../ui";
 import { Outlet } from "react-router-dom";
 import NavBar from "../NavBar";
 import { useState } from "react";
-import { Menu } from "lucide-react";
+import { Menu, User, Moon, Sun } from "lucide-react";
+import { useTheme } from "@/core/theme/ThemeContext";
 
 export function BaseLayout() {
   const [navOpen, setNavOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
+  const [openDropdown, setOpenDropdown] = useState(false);
 
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
@@ -22,7 +24,36 @@ export function BaseLayout() {
             ariaLabel="Open navigation menu"
             onClick={() => setNavOpen(true)}
           />
-          <ThemeToggle />
+
+          <Dropdown
+            trigger={({ open, toggle }) => (
+              <IconButton
+                icon={User}
+                ariaLabel="Open profile menu"
+                onClick={toggle}
+                aria-expanded={open}
+              />
+            )}
+            placement="bottom-end"
+            open={openDropdown}
+            onOpenChange={setOpenDropdown}
+            items={[
+              {
+                label: "Profile",
+                Icon: User,
+                onSelect: () => {
+                  console.log("Go to profile");
+                },
+              },
+              {
+                label: theme === "light" ? "Dark Mode" : "Light Mode",
+                Icon: theme === "light" ? Moon : Sun,
+                onSelect: () => {
+                  toggleTheme();
+                },
+              },
+            ]}
+          />
         </Box>
       </header>
       <main className="container mx-auto p-6">
