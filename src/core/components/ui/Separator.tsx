@@ -1,0 +1,5 @@
+import { cn } from "../../utils";
+
+export function Separator({ className }: React.HTMLAttributes<HTMLDivElement>) {
+  return <div className={cn("h-px w-full bg-border", className)} />;
+}
