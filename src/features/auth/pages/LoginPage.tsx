@@ -12,7 +12,7 @@ export default function LoginPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    router("/"); // Redireciona para a página inicial após o login
+    router("/");
   };
 
   return (
