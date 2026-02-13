@@ -1,8 +1,8 @@
-import type { ReactNode } from "react";
 import { Typography } from "../ui";
 import { ThemeToggle } from "../ThemeToggle";
+import { Outlet } from "react-router-dom";
 
-export function BaseLayout({ children }: { children: ReactNode }) {
+export function BaseLayout() {
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
       <header className="sticky top-0 z-40 w-full border-b bg-card/80 backdrop-blur-md">
@@ -13,7 +13,9 @@ export function BaseLayout({ children }: { children: ReactNode }) {
           <ThemeToggle />
         </div>
       </header>
-      <main className="container mx-auto p-6">{children}</main>
+      <main className="container mx-auto p-6">
+        <Outlet />
+      </main>
     </div>
   );
 }
