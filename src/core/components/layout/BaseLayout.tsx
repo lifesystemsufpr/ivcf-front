@@ -56,7 +56,7 @@ export function BaseLayout() {
           />
         </Box>
       </header>
-      <main className="container mx-auto p-6">
+      <main className="container mx-auto p-2">
         <Outlet />
       </main>
 

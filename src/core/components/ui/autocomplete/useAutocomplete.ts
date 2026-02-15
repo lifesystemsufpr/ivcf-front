@@ -148,6 +148,18 @@ export function useAutocomplete<T>({
     }
   };
 
+  React.useEffect(() => {
+  const handleClickOutside = (event: MouseEvent) => {
+    if (!rootRef.current) return;
+    if (rootRef.current.contains(event.target as Node)) return;
+    setOpen(false);
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+  return () =>
+    document.removeEventListener("mousedown", handleClickOutside);
+}, [setOpen]);
+
   return {
     id,
     rootRef,

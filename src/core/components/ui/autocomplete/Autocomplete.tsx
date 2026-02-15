@@ -1,12 +1,23 @@
 import * as React from "react";
+import { cn } from "@/core/utils";
 import { useAutocomplete, type UseAutocompleteProps } from "./useAutocomplete";
 
 interface AutocompleteProps<T> extends UseAutocompleteProps<T> {
   renderInput: (props: any) => React.ReactNode;
+  renderOption?: (option: T, state: { active: boolean }) => React.ReactNode;
+  loadingText?: string;
+  noOptionsText?: string;
+  menuClassName?: string;
+  optionClassName?: string;
 }
 
 export function Autocomplete<T>({
   renderInput,
+  renderOption,
+  loadingText = "Carregando...",
+  noOptionsText = "Nenhum resultado",
+  menuClassName,
+  optionClassName,
   ...hookProps
 }: AutocompleteProps<T>) {
   const {
@@ -29,7 +40,7 @@ export function Autocomplete<T>({
   } = useAutocomplete(hookProps);
 
   return (
-    <div ref={rootRef} style={{ position: "relative" }}>
+    <div ref={rootRef} className="relative">
       {renderInput({
         role: "combobox",
         "aria-expanded": open,
@@ -47,48 +58,67 @@ export function Autocomplete<T>({
         onFocus: () => setOpen(true),
       })}
 
-      {open && (
+      <div
+        className={cn(
+          "absolute left-0 right-0 z-50 mt-2 origin-top rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] text-[hsl(var(--foreground))] shadow-xl",
+          "transition-all duration-150 ease-out",
+          open
+            ? "pointer-events-auto scale-100 opacity-100"
+            : "pointer-events-none scale-95 opacity-0",
+          menuClassName,
+        )}
+      >
         <ul
           id={`${id}-listbox`}
           ref={listRef}
           role="listbox"
           onScroll={handleScroll}
-          style={{
-            position: "absolute",
-            width: "100%",
-            maxHeight: 240,
-            overflowY: "auto",
-            background: "#fff",
-            border: "1px solid #ddd",
-            zIndex: 1000,
-          }}
+          className="max-h-60 overflow-y-auto py-1"
         >
-          {filteredOptions.map((option, index) => {
-            const active = index === activeIndex;
+          {loading && (
+            <li className="px-3 py-2 text-sm text-[hsl(var(--muted-foreground))]">
+              {loadingText}
+            </li>
+          )}
 
-            return (
-              <li
-                key={index}
-                id={`${id}-option-${index}`}
-                role="option"
-                aria-selected={active}
-                style={{
-                  padding: 8,
-                  background: active ? "#eee" : undefined,
-                  cursor: "pointer",
-                }}
-                onMouseEnter={() => setActiveIndex(index)}
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => selectOption(option)}
-              >
-                {getOptionLabel(option)}
-              </li>
-            );
-          })}
+          {!loading && filteredOptions.length === 0 && (
+            <li className="px-3 py-2 text-sm text-[hsl(var(--muted-foreground))]">
+              {noOptionsText}
+            </li>
+          )}
 
-          {loading && <li style={{ padding: 8 }}>Loading...</li>}
+          {!loading &&
+            filteredOptions.map((option, index) => {
+              const active = index === activeIndex;
+              const content = renderOption
+                ? renderOption(option, { active })
+                : getOptionLabel(option);
+
+              return (
+                <li key={index} className="w-full">
+                  <button
+                    type="button"
+                    id={`${id}-option-${index}`}
+                    role="option"
+                    aria-selected={active}
+                    onMouseEnter={() => setActiveIndex(index)}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => selectOption(option)}
+                    className={cn(
+                      "flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors cursor-pointer",
+                      active
+                        ? "bg-[hsl(var(--muted))] text-[hsl(var(--foreground))]"
+                        : "text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))]",
+                      optionClassName,
+                    )}
+                  >
+                    {content}
+                  </button>
+                </li>
+              );
+            })}
         </ul>
-      )}
+      </div>
     </div>
   );
 }

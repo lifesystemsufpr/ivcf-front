@@ -1,13 +1,12 @@
 import { Autocomplete, Input } from "@/core/components/ui";
-import { participantsMock } from "../mocks";
-import type { Participant } from "../types";
+import { useParticipantContext } from "../context/ParticipantContext";
 
 export default function ParticipantAutocomplete() {
-  const participantes: Participant[] = participantsMock;
+  const { participants } = useParticipantContext();
 
   return (
     <Autocomplete
-      options={participantes}
+      options={participants}
       renderInput={(params) => (
         <Input {...params} placeholder="Selecione um participante" />
       )}
