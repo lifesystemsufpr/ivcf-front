@@ -12,3 +12,4 @@ export * from "./Drawer";
 export * from "./Dropdown";
 export * from "./Avatar";
 export * from "./IconButton";
+export * from "./autocomplete/Autocomplete";

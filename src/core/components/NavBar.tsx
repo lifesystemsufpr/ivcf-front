@@ -1,4 +1,6 @@
-import { Box, Drawer, Typography } from "./ui";
+import { useNavigate } from "react-router-dom";
+import { clientRoutes } from "../configs/client.routes";
+import { Box, Button, Drawer, Separator } from "./ui";
 
 export interface NavBarProps {
   open: boolean;
@@ -6,6 +8,9 @@ export interface NavBarProps {
 }
 
 export default function NavBar({ open, onClose }: NavBarProps) {
+  const router = useNavigate();
+  const activeRoute = window.location.pathname;
+
   return (
     <Drawer
       open={open}
@@ -14,10 +19,32 @@ export default function NavBar({ open, onClose }: NavBarProps) {
       size="md"
       title="IVCF-20"
     >
-      <Box>
-        <Typography variant="h2" className="mb-4">
-          Navigation
-        </Typography>
+      <Separator />
+      <Box display="flex" direction="column" gap={10} my={10}>
+        <Button
+          variant={activeRoute === "/" ? "secondary" : "default"}
+          onClick={() => router("/")}
+        >
+          Home
+        </Button>
+        <Button
+          variant={
+            activeRoute === clientRoutes.PARTICIPANTS.LIST
+              ? "secondary"
+              : "default"
+          }
+          onClick={() => router(clientRoutes.PARTICIPANTS.LIST)}
+        >
+          Participantes
+        </Button>
+        <Button
+          variant={
+            activeRoute === clientRoutes.IVCF.TEST ? "secondary" : "default"
+          }
+          onClick={() => router(clientRoutes.IVCF.TEST)}
+        >
+          Avaliações
+        </Button>
       </Box>
     </Drawer>
   );
