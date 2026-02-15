@@ -8,6 +8,8 @@ export * from "./Input";
 export * from "./Card";
 export * from "./Box";
 export * from "./Typography";
+export * from "./Dialog";
+export * from "./Modal";
 export * from "./Drawer";
 export * from "./Dropdown";
 export * from "./Avatar";

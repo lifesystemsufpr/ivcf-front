@@ -8,7 +8,7 @@ export default function ParticipantAutocomplete() {
     <Autocomplete
       options={participants}
       renderInput={(params) => (
-        <Input {...params} placeholder="Selecione um participante" />
+        <Input {...params} placeholder="Pesquise um participante" />
       )}
       getOptionLabel={(option) => option.fullName}
     />

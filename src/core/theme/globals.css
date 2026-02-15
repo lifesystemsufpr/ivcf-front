@@ -34,30 +34,45 @@
 }
 
 @layer base {
+
   :root {
-    /* Seus valores HSL atuais */
-    --background: 0 0% 100%;
+    /* Branco frio base */
+    --background: 210 40% 98%;
     --foreground: 217 47% 11%;
+
+    /* Superfícies com hierarquia */
     --card: 0 0% 100%;
     --card-foreground: 217 47% 11%;
-    --popover: 0 0% 100%;
+
+    --popover: 210 40% 99%;
     --popover-foreground: 217 47% 11%;
+
+    /* Azul primário */
     --primary: 215 57% 29%;
     --primary-foreground: 0 0% 100%;
     --primary-hover: 215 57% 35%;
-    --primary-soft: 215 57% 95%;
+    --primary-soft: 215 57% 94%;
+
+    /* Verde accent */
     --accent: 85 64% 51%;
     --accent-foreground: 215 57% 15%;
     --accent-hover: 85 64% 45%;
     --accent-soft: 85 64% 92%;
+
+    /* Destructive */
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 214 32% 88%;
-    --input: 214 32% 92%;
+
+    /* Bordas e inputs agora com leve tonalidade azul */
+    --border: 214 30% 88%;
+    --input: 214 30% 94%;
     --ring: 215 57% 29%;
+
+    /* Muted também frio (não cinza puro) */
     --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 46%;
+    --muted-foreground: 215 20% 40%;
   }
+
 
   .dark {
     --background: 215 57% 10%;
