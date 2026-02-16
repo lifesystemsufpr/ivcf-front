@@ -5,7 +5,7 @@ import AuthLayout from "@/core/components/layout/AuthLayout";
 import LoginPage from "@/features/auth/pages/LoginPage";
 import RegisterPage from "@/features/auth/pages/RegisterPage";
 import { clientRoutes } from "@/core/configs/client.routes";
-import { PatientListPage } from "@/features/participants";
+import { PatientDetailPage, PatientListPage } from "@/features/participants";
 
 export function AppRoutes() {
   return (
@@ -16,6 +16,10 @@ export function AppRoutes() {
           <Route
             path={clientRoutes.PARTICIPANTS.LIST}
             element={<PatientListPage />}
+          />
+          <Route
+            path={clientRoutes.PARTICIPANTS.DETAILS({ id: ":id" })}
+            element={<PatientDetailPage />}
           />
         </Route>
         <Route element={<AuthLayout />}>

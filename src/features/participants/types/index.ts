@@ -11,6 +11,7 @@ export interface Address {
 }
 
 export interface Participant {
+  id?: string;
   fullName: string;
   cpf: string;
   birthDate: string;
@@ -21,4 +22,7 @@ export interface Participant {
   height: number;
   weight: number;
   password: string;
+
+  updatedAt?: string;
+  createdAt?: string;
 }

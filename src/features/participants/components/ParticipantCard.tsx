@@ -11,12 +11,15 @@ import type { Participant } from "../types";
 import { Pencil, PlusCircle, Trash } from "lucide-react";
 import { useState, type MouseEvent } from "react";
 import ParticipantForm from "./ParticipantForm";
+import { useNavigate } from "react-router-dom";
+import { clientRoutes } from "@/core/configs/client.routes";
 
 interface ParticipantCardProps {
   participant: Participant;
 }
 
 export default function ParticipantCard({ participant }: ParticipantCardProps) {
+  const router = useNavigate();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
 
@@ -44,7 +47,9 @@ export default function ParticipantCard({ participant }: ParticipantCardProps) {
     <>
       <Card
         onClick={() => {
-          console.log("Clicou");
+          router(
+            clientRoutes.PARTICIPANTS.DETAILS({ id: participant.id || "" }),
+          );
         }}
         variant={"elevated"}
       >
