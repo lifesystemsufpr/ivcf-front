@@ -4,11 +4,13 @@ import {
   Card,
   CardContent,
   Dialog,
+  Modal,
   Typography,
 } from "@/core/components/ui";
 import type { Participant } from "../types";
 import { Pencil, PlusCircle, Trash } from "lucide-react";
 import { useState, type MouseEvent } from "react";
+import ParticipantForm from "./ParticipantForm";
 
 interface ParticipantCardProps {
   participant: Participant;
@@ -16,15 +18,26 @@ interface ParticipantCardProps {
 
 export default function ParticipantCard({ participant }: ParticipantCardProps) {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   const handleDeleteClick = (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
     setIsDeleteOpen(true);
   };
 
+  const handleEditClick = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    setIsEditOpen(true);
+  };
+
   const handleConfirmDelete = () => {
     console.log("Confirmar exclusao", participant.fullName);
     setIsDeleteOpen(false);
+  };
+
+  const handleUpdateParticipant = (data: Participant) => {
+    console.log("Atualizar participante", data);
+    setIsEditOpen(false);
   };
 
   return (
@@ -50,7 +63,7 @@ export default function ParticipantCard({ participant }: ParticipantCardProps) {
               variant="default"
               size="sm"
               className=" radius-full"
-              onClick={(event) => event.stopPropagation()}
+              onClick={handleEditClick}
             >
               <Pencil size={16} />
             </Button>
@@ -91,6 +104,21 @@ export default function ParticipantCard({ participant }: ParticipantCardProps) {
           </Button>
         </div>
       </Dialog>
+
+      <Modal
+        open={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        title="Editar participante"
+        description="Atualize os dados do participante."
+        size="lg"
+      >
+        <ParticipantForm
+          initialValues={participant}
+          title="Editar participante"
+          onSubmit={handleUpdateParticipant}
+          onCancel={() => setIsEditOpen(false)}
+        />
+      </Modal>
     </>
   );
 }

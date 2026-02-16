@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Box, Button, Input, Label, Typography } from "@/core/components/ui";
 import type { Participant } from "../types";
 
@@ -9,6 +9,7 @@ type ParticipantFormValues = Omit<Participant, "height" | "weight"> & {
 
 type ParticipantFormProps = {
   initialValues?: Partial<Participant>;
+  title?: string;
   onSubmit?: (data: Participant) => void;
   onCancel?: () => void;
 };
@@ -69,6 +70,7 @@ function parseNumber(value: string) {
 
 export default function ParticipantForm({
   initialValues,
+  title,
   onSubmit,
   onCancel,
 }: ParticipantFormProps) {
@@ -76,6 +78,11 @@ export default function ParticipantForm({
   const [values, setValues] = useState<ParticipantFormValues>(() =>
     buildInitialValues(initialValues),
   );
+
+  useEffect(() => {
+    setValues(buildInitialValues(initialValues));
+    setStep(0);
+  }, [initialValues]);
 
   const isLastStep = step === 1;
   const stepLabel = useMemo(
@@ -126,7 +133,7 @@ export default function ParticipantForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <Box display="flex" direction="column" gap={2}>
-        <Typography variant="h4">Novo participante</Typography>
+        <Typography variant="h4">{title ?? "Novo participante"}</Typography>
         <Typography variant="caption">
           Etapa {step + 1} de 2 - {stepLabel}
         </Typography>
@@ -324,7 +331,7 @@ export default function ParticipantForm({
               />
             </div>
 
-            <div className="space-y-2 md:col-span-2">
+            <div className="space-y-2">
               <Label htmlFor="password">Senha</Label>
               <Input
                 id="password"
