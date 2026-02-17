@@ -15,3 +15,8 @@ export function formatDateTime(dateString: string) {
   };
   return new Date(dateString).toLocaleDateString(undefined, options);
 }
+
+export function formatDate(dateString: string) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("pt-BR");
+};
