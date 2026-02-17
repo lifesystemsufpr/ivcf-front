@@ -39,9 +39,9 @@ export default function NavBar({ open, onClose }: NavBarProps) {
         </Button>
         <Button
           variant={
-            activeRoute === clientRoutes.IVCF.TEST ? "secondary" : "default"
+            activeRoute === clientRoutes.IVCF.LIST ? "secondary" : "default"
           }
-          onClick={() => router(clientRoutes.IVCF.TEST)}
+          onClick={() => router(clientRoutes.IVCF.LIST)}
         >
           Avaliações
         </Button>

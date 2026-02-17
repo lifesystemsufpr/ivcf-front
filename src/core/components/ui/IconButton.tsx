@@ -3,7 +3,13 @@ import { useEffect, useRef } from "react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/core/utils";
 
-type IconButtonVariant = "filled" | "outline" | "ghost" | "soft";
+type IconButtonBaseVariant = "filled" | "outline" | "ghost" | "soft";
+type IconButtonAccentVariant =
+  | "accent"
+  | "accentSoft"
+  | "accentOutline"
+  | "accentGhost";
+type IconButtonVariant = IconButtonBaseVariant | IconButtonAccentVariant;
 type IconButtonColor = "neutral" | "primary" | "accent" | "destructive";
 type IconButtonSize = "sm" | "md" | "lg";
 type IconButtonShape = "circular" | "rounded" | "square";
@@ -37,43 +43,42 @@ const shapeMap: Record<IconButtonShape, string> = {
   square: "rounded-md",
 };
 
+const accentVariantMap: Record<IconButtonAccentVariant, IconButtonBaseVariant> =
+  {
+    accent: "filled",
+    accentSoft: "soft",
+    accentOutline: "outline",
+    accentGhost: "ghost",
+  };
+
 const variantColorClasses: Record<
-  IconButtonVariant,
+  IconButtonBaseVariant,
   Record<IconButtonColor, string>
 > = {
   filled: {
-    neutral:
-      "bg-[hsl(var(--muted))] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted-foreground))/15]",
-    primary:
-      "bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] hover:bg-[hsl(var(--primary-hover))]",
-    accent:
-      "bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] hover:bg-[hsl(var(--accent-hover))]",
-    destructive:
-      "bg-[hsl(var(--destructive))] text-[hsl(var(--destructive-foreground))] hover:bg-[hsl(var(--destructive))/85]",
+    neutral: "bg-muted text-foreground hover:bg-muted/80",
+    primary: "bg-primary text-primary-foreground hover:bg-primary-hover",
+    accent: "bg-accent text-accent-foreground hover:bg-accent-hover",
+    destructive: "bg-destructive text-destructive-foreground hover:opacity-90",
   },
   outline: {
-    neutral:
-      "border border-[hsl(var(--border))] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))]",
-    primary:
-      "border border-[hsl(var(--primary))] text-[hsl(var(--primary))] hover:bg-[hsl(var(--primary-soft))]",
-    accent:
-      "border border-[hsl(var(--accent))] text-[hsl(var(--accent))] hover:bg-[hsl(var(--accent-soft))]",
+    neutral: "border border-border text-foreground hover:bg-muted",
+    primary: "border border-primary text-primary hover:bg-primary-soft",
+    accent: "border border-accent text-accent hover:bg-accent-soft",
     destructive:
-      "border border-[hsl(var(--destructive))] text-[hsl(var(--destructive))] hover:bg-[hsl(var(--destructive))/10]",
+      "border border-destructive text-destructive hover:bg-destructive/10",
   },
   ghost: {
-    neutral: "text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))]",
-    primary: "text-[hsl(var(--primary))] hover:bg-[hsl(var(--primary-soft))]",
-    accent: "text-[hsl(var(--accent))] hover:bg-[hsl(var(--accent-soft))]",
-    destructive:
-      "text-[hsl(var(--destructive))] hover:bg-[hsl(var(--destructive))/10]",
+    neutral: "text-foreground hover:bg-muted",
+    primary: "text-primary hover:bg-primary-soft",
+    accent: "text-accent hover:bg-accent-soft",
+    destructive: "text-destructive hover:bg-destructive/10",
   },
   soft: {
-    neutral: "bg-[hsl(var(--muted))] text-[hsl(var(--foreground))]",
-    primary: "bg-[hsl(var(--primary-soft))] text-[hsl(var(--primary))]",
-    accent: "bg-[hsl(var(--accent-soft))] text-[hsl(var(--accent-foreground))]",
-    destructive:
-      "bg-[hsl(var(--destructive))/10] text-[hsl(var(--destructive))]",
+    neutral: "bg-muted text-foreground",
+    primary: "bg-primary-soft text-primary",
+    accent: "bg-accent-soft text-accent-foreground",
+    destructive: "bg-destructive/10 text-destructive",
   },
 };
 
@@ -82,7 +87,7 @@ export function IconButton({
   ariaLabel,
   size = "md",
   variant = "filled",
-  color = "neutral",
+  color = "primary",
   shape = "circular",
   iconSize,
   elevated,
@@ -92,6 +97,11 @@ export function IconButton({
   ...props
 }: IconButtonProps) {
   const containerRef = useRef<HTMLSpanElement>(null);
+  const isAccentVariant = variant in accentVariantMap;
+  const resolvedVariant = isAccentVariant
+    ? accentVariantMap[variant as IconButtonAccentVariant]
+    : (variant as IconButtonBaseVariant);
+  const resolvedColor = isAccentVariant ? "accent" : color;
 
   useEffect(() => {
     if (Icon instanceof HTMLElement && containerRef.current) {
@@ -106,12 +116,12 @@ export function IconButton({
       aria-label={ariaLabel}
       disabled={disabled}
       className={cn(
-        "inline-flex items-center justify-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--card))] cursor-pointer",
+        "inline-flex items-center justify-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer",
         sizeMap[size],
         shapeMap[shape],
-        variantColorClasses[variant][color],
+        variantColorClasses[resolvedVariant][resolvedColor],
         elevated && "shadow-lg shadow-black/10",
-        disabled && "cursor-not-allowed opacity-60",
+        disabled && "cursor-not-allowed",
         className,
       )}
       {...props}

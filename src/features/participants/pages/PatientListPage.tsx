@@ -1,6 +1,6 @@
 import {
   Box,
-  Button,
+  IconButton,
   Modal,
   Separator,
   Typography,
@@ -44,13 +44,14 @@ export function PatientListPage() {
         >
           <ParticipantList />
         </Box>
-        <Button
-          variant="secondary"
-          className="self-end radius-full absolute bottom-4 right-4"
-          onClick={() => setIsCreateOpen(true)}
-        >
-          <Plus size={16} />
-        </Button>
+        <Box className="self-end radius-full absolute bottom-4 right-4">
+          <IconButton
+            variant="accent"
+            icon={Plus}
+            ariaLabel="Adicionar participante"
+            onClick={() => setIsCreateOpen(true)}
+          />
+        </Box>
 
         <Modal
           open={isCreateOpen}

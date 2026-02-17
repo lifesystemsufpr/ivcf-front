@@ -11,7 +11,7 @@ export interface Address {
 }
 
 export interface Participant {
-  id?: string;
+  id: string;
   fullName: string;
   cpf: string;
   birthDate: string;

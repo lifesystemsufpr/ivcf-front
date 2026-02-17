@@ -15,6 +15,7 @@ export const clientRoutes = {
   },
 
   IVCF: {
+    LIST: "/ivcf",
     INSTRUCTIONS: "/ivcf/instructions",
     TEST: "/ivcf/test",
     RESULT: ({ id }: { id: string }) => `/ivcf/result/${id}`,
