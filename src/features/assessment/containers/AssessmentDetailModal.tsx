@@ -50,34 +50,36 @@ export function AssessmentDetailModal({
     <Modal
       open={open}
       onClose={onClose}
-      title="Detalhamento da Avaliação IVCF-20"
-      description="Visualize respostas agrupadas por seção do questionário"
       size="xl"
+      hideCloseButton
+      className="h-[90vh]"
     >
       <Box className="space-y-4">
         <Card className="border">
           <CardContent className="flex flex-col gap-2 p-4">
-            <Box className="flex flex-wrap items-center gap-3">
-              <Typography variant="h3" className="font-semibold">
-                {assessment.participantName}
-              </Typography>
+            <Box
+              className="flex flex-wrap items-center gap-3"
+              justify="space-between"
+            >
+              <Box display="flex" direction="row" gap={1} align="center">
+                <Typography variant="h3" className="font-semibold">
+                  {assessment.participantName}
+                </Typography>
+                <Typography variant="small" className="text-muted-foreground">
+                  {new Date(assessment.date).toLocaleDateString("pt-BR")} Total:{" "}
+                  {assessment.totalScore} pontos
+                </Typography>
+              </Box>
               <Badge
                 className={`${styles.bg} ${styles.border} ${styles.text} border px-3 py-1`}
               >
                 {assessment.classification}
               </Badge>
             </Box>
-            <Typography variant="small" className="text-muted-foreground">
-              Protocolo {assessment.id} ·{" "}
-              {new Date(assessment.date).toLocaleDateString("pt-BR")}
-            </Typography>
-            <Typography variant="small" className="text-muted-foreground">
-              Total: {assessment.totalScore} pontos
-            </Typography>
           </CardContent>
         </Card>
 
-        <Box className="space-y-3 max-h-[65vh] overflow-y-auto pr-1">
+        <Box className="space-y-3  overflow-y-auto pr-1">
           {grouped.map((group) => (
             <GroupSection key={group.id} group={group} />
           ))}

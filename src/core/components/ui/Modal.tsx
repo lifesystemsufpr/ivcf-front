@@ -70,6 +70,8 @@ export function Modal({
 
   if (typeof document === "undefined") return null;
 
+  const showHeader = header || title || description || !hideCloseButton;
+
   return createPortal(
     <div
       className={cn(
@@ -100,7 +102,7 @@ export function Modal({
           className,
         )}
       >
-        {(header || title || description || !hideCloseButton) && (
+        {showHeader && (
           <header className="flex items-start justify-between gap-6 border-b border-[hsl(var(--border))] p-6">
             <div className="space-y-1">
               {header}
@@ -141,7 +143,20 @@ export function Modal({
           </header>
         )}
 
-        <div className="max-h-[75vh] overflow-auto p-6">{children}</div>
+        <div
+          className={`overflow-auto p-6 scrollbar-thin
+          [&::-webkit-scrollbar]:w-2
+          [&::-webkit-scrollbar-track]:bg-transparent
+          [&::-webkit-scrollbar-thumb]:bg-slate-300
+          [&::-webkit-scrollbar-thumb]:rounded-full
+          [&::-webkit-scrollbar-thumb]:border-2
+          [&::-webkit-scrollbar-thumb]:border-transparent
+          [&::-webkit-scrollbar-thumb]:bg-clip-content
+          hover:[&::-webkit-scrollbar-thumb]:bg-slate-400 
+          ${showHeader ? "max-h-[75vh]" : "max-h-[90vh]"}`}
+        >
+          {children}
+        </div>
 
         {footer && (
           <footer className="border-t border-[hsl(var(--border))] p-6">

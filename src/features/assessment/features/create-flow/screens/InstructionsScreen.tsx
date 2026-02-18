@@ -45,7 +45,7 @@ export default function InstructionsScreen({
   const canStart = Boolean(selectedLocalId);
 
   return (
-    <Box className="min-h-screen p-6 flex items-center justify-center">
+    <Box className=" p-3 flex items-center justify-center">
       <Card className="w-full max-w-4xl" padding="lg">
         <CardHeader>
           <CardTitle>Instruções do IVCF-20</CardTitle>

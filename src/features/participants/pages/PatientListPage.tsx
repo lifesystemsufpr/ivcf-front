@@ -30,7 +30,7 @@ export function PatientListPage() {
           justify="space-between"
           align="center"
         >
-          <Typography variant="h4">Lista de Pacientes</Typography>
+          <Typography variant="h4">Lista de Participantes</Typography>
           <ParticipantAutocomplete />
         </Box>
         <Separator className="mt-3 mb-3" />

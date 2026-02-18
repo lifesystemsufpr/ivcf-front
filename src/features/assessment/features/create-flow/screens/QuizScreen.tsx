@@ -113,9 +113,9 @@ export default function QuizScreen() {
   const previousDisabled = currentQuestion === 1 || isSubmitting;
 
   return (
-    <Box className="min-h-screen  p-6 flex items-center justify-center">
+    <Box className="min-h-screen p-6 flex items-center justify-center">
       <Card className="w-full max-w-5xl" padding="lg">
-        <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between p-2">
           <div>
             <CardTitle>Questionário IVCF-20</CardTitle>
             <Typography variant="small" className="text-muted-foreground">
@@ -125,7 +125,7 @@ export default function QuizScreen() {
           <ProgressBar current={currentQuestion} total={IVCF_TOTAL_QUESTIONS} />
         </CardHeader>
 
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 p-2">
           {!participantId && (
             <Alert className="space-y-2 border-amber-300 bg-amber-50 text-amber-800">
               <Typography variant="small" className="font-medium">

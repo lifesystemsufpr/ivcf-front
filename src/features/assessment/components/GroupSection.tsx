@@ -57,7 +57,7 @@ function SubgroupSection({ subgroup }: { subgroup: GroupNode }) {
 
 export default function GroupSection({ group }: { group: GroupNode }) {
   return (
-    <details className="rounded-lg border border-border shadow-sm" open>
+    <details className="rounded-lg border border-border shadow-sm">
       <summary className="flex cursor-pointer items-center justify-between gap-3 px-4 py-3">
         <span className="font-semibold">{group.label}</span>
         <Typography variant="small" className="text-muted-foreground">
