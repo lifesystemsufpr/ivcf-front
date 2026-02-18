@@ -51,11 +51,15 @@ function loadInitialState(): AssessmentState {
   }
 }
 
-export const AssessmentContext = createContext<AssessmentContextValue | undefined>(
-  undefined,
-);
+export const AssessmentContext = createContext<
+  AssessmentContextValue | undefined
+>(undefined);
 
-export function AssessmentProvider({ children }: { children: React.ReactNode }) {
+export function AssessmentProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [state, setState] = useState<AssessmentState>(() => loadInitialState());
 
   useEffect(() => {
@@ -67,7 +71,10 @@ export function AssessmentProvider({ children }: { children: React.ReactNode }) 
   }, [state]);
 
   const totalScore = useMemo(() => {
-    return Object.values(state.answers).reduce((sum, answer) => sum + answer.score, 0);
+    return Object.values(state.answers).reduce(
+      (sum, answer) => sum + answer.score,
+      0,
+    );
   }, [state.answers]);
 
   const value = useMemo<AssessmentContextValue>(() => {
@@ -88,12 +95,18 @@ export function AssessmentProvider({ children }: { children: React.ReactNode }) 
     const nextQuestion = () => {
       setState((prev) => ({
         ...prev,
-        currentQuestion: Math.min(prev.currentQuestion + 1, IVCF_TOTAL_QUESTIONS),
+        currentQuestion: Math.min(
+          prev.currentQuestion + 1,
+          IVCF_TOTAL_QUESTIONS,
+        ),
       }));
     };
 
     const previousQuestion = () => {
-      setState((prev) => ({ ...prev, currentQuestion: Math.max(prev.currentQuestion - 1, 1) }));
+      setState((prev) => ({
+        ...prev,
+        currentQuestion: Math.max(prev.currentQuestion - 1, 1),
+      }));
     };
 
     const setCurrentQuestion = (question: number) => {
@@ -119,13 +132,19 @@ export function AssessmentProvider({ children }: { children: React.ReactNode }) 
     };
   }, [state, totalScore]);
 
-  return <AssessmentContext.Provider value={value}>{children}</AssessmentContext.Provider>;
+  return (
+    <AssessmentContext.Provider value={value}>
+      {children}
+    </AssessmentContext.Provider>
+  );
 }
 
 export function useAssessmentContext() {
   const context = useContext(AssessmentContext);
   if (!context) {
-    throw new Error("useAssessmentContext must be used within an AssessmentProvider");
+    throw new Error(
+      "useAssessmentContext must be used within an AssessmentProvider",
+    );
   }
   return context;
 }

@@ -12,7 +12,9 @@ export function ProgressBar({ current, total }: ProgressBarProps) {
   return (
     <Box className="w-full space-y-2">
       <Box className="flex items-center justify-between">
-        <Typography variant="small">Questão {current} de {total}</Typography>
+        <Typography variant="small">
+          Questão {current} de {total}
+        </Typography>
         <Typography variant="small">{Math.round(percentage)}%</Typography>
       </Box>
       <div className="h-3 w-full overflow-hidden rounded-full bg-muted">

@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { Button, Card, CardContent, CardHeader, CardTitle, Typography } from "@/core/components/ui";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Typography,
+} from "@/core/components/ui";
 import type { IvcfOption, IvcfQuestion } from "../questions";
 
 interface QuestionCardProps {
@@ -8,7 +15,11 @@ interface QuestionCardProps {
   onSelect: (option: IvcfOption) => void;
 }
 
-export function QuestionCard({ question, selectedOptionId, onSelect }: QuestionCardProps) {
+export function QuestionCard({
+  question,
+  selectedOptionId,
+  onSelect,
+}: QuestionCardProps) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -23,7 +34,9 @@ export function QuestionCard({ question, selectedOptionId, onSelect }: QuestionC
       className={`w-full transition-all duration-300 ease-out ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}
     >
       <CardHeader>
-        <Typography variant="small" className="text-muted-foreground">Questão {question.order}</Typography>
+        <Typography variant="small" className="text-muted-foreground">
+          Questão {question.order}
+        </Typography>
         <CardTitle>{question.statement}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
@@ -38,7 +51,10 @@ export function QuestionCard({ question, selectedOptionId, onSelect }: QuestionC
               onClick={() => onSelect(option)}
             >
               <span className="font-medium">{option.label}</span>
-              <Typography variant="caption" className="ml-auto text-muted-foreground">
+              <Typography
+                variant="caption"
+                className={`ml-auto text-muted-foreground ${isActive ? "text-[hsl(var(--foreground))]" : ""}`}
+              >
                 Pontuação: {option.score}
               </Typography>
             </Button>

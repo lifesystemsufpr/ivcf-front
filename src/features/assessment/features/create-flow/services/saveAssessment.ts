@@ -26,7 +26,9 @@ function computeClassification(score: number): FrailtyClassification {
 function persistResult(result: SavedAssessment) {
   try {
     const stored = sessionStorage.getItem(RESULTS_KEY);
-    const parsed: Record<string, SavedAssessment> = stored ? JSON.parse(stored) : {};
+    const parsed: Record<string, SavedAssessment> = stored
+      ? JSON.parse(stored)
+      : {};
     parsed[result.id] = result;
     sessionStorage.setItem(RESULTS_KEY, JSON.stringify(parsed));
   } catch (error) {
@@ -34,9 +36,17 @@ function persistResult(result: SavedAssessment) {
   }
 }
 
-export async function saveAssessment({ participantId, answers }: SaveAssessmentInput) {
-  const totalScore = Object.values(answers).reduce((sum, answer) => sum + answer.score, 0);
-  const id = crypto.randomUUID ? crypto.randomUUID() : `assessment-${Date.now()}`;
+export async function saveAssessment({
+  participantId,
+  answers,
+}: SaveAssessmentInput) {
+  const totalScore = Object.values(answers).reduce(
+    (sum, answer) => sum + answer.score,
+    0,
+  );
+  const id = crypto.randomUUID
+    ? crypto.randomUUID()
+    : `assessment-${Date.now()}`;
   const createdAt = new Date().toISOString();
   const classification = computeClassification(totalScore);
 

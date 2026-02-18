@@ -28,7 +28,10 @@ export function AppRoutes() {
           />
           <Route path={clientRoutes.IVCF.LIST} element={<AssessmentPage />} />
           <Route element={<CreateAssessmentLayout />}>
-            <Route path={clientRoutes.IVCF.INSTRUCTIONS} element={<InstructionsScreen />} />
+            <Route
+              path={clientRoutes.IVCF.INSTRUCTIONS}
+              element={<InstructionsScreen />}
+            />
             <Route path={clientRoutes.IVCF.TEST} element={<QuizScreen />} />
             <Route
               path={clientRoutes.IVCF.RESULT({ id: ":id" })}
