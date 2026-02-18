@@ -1,13 +1,4 @@
-import {
-  Alert,
-  Badge,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  Typography,
-} from "@/core/components/ui";
+import { Box, Typography } from "@/core/components/ui";
 
 export default function HomePage() {
   return (
