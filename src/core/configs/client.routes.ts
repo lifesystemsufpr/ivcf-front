@@ -16,8 +16,8 @@ export const clientRoutes = {
 
   IVCF: {
     LIST: "/ivcf",
-    INSTRUCTIONS: "/ivcf/instructions",
-    TEST: "/ivcf/test",
+    INSTRUCTIONS: "/ivcf/new/instructions",
+    TEST: "/ivcf/new/assessment",
     RESULT: ({ id }: { id: string }) => `/ivcf/result/${id}`,
     EXPORT: ({ id }: { id: string }) => `/ivcf/result/${id}/pdf`,
   },
