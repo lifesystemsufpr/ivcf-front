@@ -43,6 +43,13 @@ export default function ParticipantCard({ participant }: ParticipantCardProps) {
     setIsEditOpen(false);
   };
 
+  const handleStartAssessment = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    router(clientRoutes.IVCF.INSTRUCTIONS, {
+      state: { participantId: participant.id },
+    });
+  };
+
   return (
     <>
       <Card
@@ -77,7 +84,7 @@ export default function ParticipantCard({ participant }: ParticipantCardProps) {
               variant="default"
               size="sm"
               className="radius-full"
-              onClick={(event) => event.stopPropagation()}
+              onClick={handleStartAssessment}
             >
               <PlusCircle size={16} />
             </Button>

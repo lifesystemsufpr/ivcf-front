@@ -113,7 +113,7 @@ export default function QuizScreen() {
   const previousDisabled = currentQuestion === 1 || isSubmitting;
 
   return (
-    <Box className="min-h-screen bg-muted/30 p-6 flex items-center justify-center">
+    <Box className="min-h-screen  p-6 flex items-center justify-center">
       <Card className="w-full max-w-5xl" padding="lg">
         <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>

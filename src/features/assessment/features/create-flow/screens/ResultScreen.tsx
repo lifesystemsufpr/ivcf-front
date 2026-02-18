@@ -25,7 +25,7 @@ export default function ResultScreen() {
 
   if (!assessment) {
     return (
-      <Box className="min-h-screen bg-muted/30 p-6 flex items-center justify-center">
+      <Box className="min-h-screen p-6 flex items-center justify-center">
         <Card padding="lg" className="w-full max-w-3xl space-y-4">
           <CardHeader>
             <CardTitle>Resultado não encontrado</CardTitle>

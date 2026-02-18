@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useMemo } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   Box,
   Button,
@@ -18,43 +18,34 @@ interface InstructionsScreenProps {
 }
 
 export default function InstructionsScreen({
-  participantId,
+  participantId: propParticipantId,
 }: InstructionsScreenProps) {
   const navigate = useNavigate();
-  const {
-    participantId: selectedId,
-    selectParticipant,
-    reset,
-  } = useAssessmentContext();
-  const [localParticipantId, setLocalParticipantId] = useState<string | null>(
-    participantId ?? null,
+  const location = useLocation();
+  const { selectParticipant, reset } = useAssessmentContext();
+
+  const initialId = useMemo(() => {
+    const stateId = (location.state as { participantId?: string } | null)
+      ?.participantId;
+    return propParticipantId ?? stateId ?? null;
+  }, [propParticipantId, location.state]);
+
+  const [selectedLocalId, setSelectedLocalId] = useState<string | null>(
+    initialId,
   );
 
-  useEffect(() => {
-    if (participantId) {
-      selectParticipant(participantId);
-    }
-  }, [participantId, selectParticipant]);
-
-  useEffect(() => {
-    if (selectedId && !localParticipantId) {
-      setLocalParticipantId(selectedId);
-    }
-  }, [selectedId, localParticipantId]);
-
-  const canStart = Boolean(localParticipantId || participantId || selectedId);
-
   const handleStart = () => {
-    const effectiveId = localParticipantId || participantId || selectedId;
-    if (!effectiveId) return;
-
+    if (!selectedLocalId) return;
     reset();
-    selectParticipant(effectiveId);
+    selectParticipant(selectedLocalId);
+
     navigate(clientRoutes.IVCF.TEST);
   };
 
+  const canStart = Boolean(selectedLocalId);
+
   return (
-    <Box className="min-h-screen bg-muted/30 p-6 flex items-center justify-center">
+    <Box className="min-h-screen p-6 flex items-center justify-center">
       <Card className="w-full max-w-4xl" padding="lg">
         <CardHeader>
           <CardTitle>Instruções do IVCF-20</CardTitle>
@@ -65,35 +56,51 @@ export default function InstructionsScreen({
         </CardHeader>
         <CardContent className="space-y-6">
           <Box className="space-y-2">
-            <Typography>O que esperar:</Typography>
+            <Typography className="font-medium">O que esperar:</Typography>
             <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
               <li>Uma pergunta por vez, para manter o foco.</li>
-              <li>
-                Suas respostas são salvas automaticamente durante o
-                preenchimento.
-              </li>
+              <li>Suas respostas são salvas automaticamente.</li>
               <li>Você poderá voltar para revisar antes de finalizar.</li>
             </ul>
           </Box>
 
-          {!participantId && (
+          {/* Só mostra o seletor se não veio um ID fixo por prop ou state */}
+          {!initialId && (
             <Box className="space-y-2">
               <Typography variant="small" className="font-medium">
                 Escolha o participante
               </Typography>
               <ParticipantAutocomplete
-                onChange={(value) => setLocalParticipantId(value?.id ?? null)}
+                onChange={(value) => setSelectedLocalId(value?.id ?? null)}
+                initialId={selectedLocalId}
                 className="max-w-xl"
               />
             </Box>
           )}
 
-          <Box className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <Typography variant="small" className="text-muted-foreground">
-              Depois de começar, você pode navegar entre as questões e retomar
-              de onde parou.
+          {/* Feedback visual se o participante já estiver selecionado */}
+          {initialId && (
+            <Box className="p-3 bg-primary/5 border border-primary/10 rounded-md">
+              <Typography variant="small" className="text-primary font-medium">
+                Participante selecionado para avaliação.
+              </Typography>
+            </Box>
+          )}
+
+          <Box className="flex flex-col gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between">
+            <Typography
+              variant="small"
+              className="text-muted-foreground max-w-md"
+            >
+              Ao iniciar, você será direcionado para a primeira questão do
+              IVCF-20.
             </Typography>
-            <Button onClick={handleStart} disabled={!canStart} size="lg">
+            <Button
+              onClick={handleStart}
+              disabled={!canStart}
+              size="lg"
+              className="px-8"
+            >
               Iniciar questionário
             </Button>
           </Box>
