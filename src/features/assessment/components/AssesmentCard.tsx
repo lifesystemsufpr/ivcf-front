@@ -38,7 +38,7 @@ export default function AssesmentCard({ assessment }: AssesmentCardProps) {
           </Box>
           <Classification classification={assessment.classification} />
         </Box>
-        <Separator className="my-4" />
+        <Separator className="mt-2" />
       </CardContent>
       <CardFooter className="p-1">
         <Typography variant="caption" className="text-gray-500">

@@ -1,11 +1,13 @@
 import { Box, Dropdown, IconButton } from "../ui";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import NavBar from "../NavBar";
 import { useState } from "react";
-import { Menu, User, Moon, Sun } from "lucide-react";
+import { Menu, User, Moon, Sun, LogOut } from "lucide-react";
 import { useTheme } from "@/core/theme/ThemeContext";
+import { clientRoutes } from "@/core/configs/client.routes";
 
 export function BaseLayout() {
+  const router = useNavigate();
   const [navOpen, setNavOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const [openDropdown, setOpenDropdown] = useState(false);
@@ -50,6 +52,13 @@ export function BaseLayout() {
                 Icon: theme === "light" ? Moon : Sun,
                 onSelect: () => {
                   toggleTheme();
+                },
+              },
+              {
+                label: "Logout",
+                Icon: LogOut,
+                onSelect: () => {
+                  router(clientRoutes.AUTH.LOGIN);
                 },
               },
             ]}

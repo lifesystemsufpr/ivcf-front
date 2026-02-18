@@ -18,7 +18,7 @@ export default function LoginPage() {
   return (
     <Box display="flex" justify="center" align="center">
       <Box
-        className="w-full max-w-md rounded-xl shadow-lg "
+        className="w-full max-w-md rounded-xl shadow-lg p-6 border"
         display="flex"
         direction="column"
         gap={24}

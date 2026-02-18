@@ -18,26 +18,6 @@ export default function HomePage() {
           Gerencie seus dados com eficiência e leveza.
         </Typography>
       </Box>
-
-      <Box>
-        <Card>
-          <CardHeader>
-            <div className="flex justify-between items-center">
-              <Typography variant="h3">Performance</Typography>
-              <Badge variant="secondary">Ativo</Badge>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Typography variant="body" className="mb-4">
-              Seu projeto está rodando com componentes atômicos e Tailwind CSS.
-            </Typography>
-            <Button className="w-full">Ver Detalhes</Button>
-            <Alert className="mt-4">
-              Atenção: Verifique as métricas de desempenho regularmente.
-            </Alert>
-          </CardContent>
-        </Card>
-      </Box>
     </div>
   );
 }
