@@ -9,6 +9,7 @@ interface AutocompleteProps<T> extends UseAutocompleteProps<T> {
   noOptionsText?: string;
   menuClassName?: string;
   optionClassName?: string;
+  className?: string;
 }
 
 export function Autocomplete<T>({
@@ -18,6 +19,7 @@ export function Autocomplete<T>({
   noOptionsText = "Nenhum resultado",
   menuClassName,
   optionClassName,
+  className,
   ...hookProps
 }: AutocompleteProps<T>) {
   const {
@@ -40,7 +42,7 @@ export function Autocomplete<T>({
   } = useAutocomplete(hookProps);
 
   return (
-    <div ref={rootRef} className="relative">
+    <div ref={rootRef} className={cn("relative", className)}>
       {renderInput({
         role: "combobox",
         "aria-expanded": open,

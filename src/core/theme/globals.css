@@ -34,7 +34,6 @@
 }
 
 @layer base {
-
   :root {
     /* Branco frio base */
     --background: 210 40% 98%;
@@ -64,15 +63,14 @@
     --destructive-foreground: 0 0% 100%;
 
     /* Bordas e inputs agora com leve tonalidade azul */
-    --border: 214 30% 88%;
-    --input: 214 30% 94%;
+    --border: 215 20% 85%;
+    --input: 215 20% 85%;
     --ring: 215 57% 29%;
 
     /* Muted também frio (não cinza puro) */
     --muted: 210 40% 96%;
     --muted-foreground: 215 20% 40%;
   }
-
 
   .dark {
     --background: 215 57% 10%;
@@ -91,8 +89,8 @@
     --accent-soft: 85 50% 20%;
     --destructive: 0 63% 40%;
     --destructive-foreground: 0 0% 100%;
-    --border: 215 40% 22%;
-    --input: 215 40% 18%;
+    --border: 215 40% 32%;
+    --input: 215 40% 35%;
     --ring: 215 50% 45%;
     --muted: 215 40% 17%;
     --muted-foreground: 210 20% 70%;
