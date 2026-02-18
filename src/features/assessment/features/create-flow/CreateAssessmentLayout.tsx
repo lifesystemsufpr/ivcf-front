@@ -1,6 +1,13 @@
 import { Outlet } from "react-router-dom";
-import { CreateAssessmentProvider } from "./context/CreateAssessmentContext";
+import { ParticipantProvider } from "@/features/participants/context/ParticipantContext";
+import { AssessmentProvider } from "./context/CreateAssessmentContext";
 
-<CreateAssessmentProvider>
-  <Outlet />
-</CreateAssessmentProvider>;
+export default function CreateAssessmentLayout() {
+  return (
+    <ParticipantProvider>
+      <AssessmentProvider>
+        <Outlet />
+      </AssessmentProvider>
+    </ParticipantProvider>
+  );
+}
