@@ -23,7 +23,7 @@ export function PatientListPage() {
 
   return (
     <ParticipantProvider>
-      <Box className="flex flex-col h-[84vh]">
+      <Box type="screen" className="flex flex-col">
         <Box
           display="flex"
           direction="row"

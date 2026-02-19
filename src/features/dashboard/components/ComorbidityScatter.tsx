@@ -15,7 +15,6 @@ import {
   exportElementAsPdf,
   exportElementAsPng,
   nivoTheme,
-  riskColorMap,
 } from "../utils/transforms";
 
 type ComorbidityScatterProps = {
@@ -95,11 +94,6 @@ export function ComorbidityScatter({ data }: ComorbidityScatterProps) {
             margin={{ top: 30, right: 40, bottom: 60, left: 70 }}
             blendMode="multiply"
             nodeSize={({ data }) => data.size}
-            nodeColor={(node) =>
-              riskColorMap[
-                (node.data.riskLevel as keyof typeof riskColorMap) ?? "Robusto"
-              ]
-            }
             axisBottom={{
               legend: "Número de comorbidades crônicas",
               legendOffset: 42,

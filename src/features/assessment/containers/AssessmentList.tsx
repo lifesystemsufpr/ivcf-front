@@ -11,7 +11,7 @@ export default function AssessmentList() {
       direction="column"
       gap={8}
       my={4}
-      className="h-[75vh] overflow-y-auto pr-2 scrollbar-thin 
+      className="h-[calc(100%-98px)] overflow-y-auto pr-2 scrollbar-thin 
                   [&::-webkit-scrollbar]:w-2
                   [&::-webkit-scrollbar-track]:bg-transparent
                   [&::-webkit-scrollbar-thumb]:bg-slate-300

@@ -19,7 +19,7 @@ export function BaseLayout() {
           display="flex"
           justify="space-between"
           align="center"
-          className="container mx-auto p-4"
+          className="container mx-auto p-4 h-18.75"
         >
           <IconButton
             icon={Menu}

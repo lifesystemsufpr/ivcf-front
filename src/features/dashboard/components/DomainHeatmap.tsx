@@ -108,13 +108,13 @@ export function DomainHeatmap({ data, stratification }: DomainHeatmapProps) {
               emptyColor="#f5f5f5"
               inactiveOpacity={0.25}
               hoverTarget="cell"
-              tooltip={({ xKey, yKey, value }) => (
+              tooltip={({ cell }) => (
                 <div className="text-sm">
-                  <strong>{yKey}</strong>
+                  <strong>{cell.x}</strong>
                   <div>
-                    {dimensionLabel[stratification]}: {xKey}
+                    {dimensionLabel[stratification]}: {cell.y.toFixed(0)}
                   </div>
-                  <div>Score médio: {value?.toFixed(2)}</div>
+                  <div>Score médio: {cell.value?.toFixed(2)}</div>
                 </div>
               )}
             />

@@ -16,6 +16,8 @@ type BoxOwnProps = {
   as?: React.ElementType;
   className?: string;
 
+  type?: "screen";
+
   /* Layout */
   display?: React.CSSProperties["display"];
   direction?: FlexDirection;
@@ -37,6 +39,7 @@ type BoxProps<T extends React.ElementType> = BoxOwnProps &
 
 export function Box<T extends React.ElementType = "div">({
   as,
+  type,
   className,
   display,
   direction,
@@ -55,6 +58,7 @@ export function Box<T extends React.ElementType = "div">({
   const Component = as || "div";
 
   const computedStyle: React.CSSProperties = {
+    height: type === "screen" ? "calc(100vh - 92px)" : undefined,
     display,
     flexDirection: direction,
     justifyContent: justify,

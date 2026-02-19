@@ -46,7 +46,7 @@ export function FilterToolbar({
   return (
     <Box className="rounded-lg border bg-card p-4 shadow-sm">
       <div className="flex flex-wrap items-end gap-4">
-        <div className="space-y-1">
+        <Box className="space-y-1" display="flex" direction="column">
           <Label htmlFor="sexo">Sexo</Label>
           <select
             id="sexo"
@@ -60,11 +60,11 @@ export function FilterToolbar({
             <option value="F">Feminino</option>
             <option value="M">Masculino</option>
           </select>
-        </div>
+        </Box>
 
-        <div className="space-y-1">
+        <Box className="space-y-1" display="flex" direction="column">
           <Label>Idade (mín - máx)</Label>
-          <div className="flex items-center gap-2">
+          <Box display="flex" align="center" gap={2}>
             <Input
               type="number"
               className="w-20"
@@ -82,12 +82,12 @@ export function FilterToolbar({
               value={(filters.ageRange ?? [ageBounds.min, ageBounds.max])[1]}
               onChange={(e) => handleAgeChange(e, 1)}
             />
-          </div>
-        </div>
+          </Box>
+        </Box>
 
-        <div className="space-y-1">
+        <Box className="space-y-1" display="flex" direction="column">
           <Label>Período</Label>
-          <div className="flex items-center gap-2">
+          <Box display="flex" align="center" gap={2}>
             <Input
               type="date"
               value={filters.period?.start ?? ""}
@@ -109,10 +109,10 @@ export function FilterToolbar({
                 })
               }
             />
-          </div>
-        </div>
+          </Box>
+        </Box>
 
-        <div className="space-y-1">
+        <Box className="space-y-1" display="flex" direction="column">
           <Label htmlFor="estratificacao">Estratificar por</Label>
           <select
             id="estratificacao"
@@ -125,9 +125,9 @@ export function FilterToolbar({
             <option value="sex">Sexo</option>
             <option value="ageGroup">Faixa etária</option>
           </select>
-        </div>
+        </Box>
 
-        <div className="space-y-1">
+        <Box className="space-y-1" display="flex" direction="column">
           <Label>Modo linha temporal</Label>
           <div className="flex items-center gap-2">
             <label className="flex items-center gap-2 text-sm">
@@ -140,7 +140,7 @@ export function FilterToolbar({
               <span>Separar por sexo</span>
             </label>
           </div>
-        </div>
+        </Box>
 
         <div className="flex flex-1 justify-end gap-2">
           <Button

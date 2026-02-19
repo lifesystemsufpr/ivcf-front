@@ -73,14 +73,14 @@ export function RiskPyramid({ data }: RiskPyramidProps) {
               layout="horizontal"
               colors={({ id }) => riskColorMap[id as keyof typeof riskColorMap]}
               theme={nivoTheme}
-              margin={{ top: 30, right: 30, bottom: 50, left: 120 }}
+              margin={{ top: 30, right: 30, bottom: 60, left: 120 }}
               padding={0.3}
               innerPadding={4}
               valueFormat=".1f"
               enableGridX
               axisBottom={{
                 legend: "% na coorte",
-                legendOffset: 36,
+                legendOffset: 50,
                 legendPosition: "middle",
               }}
               axisLeft={{
