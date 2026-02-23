@@ -15,6 +15,7 @@ import { clientRoutes } from "@/core/configs/client.routes";
 import { useState } from "react";
 import ParticipantDetailContent from "../components/ParticipantDetailContent";
 import type { ParticipantDetailTabs } from "../types";
+import { ParticipantDashboard } from "../features/indicators";
 
 export function PatientDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -54,7 +55,7 @@ export function PatientDetailPage() {
           <ParticipantDetailContent participant={participant} />
         </TabPanel>
         <TabPanel value="indicators">
-          <Typography>Conteúdo dos indicadores do paciente...</Typography>
+          <ParticipantDashboard />
         </TabPanel>
         <TabPanel value="assessments">
           <Typography>Conteúdo das avaliações do paciente...</Typography>

@@ -15,6 +15,7 @@ type ParticipantFormProps = {
 };
 
 const defaultValues: ParticipantFormValues = {
+  id: "",
   fullName: "",
   cpf: "",
   birthDate: "",

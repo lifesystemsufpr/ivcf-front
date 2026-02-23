@@ -1,5 +1,4 @@
-import type { RiskLevel } from "@/features/dashboard/types";
-
+import type { FrailtyClassification } from "@/core/types";
 export interface IVCF_DomainScores {
   age: number;
   selfPerception: number;
@@ -15,13 +14,13 @@ export interface IVCF_Assessment {
   id: string;
   date: string;
   totalScore: number;
-  riskLevel: RiskLevel;
+  riskLevel: FrailtyClassification;
   domains: IVCF_DomainScores;
   rawResponses: Record<string, any>;
 }
 
-export interface PatientEvolutionData {
-  patientId: string;
-  patientName: string;
+export interface ParticipantEvolutionData {
+  participantId: string;
+  participantName: string;
   assessments: IVCF_Assessment[];
 }
