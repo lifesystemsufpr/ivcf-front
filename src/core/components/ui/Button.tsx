@@ -22,7 +22,7 @@ const buttonVariants = cva(
           "bg-accent text-accent-foreground shadow-sm hover:bg-accent-hover",
         destructive:
           "bg-destructive text-destructive-foreground shadow-sm hover:opacity-90",
-        outline: "border border-border bg-transparent hover:bg-muted",
+        outline: "border border-border bg-transparent hover:bg-muted color-red",
         ghost: "hover:bg-muted",
       },
       size: {

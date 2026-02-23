@@ -1,4 +1,4 @@
-import { Box, Button } from "@/core/components/ui";
+import { Box, Button, Typography } from "@/core/components/ui";
 import { useAssessmentList } from "../contexts/AssessmentListContext";
 import ParticipantAutocomplete from "@/features/participants/components/ParticipantAutocomplete";
 import { ParticipantProvider } from "@/features/participants/context/ParticipantContext";
@@ -66,11 +66,19 @@ export default function ListFilters() {
             onSubmitFilters();
           }}
         >
-          Limpar filtros
+          <Typography variant="small" color="accent">
+            Limpar filtros
+          </Typography>
         </Button>
 
-        <Button onClick={onSubmitFilters} className="ml-2">
-          Aplicar filtros
+        <Button
+          onClick={onSubmitFilters}
+          className="ml-2"
+          variant={"secondary"}
+        >
+          <Typography variant="small" color="primary">
+            Aplicar filtros
+          </Typography>
         </Button>
       </Box>
     </Box>

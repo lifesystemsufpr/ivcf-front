@@ -14,7 +14,7 @@ export function BaseLayout() {
 
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
-      <header className="sticky top-0 z-40 w-full border-b bg-card/80 backdrop-blur-md">
+      <header className="sticky top-0 z-40 w-full border-b backdrop-blur-md bg-primary">
         <Box
           display="flex"
           justify="space-between"

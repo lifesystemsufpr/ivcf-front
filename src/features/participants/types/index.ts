@@ -1,4 +1,5 @@
-export type Gender = 'MALE' | 'FEMALE' | 'OTHER';
+export type ParticipantDetailTabs = "details" | "indicators" | "assessments";
+export type Gender = "MALE" | "FEMALE" | "OTHER";
 
 export interface Address {
   street: string;

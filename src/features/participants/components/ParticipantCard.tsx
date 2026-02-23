@@ -62,17 +62,21 @@ export default function ParticipantCard({ participant }: ParticipantCardProps) {
       >
         <CardContent className="p-3 flex flex-row justify-between align-center">
           <Box display="flex" direction="column" gap={1}>
-            <Typography>{participant.fullName}</Typography>
+            <Typography color="secondary" className="font-bold  ">
+              {participant.fullName}
+            </Typography>
             <Box display="flex" direction="row" gap={5} align="center">
-              <Typography variant="caption">{participant.birthDate}</Typography>
-              <Typography variant="caption">
+              <Typography color="secondary" variant="caption">
+                {participant.birthDate}
+              </Typography>
+              <Typography color="secondary" variant="caption">
                 · CPF: {participant.cpf}
               </Typography>
             </Box>
           </Box>
           <Box display="flex" direction="row" gap={8} align="center">
             <Button
-              variant="default"
+              variant="secondary"
               size="sm"
               className=" radius-full"
               onClick={handleEditClick}
@@ -81,7 +85,7 @@ export default function ParticipantCard({ participant }: ParticipantCardProps) {
             </Button>
 
             <Button
-              variant="default"
+              variant="secondary"
               size="sm"
               className="radius-full"
               onClick={handleStartAssessment}

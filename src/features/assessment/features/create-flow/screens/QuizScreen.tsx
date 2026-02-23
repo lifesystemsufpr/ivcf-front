@@ -167,12 +167,15 @@ export default function QuizScreen() {
                 disabled={previousDisabled}
                 onClick={previousQuestion}
               >
-                Anterior
+                <Typography variant="small" color="accent">
+                  Anterior
+                </Typography>
               </Button>
               <Button
                 onClick={handleNext}
                 disabled={primaryButtonDisabled}
                 loading={isSubmitting}
+                variant={"secondary"}
               >
                 {isLastQuestion ? "Finalizar e ver resultado" : "Próxima"}
               </Button>

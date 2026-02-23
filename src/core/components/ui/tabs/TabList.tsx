@@ -76,11 +76,10 @@ export function TabList({
       {/* Indicador animado */}
       <div
         className={cn(
-          "absolute bg-primary transition-all duration-300 ease-in-out",
+          "absolute bg-primary transition-all duration-300 ease-in-out", // Cor primary aqui
           isHorizontal ? "bottom-0 h-0.5" : "right-0 w-0.5",
         )}
         style={indicatorStyle}
-        aria-hidden="true"
       />
     </div>
   );

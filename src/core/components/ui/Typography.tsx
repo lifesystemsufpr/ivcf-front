@@ -1,6 +1,9 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../utils";
+
+export type TypographyColor = "primary" | "secondary" | "muted" | "accent";
+
 const typographyVariants = cva("text-foreground", {
   variants: {
     variant: {
@@ -23,19 +26,25 @@ interface TypographyProps
     React.HTMLAttributes<HTMLElement>,
     VariantProps<typeof typographyVariants> {
   as?: React.ElementType;
+  color?: TypographyColor;
 }
 
 export function Typography({
   as,
   variant,
   className,
+  color = "primary",
   ...props
 }: TypographyProps) {
   const Component = as || "p";
 
   return (
     <Component
-      className={cn(typographyVariants({ variant }), className)}
+      className={cn(
+        typographyVariants({ variant }),
+        color && `text-${color}`,
+        className,
+      )}
       {...props}
     />
   );

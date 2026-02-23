@@ -13,6 +13,7 @@
     "@nivo/bar": "^0.99.0",
     "@nivo/heatmap": "^0.99.0",
     "@nivo/line": "^0.99.0",
+    "@nivo/radar": "^0.99.0",
     "@nivo/scatterplot": "^0.99.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
