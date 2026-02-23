@@ -17,4 +17,4 @@ export * from "./IconButton";
 export * from "./autocomplete/Autocomplete";
 export * from "./Breadcrumbs";
 export * from "./Link";
-export * from "./tabs";
+export * from "./Tabs";
