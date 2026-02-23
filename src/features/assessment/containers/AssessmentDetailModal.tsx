@@ -58,8 +58,10 @@ export function AssessmentDetailModal({
         <Card className="border">
           <CardContent className="flex flex-col gap-2 p-4">
             <Box
-              className="flex flex-wrap items-center gap-3"
+              className="flex flex-wrap items-center"
               justify="space-between"
+              align="center"
+              gap={8}
             >
               <Box display="flex" direction="row" gap={1} align="center">
                 <Typography variant="h3" className="font-semibold">

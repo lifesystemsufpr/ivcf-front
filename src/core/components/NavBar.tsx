@@ -18,6 +18,7 @@ export default function NavBar({ open, onClose }: NavBarProps) {
       anchor="left"
       size="md"
       title="IVCF-20"
+      className=" border-0"
     >
       <Separator />
       <Box display="flex" direction="column" gap={10} my={10}>

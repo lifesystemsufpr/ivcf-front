@@ -14,10 +14,11 @@ import {
 import { clientRoutes } from "@/core/configs/client.routes";
 import { useState } from "react";
 import ParticipantDetailContent from "../components/ParticipantDetailContent";
+import type { ParticipantDetailTabs } from "../types";
 
 export function PatientDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const [activeTab, setActiveTab] = useState<string | number>("details");
+  const [activeTab, setActiveTab] = useState<ParticipantDetailTabs>("details");
 
   const participant = participantsMock.find((p) => p.id === id);
 
@@ -31,7 +32,7 @@ export function PatientDetailPage() {
         <Link as={RouterLink} to={clientRoutes.PARTICIPANTS.LIST}>
           Pacientes
         </Link>
-        <Typography as="span" variant="small" className="text-foreground">
+        <Typography as="span" variant="small" className="text-primary">
           {participant.fullName}
         </Typography>
       </Breadcrumbs>
@@ -40,19 +41,23 @@ export function PatientDetailPage() {
       <Tabs
         value={activeTab}
         onChange={(value) => {
-          setActiveTab(value);
+          setActiveTab(value as ParticipantDetailTabs);
         }}
       >
         <TabList className="w-full">
           <Tab value="details">Detalhes</Tab>
-          <Tab value="history">Histórico</Tab>
+          <Tab value="indicators">Indicadores</Tab>
+          <Tab value="assessments">Avaliações</Tab>
         </TabList>
 
         <TabPanel value="details">
           <ParticipantDetailContent participant={participant} />
         </TabPanel>
-        <TabPanel value="history">
-          <Typography>Conteúdo do histórico do paciente...</Typography>
+        <TabPanel value="indicators">
+          <Typography>Conteúdo dos indicadores do paciente...</Typography>
+        </TabPanel>
+        <TabPanel value="assessments">
+          <Typography>Conteúdo das avaliações do paciente...</Typography>
         </TabPanel>
       </Tabs>
     </Box>

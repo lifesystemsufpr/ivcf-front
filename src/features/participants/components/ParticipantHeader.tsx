@@ -17,7 +17,9 @@ export default function ParticipantHeader({
     <Box display="flex" direction="row" align="center" gap={3}>
       <Avatar name={participant.fullName} />
       <Box display="flex" direction="column" gap={1} className="ml-3">
-        <Typography>{participant.fullName}</Typography>
+        <Typography className="font-bold text-primary">
+          {participant.fullName}
+        </Typography>
         <Typography variant={"caption"}>{updatedAtFormatted}</Typography>
       </Box>
     </Box>
