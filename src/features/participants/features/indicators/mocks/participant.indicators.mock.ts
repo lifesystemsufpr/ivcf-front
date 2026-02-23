@@ -5,7 +5,7 @@ export const MOCK_EVOLUTION_DATA: ParticipantEvolutionData = {
   participantName: "João Lucas",
   assessments: [
     {
-      id: "eval-1",
+      id: "assessment-1",
       date: "2023-05-15T10:00:00Z",
       totalScore: 4,
       riskLevel: "Robusto",
@@ -19,10 +19,9 @@ export const MOCK_EVOLUTION_DATA: ParticipantEvolutionData = {
         communication: 0,
         comorbidities: 1,
       },
-      rawResponses: { quedas: "Não", fadiga: "Sim" },
     },
     {
-      id: "eval-2",
+      id: "assessment-2",
       date: "2023-08-20T10:00:00Z",
       totalScore: 6,
       riskLevel: "Robusto",
@@ -36,10 +35,9 @@ export const MOCK_EVOLUTION_DATA: ParticipantEvolutionData = {
         communication: 0,
         comorbidities: 1,
       },
-      rawResponses: { quedas: "Não", fadiga: "Sim" },
     },
     {
-      id: "eval-3",
+      id: "assessment-3",
       date: "2023-11-20T14:30:00Z",
       totalScore: 9,
       riskLevel: "Pré-frágil",
@@ -53,10 +51,9 @@ export const MOCK_EVOLUTION_DATA: ParticipantEvolutionData = {
         communication: 0,
         comorbidities: 1,
       },
-      rawResponses: { quedas: "1 queda", fadiga: "Sim" },
     },
     {
-      id: "eval-4",
+      id: "assessment-4",
       date: "2024-02-18T09:00:00Z",
       totalScore: 12,
       riskLevel: "Pré-frágil",
@@ -70,10 +67,9 @@ export const MOCK_EVOLUTION_DATA: ParticipantEvolutionData = {
         communication: 1,
         comorbidities: 1,
       },
-      rawResponses: { quedas: "1 queda", fadiga: "Sim" },
     },
     {
-      id: "eval-5",
+      id: "assessment-5",
       date: "2024-05-10T09:15:00Z",
       totalScore: 16,
       riskLevel: "Frágil",
@@ -87,10 +83,9 @@ export const MOCK_EVOLUTION_DATA: ParticipantEvolutionData = {
         communication: 1,
         comorbidities: 1,
       },
-      rawResponses: { quedas: "2 quedas", fadiga: "Sim" },
     },
     {
-      id: "eval-6",
+      id: "assessment-6",
       date: "2024-08-12T09:15:00Z",
       totalScore: 19,
       riskLevel: "Frágil",
@@ -104,10 +99,9 @@ export const MOCK_EVOLUTION_DATA: ParticipantEvolutionData = {
         communication: 1,
         comorbidities: 1,
       },
-      rawResponses: { quedas: "3 quedas", fadiga: "Intensa" },
     },
     {
-      id: "eval-7",
+      id: "assessment-7",
       date: "2024-11-15T09:15:00Z",
       totalScore: 17,
       riskLevel: "Frágil",
@@ -121,7 +115,6 @@ export const MOCK_EVOLUTION_DATA: ParticipantEvolutionData = {
         communication: 1,
         comorbidities: 1,
       },
-      rawResponses: { quedas: "1 queda", fadiga: "Moderada" },
     },
   ],
 };

@@ -16,7 +16,6 @@ export interface IVCF_Assessment {
   totalScore: number;
   riskLevel: FrailtyClassification;
   domains: IVCF_DomainScores;
-  rawResponses: Record<string, any>;
 }
 
 export interface ParticipantEvolutionData {

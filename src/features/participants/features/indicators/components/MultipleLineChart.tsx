@@ -25,6 +25,7 @@ type MultipleLineChartProps = {
   yLabel?: string;
   height?: number;
   showExport?: boolean;
+  onSelectAssessment?: (id: string) => void;
 };
 
 const defaultDomains: DomainDefinition[] = [
@@ -62,6 +63,7 @@ export function MultipleLineChart({
   yLabel = "Pontuação por domínio",
   height = 420,
   showExport = false,
+  onSelectAssessment,
 }: MultipleLineChartProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -95,6 +97,7 @@ export function MultipleLineChart({
         data: sortedAssessments.map((assessment) => ({
           x: formatDateLabel(assessment.date),
           y: assessment.domains[domain.key] ?? 0,
+          assessmentId: assessment.id,
         })),
       }));
   }, [domains, sortedAssessments, selectedDomains, colorsByLabel]);
@@ -197,6 +200,15 @@ export function MultipleLineChart({
             areaOpacity={0.08}
             useMesh
             colors={({ id }) => colorsByLabel[id as string]}
+            onClick={(item) => {
+              if ("points" in item) return;
+
+              const assessmentId = item.data.assessmentId;
+
+              if (assessmentId) {
+                onSelectAssessment?.(assessmentId);
+              }
+            }}
             axisBottom={{
               tickRotation: -25,
               legend: xLabel,

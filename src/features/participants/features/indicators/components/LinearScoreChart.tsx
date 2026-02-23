@@ -9,6 +9,7 @@ import { Typography } from "@/core/components/ui/Typography";
 type LinearScoreChartProps = {
   assessments: IVCF_Assessment[];
   height?: number;
+  onSelectAssessment?: (id: string) => void;
 };
 
 function formatDateLabel(date: string) {
@@ -20,6 +21,7 @@ function formatDateLabel(date: string) {
 export function LinearScoreChart({
   assessments,
   height = 420,
+  onSelectAssessment,
 }: LinearScoreChartProps) {
   const sorted = useMemo(
     () =>
@@ -38,6 +40,7 @@ export function LinearScoreChart({
           y: a.totalScore,
           riskLevel: a.riskLevel,
           rawDate: a.date,
+          assessmentId: a.id,
         })),
       },
     ];
@@ -87,6 +90,16 @@ export function LinearScoreChart({
             enableArea={true}
             areaOpacity={0.08}
             useMesh={true}
+            onClick={(item) => {
+              if ("points" in item) return;
+
+              // Agora TS sabe que é Point
+              const assessmentId = item.data.assessmentId;
+
+              if (assessmentId) {
+                onSelectAssessment?.(assessmentId);
+              }
+            }}
             tooltip={({ point }) => (
               <div className="rounded-md border bg-background p-2 text-xs shadow-md">
                 <div className="font-medium">
