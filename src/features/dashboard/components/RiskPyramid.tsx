@@ -9,15 +9,16 @@ import {
   exportElementAsPdf,
   exportElementAsPng,
 } from "../utils/transforms";
+import { Box } from "@/core/components/ui";
 
-const keys = ["Robusto", "Pre-Fragil", "Fragil"] as const;
+const keys = ["Robusto", "Pré-frágil", "Frágil"] as const;
 
 type RiskPyramidProps = {
   data: {
     group: string;
     Robusto: number;
-    "Pre-Fragil": number;
-    Fragil: number;
+    "Pré-frágil": number;
+    Frágil: number;
   }[];
 };
 
@@ -103,12 +104,20 @@ export function RiskPyramid({ data }: RiskPyramidProps) {
               labelSkipWidth={12}
               labelSkipHeight={12}
               tooltip={({ id, value, indexValue }) => (
-                <div className="text-sm">
-                  <strong>{indexValue}</strong>
-                  <div>
+                <Box
+                  display="flex"
+                  direction="column"
+                  align="center"
+                  p={5}
+                  className="bg-background rounded w-30 border"
+                >
+                  <Typography color="secondary" variant="body">
+                    {indexValue}
+                  </Typography>
+                  <Typography color="secondary" variant="small">
                     {id}: {value}%
-                  </div>
-                </div>
+                  </Typography>
+                </Box>
               )}
             />
           )}

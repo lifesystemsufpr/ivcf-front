@@ -2,7 +2,7 @@ import { ResponsiveBar } from "@nivo/bar";
 import { nivoTheme } from "../utils/transforms";
 import type { RiskBarDatum } from "../types";
 import { Card, CardContent } from "@/core/components/ui/Card";
-import { Typography } from "@/core/components/ui";
+import { Box, Typography } from "@/core/components/ui";
 
 export function RiskAmountBar({ data }: { data: RiskBarDatum[] }) {
   return (
@@ -16,7 +16,7 @@ export function RiskAmountBar({ data }: { data: RiskBarDatum[] }) {
         </Typography>
 
         {/* container que ocupa o resto */}
-        <div className="flex-1 w-full">
+        <div className="flex-1 w-full min-h-[300px]">
           <ResponsiveBar
             data={data}
             keys={["percentage"]}
@@ -41,11 +41,23 @@ export function RiskAmountBar({ data }: { data: RiskBarDatum[] }) {
             labelSkipHeight={12}
             labelTextColor="#ffffff"
             tooltip={({ data }) => (
-              <div className="rounded bg-white p-2 shadow border text-xs">
-                <strong>{data.category}</strong>
-                <div>{data.count} pacientes</div>
-                <div>{data.percentage}%</div>
-              </div>
+              <Box
+                display="flex"
+                direction="column"
+                align="center"
+                p={5}
+                className="bg-background rounded w-30 border"
+              >
+                <Typography color="secondary" variant="body">
+                  {data.category}
+                </Typography>
+                <Typography color="secondary" variant="caption">
+                  {data.count} pacientes
+                </Typography>
+                <Typography color="secondary" variant="caption">
+                  {data.percentage}%
+                </Typography>
+              </Box>
             )}
           />
         </div>

@@ -4,9 +4,9 @@ import { FilterToolbar } from "../components/FilterToolbar";
 import { SummaryStats } from "../components/SummaryStats";
 import { DomainHeatmap } from "../components/DomainHeatmap";
 import { RiskPyramid } from "../components/RiskPyramid";
-import { FragilityTrend } from "../components/FragilityTrend";
 import { useFragilityData } from "../hooks/useFragilityData";
 import { RiskAmountBar } from "../components/RiskAmountBar";
+import { ComorbidityScatter } from "../components/ComorbidityScatter";
 
 export default function HomePage() {
   const {
@@ -40,15 +40,17 @@ export default function HomePage() {
         </Typography>
       </div>
 
-      <FilterToolbar
-        filters={filters}
-        setFilter={setFilter}
-        stratification={stratification}
-        setStratification={setStratification}
-        trendBySex={trendBySex}
-        setTrendBySex={setTrendBySex}
-        ageBounds={metadata.ageBounds}
-      />
+      <div className="sticky top-15 z-30 bg-background/95 backdrop-blur-sm py-2 -mx-2 px-2">
+        <FilterToolbar
+          filters={filters}
+          setFilter={setFilter}
+          stratification={stratification}
+          setStratification={setStratification}
+          trendBySex={trendBySex}
+          setTrendBySex={setTrendBySex}
+          ageBounds={metadata.ageBounds}
+        />
+      </div>
 
       <SummaryStats summary={summary} />
 
@@ -59,7 +61,7 @@ export default function HomePage() {
 
       <div className="grid gap-6 xl:grid-cols-2">
         <DomainHeatmap data={charts.heatmap} stratification={stratification} />
-        <FragilityTrend data={charts.trend} bySex={trendBySex} />
+        <ComorbidityScatter data={charts.scatter} />
       </div>
     </div>
   );

@@ -1,9 +1,8 @@
-import { type ChangeEvent, useCallback } from "react";
+import { type ChangeEvent, useState, useEffect } from "react";
 import { Box } from "@/core/components/ui/Box";
 import { Button } from "@/core/components/ui/Button";
 import { Input } from "@/core/components/ui/Input";
 import { Label } from "@/core/components/ui/Label";
-import { Typography } from "@/core/components/ui/Typography";
 import type { AggregationDimension, FragilityFilters } from "../types";
 
 type FilterToolbarProps = {
@@ -24,32 +23,72 @@ export function FilterToolbar({
   setFilter,
   stratification,
   setStratification,
-  trendBySex,
-  setTrendBySex,
   ageBounds,
 }: FilterToolbarProps) {
-  // Handlers memorizados para evitar re-renderizações desnecessárias
-  const handleAgeChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>, index: 0 | 1) => {
-      const value = Number(e.target.value);
-      const current = filters.ageRange ?? [ageBounds.min, ageBounds.max];
-      const next: [number, number] =
-        index === 0 ? [value, current[1]] : [current[0], value];
-      setFilter("ageRange", next);
-    },
-    [filters.ageRange, ageBounds, setFilter],
+  // 1. Estados Locais para inputs de texto/data (Buffer)
+  const [localAge, setLocalAge] = useState<[number, number]>(
+    filters.ageRange ?? [ageBounds.min, ageBounds.max],
   );
+  const [localPeriod, setLocalPeriod] = useState({
+    start: filters.period?.start ?? "",
+    end: filters.period?.end ?? "",
+  });
+
+  useEffect(() => {
+    setLocalAge(filters.ageRange ?? [ageBounds.min, ageBounds.max]);
+    setLocalPeriod({
+      start: filters.period?.start ?? "",
+      end: filters.period?.end ?? "",
+    });
+  }, [filters.ageRange, filters.period, ageBounds]);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (JSON.stringify(localAge) !== JSON.stringify(filters.ageRange)) {
+        setFilter("ageRange", localAge);
+      }
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [localAge, setFilter, filters.ageRange]);
+
+  // 4. Efeito de Debounce para Período
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (JSON.stringify(localPeriod) !== JSON.stringify(filters.period)) {
+        setFilter("period", localPeriod);
+      }
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [localPeriod, setFilter, filters.period]);
+
+  const handleAgeInputChange = (
+    e: ChangeEvent<HTMLInputElement>,
+    index: 0 | 1,
+  ) => {
+    const value = Number(e.target.value);
+    setLocalAge((prev) => {
+      const next: [number, number] = [...prev];
+      next[index] = value;
+      return next;
+    });
+  };
+
+  const handlePeriodInputChange = (
+    e: ChangeEvent<HTMLInputElement>,
+    key: "start" | "end",
+  ) => {
+    setLocalPeriod((prev) => ({ ...prev, [key]: e.target.value }));
+  };
 
   const handleExport = () => {
-    // No modo profissional, enviamos os filtros para o BFF gerar o arquivo
     console.log("Solicitando exportação ao BFF com filtros:", filters);
     alert("O download do CSV será processado pelo servidor.");
   };
 
   return (
-    <Box className="rounded-lg border bg-card p-4 shadow-sm">
+    <Box className="rounded-lg border bg-card p-4 shadow-md">
       <div className="flex flex-wrap items-end gap-4">
-        {/* Filtro de Sexo */}
+        {/* Sexo (Sem debounce, pois é clique único) */}
         <Box className="space-y-1" display="flex" direction="column">
           <Label htmlFor="sexo">Sexo</Label>
           <select
@@ -66,7 +105,7 @@ export function FilterToolbar({
           </select>
         </Box>
 
-        {/* Filtro de Idade */}
+        {/* Idade com Debounce */}
         <Box className="space-y-1" display="flex" direction="column">
           <Label>
             Idade ({ageBounds.min} - {ageBounds.max})
@@ -77,8 +116,8 @@ export function FilterToolbar({
               className="w-20"
               min={ageBounds.min}
               max={ageBounds.max}
-              value={(filters.ageRange ?? [ageBounds.min, ageBounds.max])[0]}
-              onChange={(e) => handleAgeChange(e, 0)}
+              value={localAge[0]}
+              onChange={(e) => handleAgeInputChange(e, 0)}
             />
             <span className="text-sm text-muted-foreground">até</span>
             <Input
@@ -86,39 +125,32 @@ export function FilterToolbar({
               className="w-20"
               min={ageBounds.min}
               max={ageBounds.max}
-              value={(filters.ageRange ?? [ageBounds.min, ageBounds.max])[1]}
-              onChange={(e) => handleAgeChange(e, 1)}
+              value={localAge[1]}
+              onChange={(e) => handleAgeInputChange(e, 1)}
             />
           </Box>
         </Box>
 
-        {/* Filtro de Período */}
+        {/* Período com Debounce */}
         <Box className="space-y-1" display="flex" direction="column">
           <Label>Período de coleta</Label>
           <Box display="flex" align="center" gap={2}>
             <Input
               type="date"
-              value={filters.period?.start ?? ""}
-              onChange={(e) =>
-                setFilter("period", {
-                  ...filters.period,
-                  start: e.target.value,
-                })
-              }
+              value={localPeriod.start}
+              onChange={(e) => handlePeriodInputChange(e, "start")}
             />
             <Input
               type="date"
-              value={filters.period?.end ?? ""}
-              onChange={(e) =>
-                setFilter("period", { ...filters.period, end: e.target.value })
-              }
+              value={localPeriod.end}
+              onChange={(e) => handlePeriodInputChange(e, "end")}
             />
           </Box>
         </Box>
 
-        {/* Estratificação de Gráficos */}
+        {/* Estratificação */}
         <Box className="space-y-1" display="flex" direction="column">
-          <Label htmlFor="estratificacao">Estratificar Heatmap/Pirâmide</Label>
+          <Label htmlFor="estratificacao">Estratificar por</Label>
           <select
             id="estratificacao"
             className="h-10 rounded-md border border-input bg-background px-3 text-sm"
@@ -127,25 +159,12 @@ export function FilterToolbar({
               setStratification(e.target.value as AggregationDimension)
             }
           >
-            <option value="sex">Por Sexo</option>
-            <option value="ageGroup">Por Faixa Etária</option>
+            <option value="sex">Sexo</option>
+            <option value="ageGroup">Faixa Etária</option>
           </select>
         </Box>
 
-        {/* Toggle de Tendência */}
-        <Box className="pb-2">
-          <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
-            <input
-              type="checkbox"
-              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-              checked={trendBySex}
-              onChange={(e) => setTrendBySex(e.target.checked)}
-            />
-            <span>Tendência por sexo</span>
-          </label>
-        </Box>
-
-        {/* Ações de Reset e Exportação */}
+        {/* Ações */}
         <div className="flex flex-1 justify-end gap-2">
           <Button
             variant="ghost"
@@ -156,20 +175,13 @@ export function FilterToolbar({
               setFilter("sex", "all");
             }}
           >
-            Limpar Filtros
+            Limpar
           </Button>
           <Button variant="secondary" size="sm" onClick={handleExport}>
             Exportar CSV
           </Button>
         </div>
       </div>
-      <Typography
-        variant="caption"
-        className="mt-2 block text-muted-foreground italic"
-      >
-        * As alterações nos filtros atualizam todos os indicadores e gráficos
-        automaticamente.
-      </Typography>
     </Box>
   );
 }

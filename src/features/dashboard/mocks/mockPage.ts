@@ -5,151 +5,234 @@ import type {
   FragilityFilters,
 } from "../types";
 
+function classifyRisk(score: number) {
+  if (score < 7) return "Robusto";
+  if (score < 15) return "Pré-frágil";
+  return "Frágil";
+}
+
 export const getMockedData = (
   filters: FragilityFilters,
   stratification: AggregationDimension,
 ): FragilityDashboardResponse => {
-  const isByAge = stratification === "ageGroup";
+  const TOTAL = 100;
 
-  const groups = isByAge
-    ? ["<65", "65-74", "75-84", "85+"]
-    : ["Masculino", "Feminino"];
-  const total = filters.sex === "all" ? 142 : 71;
-  const counts = {
-    Robusto: Math.floor(total * 0.3),
-    "Pré-frágil": Math.floor(total * 0.45),
-    Frágil: Math.floor(total * 0.25),
+  // --------------------------
+  // 1️⃣ GERAR COORTE SINTÉTICA
+  // --------------------------
+
+  const patients = Array.from({ length: TOTAL }).map((_, i) => {
+    const age = 60 + Math.floor(Math.random() * 38); // 60–98
+
+    // Score correlacionado com idade + ruído
+    const baseScore = (age - 60) * 0.6;
+    const noise = Math.random() * 6;
+    const score = Math.min(40, Number((baseScore + noise).toFixed(1)));
+
+    const sex = Math.random() > 0.5 ? "M" : "F";
+    const riskLevel = classifyRisk(score);
+
+    return {
+      id: i,
+      age,
+      sex,
+      score,
+      riskLevel,
+      date: `2025-01-${String((i % 28) + 1).padStart(2, "0")}`,
+    };
+  });
+
+  // Aplicar filtro por sexo
+  const filtered =
+    filters.sex && filters.sex !== "all"
+      ? patients.filter((p) => p.sex === filters.sex)
+      : patients;
+
+  const total = filtered.length;
+
+  // --------------------------
+  // 2️⃣ SUMMARY
+  // --------------------------
+
+  const avgScore = filtered.reduce((acc, p) => acc + p.score, 0) / total;
+
+  const avgAge = filtered.reduce((acc, p) => acc + p.age, 0) / total;
+
+  const ageGroups = {
+    "60-74": 0,
+    "75-84": 0,
+    "85+": 0,
   };
+
+  filtered.forEach((p) => {
+    if (p.age <= 74) ageGroups["60-74"]++;
+    else if (p.age <= 84) ageGroups["75-84"]++;
+    else ageGroups["85+"]++;
+  });
+
+  // --------------------------
+  // 3️⃣ RISK BAR
+  // --------------------------
+
+  const riskCounts = {
+    Robusto: 0,
+    "Pré-frágil": 0,
+    Frágil: 0,
+  };
+
+  filtered.forEach((p) => {
+    riskCounts[p.riskLevel as keyof typeof riskCounts]++;
+  });
+
+  // --------------------------
+  // 4️⃣ SCATTER
+  // --------------------------
+
+  const scatter = ["M", "F"].map((sex) => ({
+    id: sex === "M" ? "Masculino" : "Feminino",
+    color: sex === "M" ? "#38bdf8" : "#a855f7",
+    data: filtered
+      .filter((p) => p.sex === sex)
+      .map((p) => ({
+        x: p.age,
+        y: p.score,
+        size: 8 + p.score * 0.3,
+        age: p.age,
+        sex: p.sex,
+        riskLevel: p.riskLevel,
+        date: p.date,
+      })),
+  }));
+
+  // --------------------------
+  // 5️⃣ HEATMAP (média por domínio)
+  // --------------------------
+
+  const groups =
+    stratification === "ageGroup"
+      ? ["60-74", "75-84", "85+"]
+      : ["Masculino", "Feminino"];
+
+  const heatmap = DOMAIN_DEFINITIONS.map((domain) => ({
+    id: domain.label,
+    data: groups.map((group) => {
+      const groupPatients =
+        stratification === "ageGroup"
+          ? filtered.filter((p) =>
+              group === "60-74"
+                ? p.age <= 74
+                : group === "75-84"
+                  ? p.age <= 84 && p.age > 74
+                  : p.age > 84,
+            )
+          : filtered.filter((p) =>
+              group === "Masculino" ? p.sex === "M" : p.sex === "F",
+            );
+
+      const avg =
+        groupPatients.reduce((acc, p) => acc + p.score, 0) /
+        (groupPatients.length || 1);
+
+      const domainScore = Math.min(
+        domain.max,
+        Number((avg * (domain.max / 40)).toFixed(2)),
+      );
+
+      return { x: group, y: domainScore };
+    }),
+  }));
+
+  // --------------------------
+  // 6️⃣ RISK PYRAMID
+  // --------------------------
+
+  const riskPyramid =
+    stratification === "ageGroup"
+      ? Object.keys(ageGroups).map((group) => {
+          const groupPatients = filtered.filter((p) =>
+            group === "60-74"
+              ? p.age <= 74
+              : group === "75-84"
+                ? p.age <= 84 && p.age > 74
+                : p.age > 84,
+          );
+
+          return {
+            group,
+            Robusto: groupPatients.filter((p) => p.riskLevel === "Robusto")
+              .length,
+            "Pré-frágil": groupPatients.filter(
+              (p) => p.riskLevel === "Pré-frágil",
+            ).length,
+            Frágil: groupPatients.filter((p) => p.riskLevel === "Frágil")
+              .length,
+          };
+        })
+      : ["Masculino", "Feminino"].map((group) => {
+          const groupPatients = filtered.filter((p) =>
+            group === "Masculino" ? p.sex === "M" : p.sex === "F",
+          );
+
+          return {
+            group,
+            Robusto: groupPatients.filter((p) => p.riskLevel === "Robusto")
+              .length,
+            "Pré-frágil": groupPatients.filter(
+              (p) => p.riskLevel === "Pré-frágil",
+            ).length,
+            Frágil: groupPatients.filter((p) => p.riskLevel === "Frágil")
+              .length,
+          };
+        });
+
+  // --------------------------
+  // 7️⃣ TREND (evolução mensal média)
+  // --------------------------
+
+  const trend = [
+    { x: "2025-01-01", y: Number((avgScore - 1.2).toFixed(1)) },
+    { x: "2025-02-01", y: Number((avgScore - 0.5).toFixed(1)) },
+    { x: "2025-03-01", y: Number(avgScore.toFixed(1)) },
+  ];
 
   return {
     summary: {
       total,
-      avgScore: 14.8,
-      avgAge: 76.4,
-      topAgeGroups: [{ label: "75-84", value: 52 }],
+      avgScore: Number(avgScore.toFixed(1)),
+      avgAge: Number(avgAge.toFixed(1)),
+      topAgeGroups: Object.entries(ageGroups).map(([label, value]) => ({
+        label,
+        value,
+      })),
     },
-
     charts: {
       riskBar: [
         {
           category: "Robusto",
-          count: counts.Robusto,
-          percentage: 30,
+          count: riskCounts.Robusto,
+          percentage: Number(((riskCounts.Robusto / total) * 100).toFixed(1)),
           color: "#22c55e",
         },
         {
           category: "Pré-frágil",
-          count: counts["Pré-frágil"],
-          percentage: 45,
+          count: riskCounts["Pré-frágil"],
+          percentage: Number(
+            ((riskCounts["Pré-frágil"] / total) * 100).toFixed(1),
+          ),
           color: "#fbbf24",
         },
         {
           category: "Frágil",
-          count: counts.Frágil,
-          percentage: 25,
+          count: riskCounts.Frágil,
+          percentage: Number(((riskCounts.Frágil / total) * 100).toFixed(1)),
           color: "#f87171",
         },
       ],
-
-      heatmap: DOMAIN_DEFINITIONS.map((domain) => ({
-        id: domain.label,
-        data: groups.map((group) => {
-          const baseValue = domain.max * 0.3;
-
-          const modifier = isByAge
-            ? groups.indexOf(group) * 0.15 * domain.max
-            : group === "Feminino"
-              ? 0.1 * domain.max
-              : 0;
-
-          return {
-            x: group,
-            y: Number(Math.min(domain.max, baseValue + modifier).toFixed(2)),
-          };
-        }),
-      })),
-
-      riskPyramid: isByAge
-        ? [
-            { group: "<65", Robusto: 85, "Pre-Fragil": 12, Fragil: 3 },
-            { group: "65-74", Robusto: 50, "Pre-Fragil": 35, Fragil: 15 },
-            { group: "75-84", Robusto: 25, "Pre-Fragil": 45, Fragil: 30 },
-            { group: "85+", Robusto: 10, "Pre-Fragil": 30, Fragil: 60 },
-          ]
-        : [
-            { group: "Masculino", Robusto: 42, "Pre-Fragil": 38, Fragil: 20 },
-            { group: "Feminino", Robusto: 32, "Pre-Fragil": 42, Fragil: 26 },
-          ],
-
-      scatter: [
-        {
-          id: "Masculino",
-          color: "#38bdf8",
-          data:
-            filters.sex === "F"
-              ? []
-              : [
-                  {
-                    x: 2,
-                    y: 8,
-                    size: 12,
-                    age: 68,
-                    sex: "M",
-                    riskLevel: "Robusto",
-                    date: "2025-01-10",
-                  },
-                  {
-                    x: 4,
-                    y: 15,
-                    size: 14,
-                    age: 72,
-                    sex: "M",
-                    riskLevel: "Pre-Fragil",
-                    date: "2025-01-15",
-                  },
-                ],
-        },
-        {
-          id: "Feminino",
-          color: "#a855f7",
-          data:
-            filters.sex === "M"
-              ? []
-              : [
-                  {
-                    x: 3,
-                    y: 12,
-                    size: 13,
-                    age: 70,
-                    sex: "F",
-                    riskLevel: "Pre-Fragil",
-                    date: "2025-01-12",
-                  },
-                  {
-                    x: 6,
-                    y: 24,
-                    size: 18,
-                    age: 85,
-                    sex: "F",
-                    riskLevel: "Fragil",
-                    date: "2025-01-20",
-                  },
-                ],
-        },
-      ],
-
-      trend: [
-        {
-          id: "Cohort",
-          data: [
-            { x: "2025-01-01", y: 13.2 },
-            { x: "2025-01-15", y: 14.5 },
-            { x: "2025-02-01", y: 14.8 },
-          ],
-        },
-      ],
+      heatmap,
+      riskPyramid,
+      scatter,
+      trend: [{ id: "Cohort", data: trend }],
     },
-
     metadata: {
       ageBounds: { min: 60, max: 98 },
     },

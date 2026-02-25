@@ -21,8 +21,8 @@ export interface HeatMapSerie {
 export interface RiskPyramidDatum {
   group: string;
   Robusto: number;
-  "Pre-Fragil": number;
-  Fragil: number;
+  "Pré-frágil": number;
+  Frágil: number;
 }
 export interface ScatterSerieData {
   x: number;

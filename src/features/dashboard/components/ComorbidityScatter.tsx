@@ -11,6 +11,7 @@ import {
   exportElementAsPng,
   nivoTheme,
 } from "../utils/transforms";
+import { Box } from "@/core/components/ui";
 
 type ComorbidityScatterProps = {
   data: {
@@ -38,12 +39,13 @@ export function ComorbidityScatter({ data }: ComorbidityScatterProps) {
     [useCanvas],
   );
 
-  const maxComorbidity = Math.max(
-    5,
+  const maxAge = Math.max(
+    100,
     ...data.flatMap((series) => series.data.map((d) => d.x)),
   );
+
   const maxScore = Math.max(
-    20,
+    40,
     ...data.flatMap((series) => series.data.map((d) => d.y)),
   );
 
@@ -55,11 +57,10 @@ export function ComorbidityScatter({ data }: ComorbidityScatterProps) {
             variant="caption"
             className="text-primary font-medium uppercase mb-2"
           >
-            Comorbidades × fragilidade
+            Idade × fragilidade
           </Typography>
           <Typography variant="caption">
-            Correlação entre número de doenças crônicas e score total (tamanho
-            reflete idade).
+            Relação entre idade e score total IVCF-20 (tamanho reflete risco).
           </Typography>
         </div>
         <div className="flex gap-2">
@@ -95,7 +96,7 @@ export function ComorbidityScatter({ data }: ComorbidityScatterProps) {
             blendMode="multiply"
             nodeSize={({ data }) => data.size}
             axisBottom={{
-              legend: "Número de comorbidades crônicas",
+              legend: "Idade (anos)",
               legendOffset: 42,
               legendPosition: "middle",
               tickSize: 6,
@@ -108,11 +109,14 @@ export function ComorbidityScatter({ data }: ComorbidityScatterProps) {
             }}
             xScale={{
               type: "linear",
-              min: 0,
-              max: maxComorbidity + 1,
-              stacked: false,
+              min: 60,
+              max: maxAge + 2,
             }}
-            yScale={{ type: "linear", min: 0, max: maxScore + 5 }}
+            yScale={{
+              type: "linear",
+              min: 0,
+              max: maxScore + 5,
+            }}
             legends={[
               {
                 anchor: "bottom-right",
@@ -124,14 +128,18 @@ export function ComorbidityScatter({ data }: ComorbidityScatterProps) {
               },
             ]}
             tooltip={({ node }) => (
-              <div className="text-sm">
+              <Box
+                display="flex"
+                direction="column"
+                align="center"
+                p={5}
+                className="bg-background rounded w-35 border"
+              >
                 <div className="font-semibold">Sexo: {node.data.sex}</div>
-                <div>Idade: {node.data.age} anos</div>
-                <div>Comorbidades: {node.data.x}</div>
+                <div>Idade: {node.data.x} anos</div>
                 <div>Score total: {node.data.y}</div>
                 <div>Risco: {node.data.riskLevel}</div>
-                <div>Data: {node.data.date}</div>
-              </div>
+              </Box>
             )}
             layers={["grid", "axes", "nodes", "mesh", "legends"]}
           />

@@ -9,6 +9,7 @@ import {
   nivoTheme,
 } from "../utils/transforms";
 import type { AggregationDimension } from "../types";
+import { Box } from "@/core/components/ui";
 
 const heatmapColors = {
   type: "sequential" as const,
@@ -73,6 +74,11 @@ export function DomainHeatmap({ data, stratification }: DomainHeatmapProps) {
               data={data}
               colors={heatmapColors}
               theme={nivoTheme}
+              enableLabels={true}
+              label={(cell) => cell.value?.toFixed(1) ?? ""}
+              labelTextColor={(cell) => {
+                return (cell.value ?? 0) > 2 ? "#ffffff" : "#333333";
+              }}
               margin={{ top: 40, right: 80, bottom: 80, left: 120 }}
               valueFormat=".2f"
               axisTop={null}
@@ -109,13 +115,19 @@ export function DomainHeatmap({ data, stratification }: DomainHeatmapProps) {
               inactiveOpacity={0.25}
               hoverTarget="cell"
               tooltip={({ cell }) => (
-                <div className="text-sm">
-                  <strong>{cell.x}</strong>
+                <Box className="bg-background text-sm rounded p-3 w-40 shadow-md border">
                   <div>
-                    {dimensionLabel[stratification]}: {cell.y.toFixed(0)}
+                    {/* Acessamos cell.data.x para pegar o valor real da string do eixo X */}
+                    <strong>{dimensionLabel[stratification]}:</strong>{" "}
+                    {cell.data.x}
                   </div>
-                  <div>Score médio: {cell.value?.toFixed(2)}</div>
-                </div>
+                  <div>
+                    <strong>Domínio:</strong> {cell.serieId}
+                  </div>
+                  <div>
+                    <strong>Score médio:</strong> {cell.value?.toFixed(2)}
+                  </div>
+                </Box>
               )}
             />
           ) : (
