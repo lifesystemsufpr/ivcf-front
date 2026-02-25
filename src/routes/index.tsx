@@ -11,13 +11,21 @@ import CreateAssessmentLayout from "@/features/assessment/features/create-flow/C
 import InstructionsScreen from "@/features/assessment/features/create-flow/screens/InstructionsScreen";
 import QuizScreen from "@/features/assessment/features/create-flow/screens/QuizScreen";
 import ResultScreen from "@/features/assessment/features/create-flow/screens/ResultScreen";
+import { DashboardProvider } from "@/features/dashboard/contexts/DashboardContext";
 
 export function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
         <Route element={<BaseLayout />}>
-          <Route path="/" element={<HomePage />} />
+          <Route
+            path="/"
+            element={
+              <DashboardProvider>
+                <HomePage />
+              </DashboardProvider>
+            }
+          />
           <Route
             path={clientRoutes.PARTICIPANTS.LIST}
             element={<PatientListPage />}

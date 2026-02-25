@@ -3,12 +3,7 @@ import {
   ResponsiveScatterPlot,
   ResponsiveScatterPlotCanvas,
 } from "@nivo/scatterplot";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/core/components/ui/Card";
+import { Card, CardContent, CardHeader } from "@/core/components/ui/Card";
 import { Button } from "@/core/components/ui/Button";
 import { Typography } from "@/core/components/ui/Typography";
 import {
@@ -56,8 +51,13 @@ export function ComorbidityScatter({ data }: ComorbidityScatterProps) {
     <Card className="h-full">
       <CardHeader className="flex flex-row items-start justify-between gap-4">
         <div>
-          <CardTitle>Comorbidades × fragilidade</CardTitle>
-          <Typography variant="small">
+          <Typography
+            variant="caption"
+            className="text-primary font-medium uppercase mb-2"
+          >
+            Comorbidades × fragilidade
+          </Typography>
+          <Typography variant="caption">
             Correlação entre número de doenças crônicas e score total (tamanho
             reflete idade).
           </Typography>

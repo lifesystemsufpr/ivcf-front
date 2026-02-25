@@ -1,11 +1,6 @@
 import { useRef } from "react";
 import { ResponsiveBar } from "@nivo/bar";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/core/components/ui/Card";
+import { Card, CardContent, CardHeader } from "@/core/components/ui/Card";
 import { Button } from "@/core/components/ui/Button";
 import { Typography } from "@/core/components/ui/Typography";
 import {
@@ -33,8 +28,13 @@ export function RiskPyramid({ data }: RiskPyramidProps) {
     <Card className="h-full">
       <CardHeader className="flex flex-row items-start justify-between gap-4">
         <div>
-          <CardTitle>Pirâmide de risco</CardTitle>
-          <Typography variant="small">
+          <Typography
+            variant="caption"
+            className="text-primary font-medium uppercase mb-2"
+          >
+            Pirâmide de risco
+          </Typography>
+          <Typography variant="caption">
             Percentual de Robusto → Pré-Frágil → Frágil em cada estrato.
           </Typography>
         </div>

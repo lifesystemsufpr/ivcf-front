@@ -21,15 +21,19 @@ export const IVCF_DOMAIN_MAX: Record<DomainKey, number> = {
   comorbidities: 4,
 };
 
-export const DOMAIN_DEFINITIONS: { key: DomainKey; label: string }[] = [
-  { key: "age", label: "Idade" },
-  { key: "selfPerception", label: "Autopercepção" },
-  { key: "functionalCapacity", label: "Capacidade Funcional" },
-  { key: "cognition", label: "Cognição" },
-  { key: "mood", label: "Humor" },
-  { key: "mobility", label: "Mobilidade" },
-  { key: "communication", label: "Comunicação" },
-  { key: "comorbidities", label: "Comorbidades" },
+export const DOMAIN_DEFINITIONS: {
+  key: DomainKey;
+  label: string;
+  max: number;
+}[] = [
+  { key: "age", label: "Idade", max: 3 },
+  { key: "selfPerception", label: "Autopercepção", max: 1 },
+  { key: "functionalCapacity", label: "Capacidade Funcional", max: 10 },
+  { key: "cognition", label: "Cognição", max: 4 },
+  { key: "mood", label: "Humor", max: 4 },
+  { key: "mobility", label: "Mobilidade", max: 10 },
+  { key: "communication", label: "Comunicação", max: 4 },
+  { key: "comorbidities", label: "Comorbidades", max: 4 },
 ];
 
 export const classificationStyles: Record<

@@ -1,11 +1,6 @@
 import { useRef } from "react";
 import { ResponsiveHeatMap } from "@nivo/heatmap";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/core/components/ui/Card";
+import { Card, CardContent, CardHeader } from "@/core/components/ui/Card";
 import { Button } from "@/core/components/ui/Button";
 import { Typography } from "@/core/components/ui/Typography";
 import {
@@ -39,8 +34,13 @@ export function DomainHeatmap({ data, stratification }: DomainHeatmapProps) {
     <Card className="h-full">
       <CardHeader className="flex flex-row items-start justify-between gap-4">
         <div>
-          <CardTitle>Heatmap por domínio</CardTitle>
-          <Typography variant="small">
+          <Typography
+            variant="caption"
+            className="text-primary font-medium uppercase mb-2"
+          >
+            Heatmap por domínio
+          </Typography>
+          <Typography variant="caption">
             Médias de score por domínio estratificadas por{" "}
             {dimensionLabel[stratification]}.
           </Typography>
