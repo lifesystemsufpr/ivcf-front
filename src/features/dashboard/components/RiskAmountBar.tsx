@@ -16,7 +16,7 @@ export function RiskAmountBar({ data }: { data: RiskBarDatum[] }) {
         </Typography>
 
         {/* container que ocupa o resto */}
-        <div className="flex-1 w-full min-h-[300px]">
+        <div className="flex-1 w-full min-h-75">
           <ResponsiveBar
             data={data}
             keys={["percentage"]}

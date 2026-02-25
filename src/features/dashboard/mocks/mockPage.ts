@@ -4,6 +4,7 @@ import type {
   FragilityDashboardResponse,
   FragilityFilters,
 } from "../types";
+import { buildDrilldown } from "../utils/builder";
 
 function classifyRisk(score: number) {
   if (score < 7) return "Robusto";
@@ -232,6 +233,7 @@ export const getMockedData = (
       riskPyramid,
       scatter,
       trend: [{ id: "Cohort", data: trend }],
+      domainDrilldown: buildDrilldown(total),
     },
     metadata: {
       ageBounds: { min: 60, max: 98 },

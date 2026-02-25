@@ -2,6 +2,22 @@ import type { FrailtyClassification } from "@/core/types";
 
 export type Sex = "M" | "F";
 
+export interface ResponseCounts {
+  sim: number;
+  nao: number;
+}
+
+export interface DrilldownNode {
+  id: string;
+  label: string;
+  counts: ResponseCounts;
+  children?: DrilldownNode[];
+}
+
+export interface DomainDrilldownData {
+  domains: DrilldownNode[];
+}
+
 export interface RiskBarDatum {
   category: FrailtyClassification;
   count: number;
@@ -55,6 +71,7 @@ export interface FragilityDashboardResponse {
     riskPyramid: RiskPyramidDatum[];
     scatter: ScatterSerie[];
     trend: any[];
+    domainDrilldown: DrilldownNode[];
   };
   metadata: {
     ageBounds: { min: number; max: number };

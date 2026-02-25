@@ -7,6 +7,7 @@ import { RiskPyramid } from "../components/RiskPyramid";
 import { useFragilityData } from "../hooks/useFragilityData";
 import { RiskAmountBar } from "../components/RiskAmountBar";
 import { ComorbidityScatter } from "../components/ComorbidityScatter";
+import { DomainDrilldownBars } from "../components/DomainDrilldownBars";
 
 export default function HomePage() {
   const {
@@ -62,6 +63,10 @@ export default function HomePage() {
       <div className="grid gap-6 xl:grid-cols-2">
         <DomainHeatmap data={charts.heatmap} stratification={stratification} />
         <ComorbidityScatter data={charts.scatter} />
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-1">
+        <DomainDrilldownBars fullData={charts.domainDrilldown} />
       </div>
     </div>
   );
