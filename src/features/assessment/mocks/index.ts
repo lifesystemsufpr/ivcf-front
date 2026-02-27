@@ -18,19 +18,19 @@ function getClassification(score: number): FrailtyClassification {
 }
 
 const scores = [3, 8, 16, 5, 12, 18, 9, 2, 14, 20];
+const assessmentsForParticipants = 2;
 
-export const assessmentsListMock: Assessment[] = participantsMock.map(
+export const assessmentsListMock: Assessment[] = participantsMock.flatMap(
   (participant, index) => {
-    const totalScore = scores[index] || 0;
-    return {
-      id: `assessment-${index + 1}`,
+    return Array.from({ length: assessmentsForParticipants }, (_, i) => ({
+      id: `assessment-${index + 1}-${i + 1}`,
       date: new Date(2026, 1, index + 1).toISOString(),
-      totalScore,
-      classification: getClassification(totalScore),
+      totalScore: scores[index + i],
+      classification: getClassification(scores[index + i]),
       participantId: participant.id,
       participantName: participant.fullName,
       participantCpf: participant.cpf,
-    };
+    }));
   },
 );
 
