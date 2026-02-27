@@ -62,7 +62,7 @@ export function Autocomplete<T>({
 
       <div
         className={cn(
-          "absolute left-0 right-0 z-50 mt-2 origin-top rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] text-[hsl(var(--foreground))] shadow-xl",
+          "absolute left-0 right-0 z-50 mt-1 origin-top rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] text-[hsl(var(--foreground))] shadow-xl",
           "transition-all duration-150 ease-out",
           open
             ? "pointer-events-auto scale-100 opacity-100"

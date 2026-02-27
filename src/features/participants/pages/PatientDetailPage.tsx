@@ -16,6 +16,7 @@ import { useState } from "react";
 import ParticipantDetailContent from "../components/ParticipantDetailContent";
 import type { ParticipantDetailTabs } from "../types";
 import { ParticipantDashboard } from "../features/indicators";
+import ParticipantAssessmentsScreen from "../features/assessments/screen/ParticipantAssessmentsScreen";
 
 export function PatientDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -58,7 +59,7 @@ export function PatientDetailPage() {
           <ParticipantDashboard />
         </TabPanel>
         <TabPanel value="assessments">
-          <Typography>Conteúdo das avaliações do paciente...</Typography>
+          <ParticipantAssessmentsScreen id={participant.id} />
         </TabPanel>
       </Tabs>
     </Box>
