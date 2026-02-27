@@ -7,6 +7,7 @@ export const riskColorMap: Record<FrailtyClassification, string> = {
   Robusto: "#22c55e",
   "Pré-frágil": "#fbbf24",
   Frágil: "#f87171",
+  Todos: "#6b7280",
 };
 
 export const sexColorMap: Record<Sex, string> = {

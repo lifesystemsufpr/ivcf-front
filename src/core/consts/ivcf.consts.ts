@@ -55,4 +55,9 @@ export const classificationStyles: Record<
     border: "border-green-500",
     text: "text-green-700",
   },
+  Todos: {
+    bg: "bg-gray-100",
+    border: "border-gray-500",
+    text: "text-gray-700",
+  },
 };
