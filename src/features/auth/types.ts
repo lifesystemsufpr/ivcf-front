@@ -6,9 +6,13 @@ export type LoginPayload = {
 export type LoginResponse = {
   accessToken: string;
   refreshToken?: string;
-  user: {
-    id: string;
-    email: string;
-    name?: string;
-  };
 };
+
+export interface JwtPayload {
+  username: string;
+  cpf: string;
+  sub: string;
+  role: "MANAGER" | "ADMIN" | "USER";
+  iat: number;
+  exp: number;
+}

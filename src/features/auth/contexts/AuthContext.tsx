@@ -13,6 +13,7 @@ import {
   getStoredRefreshToken,
   setStoredTokens,
 } from "@/core/services/client.service";
+import { isTokenExpired } from "../utils/decoder";
 
 export type AuthUser = {
   id: string;
@@ -52,8 +53,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const storedAccess = getStoredAccessToken();
     const storedRefresh = getStoredRefreshToken();
-    if (storedAccess) setAccessToken(storedAccess);
+
+    if (storedAccess && !isTokenExpired(storedAccess)) {
+      setAccessToken(storedAccess);
+    } else {
+      clearStoredTokens();
+    }
+
     if (storedRefresh) setRefreshToken(storedRefresh);
+
     setIsHydrating(false);
   }, []);
 

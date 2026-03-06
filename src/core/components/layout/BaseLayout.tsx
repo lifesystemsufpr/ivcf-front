@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Menu, User, Moon, Sun, LogOut } from "lucide-react";
 import { useTheme } from "@/core/theme/ThemeContext";
 import { clientRoutes } from "@/core/configs/client.routes";
+import { AuthGuard } from "@/core/guards/AuthGuard";
 
 export function BaseLayout() {
   const router = useNavigate();
@@ -13,63 +14,65 @@ export function BaseLayout() {
   const [openDropdown, setOpenDropdown] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
-      <header className="sticky top-0 z-40 w-full border-b backdrop-blur-md bg-primary">
-        <Box
-          display="flex"
-          justify="space-between"
-          align="center"
-          className="container mx-auto p-4 h-18.75"
-        >
-          <IconButton
-            icon={Menu}
-            ariaLabel="Open navigation menu"
-            onClick={() => setNavOpen(true)}
-          />
+    <AuthGuard>
+      <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+        <header className="sticky top-0 z-40 w-full border-b backdrop-blur-md bg-primary">
+          <Box
+            display="flex"
+            justify="space-between"
+            align="center"
+            className="container mx-auto p-4 h-18.75"
+          >
+            <IconButton
+              icon={Menu}
+              ariaLabel="Open navigation menu"
+              onClick={() => setNavOpen(true)}
+            />
 
-          <Dropdown
-            trigger={({ open, toggle }) => (
-              <IconButton
-                icon={User}
-                ariaLabel="Open profile menu"
-                onClick={toggle}
-                aria-expanded={open}
-              />
-            )}
-            placement="bottom-end"
-            open={openDropdown}
-            onOpenChange={setOpenDropdown}
-            items={[
-              {
-                label: "Profile",
-                Icon: User,
-                onSelect: () => {
-                  console.log("Go to profile");
+            <Dropdown
+              trigger={({ open, toggle }) => (
+                <IconButton
+                  icon={User}
+                  ariaLabel="Open profile menu"
+                  onClick={toggle}
+                  aria-expanded={open}
+                />
+              )}
+              placement="bottom-end"
+              open={openDropdown}
+              onOpenChange={setOpenDropdown}
+              items={[
+                {
+                  label: "Profile",
+                  Icon: User,
+                  onSelect: () => {
+                    console.log("Go to profile");
+                  },
                 },
-              },
-              {
-                label: theme === "light" ? "Dark Mode" : "Light Mode",
-                Icon: theme === "light" ? Moon : Sun,
-                onSelect: () => {
-                  toggleTheme();
+                {
+                  label: theme === "light" ? "Dark Mode" : "Light Mode",
+                  Icon: theme === "light" ? Moon : Sun,
+                  onSelect: () => {
+                    toggleTheme();
+                  },
                 },
-              },
-              {
-                label: "Logout",
-                Icon: LogOut,
-                onSelect: () => {
-                  router(clientRoutes.AUTH.LOGIN);
+                {
+                  label: "Logout",
+                  Icon: LogOut,
+                  onSelect: () => {
+                    router(clientRoutes.AUTH.LOGIN);
+                  },
                 },
-              },
-            ]}
-          />
-        </Box>
-      </header>
-      <main className="container mx-auto p-2">
-        <Outlet />
-      </main>
+              ]}
+            />
+          </Box>
+        </header>
+        <main className="container mx-auto p-2">
+          <Outlet />
+        </main>
 
-      <NavBar open={navOpen} onClose={() => setNavOpen(false)} />
-    </div>
+        <NavBar open={navOpen} onClose={() => setNavOpen(false)} />
+      </div>
+    </AuthGuard>
   );
 }
