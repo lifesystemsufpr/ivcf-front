@@ -7,13 +7,24 @@ import {
 } from "@/core/components/ui";
 import { clientRoutes } from "@/core/configs/client.routes";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useLogin } from "../hooks/useLogin";
+import type { ApiError } from "@/core/services/client.service";
 
 export default function LoginPage() {
   const router = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const { mutateAsync: login, isPending, error } = useLogin();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    router("/");
+    try {
+      await login({ email, password });
+      router("/");
+    } catch (err) {
+      console.error("Falha no login", err);
+    }
   };
 
   return (
@@ -47,7 +58,13 @@ export default function LoginPage() {
         </Box>
 
         {/* Form Fields */}
-        <Box display="flex" direction="column" gap={16}>
+        <Box
+          display="flex"
+          direction="column"
+          gap={16}
+          onSubmit={handleSubmit}
+          as="form"
+        >
           <Box display="flex" direction="column" gap={6}>
             <Label htmlFor="email">Email</Label>
             <input
@@ -58,6 +75,9 @@ export default function LoginPage() {
               className="w-full h-11 px-3 rounded-md border border-border bg-background text-sm
                          focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
                          transition"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              required
             />
           </Box>
 
@@ -71,6 +91,9 @@ export default function LoginPage() {
               className="w-full h-11 px-3 rounded-md border border-border bg-background text-sm
                          focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
                          transition"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              required
             />
           </Box>
 
@@ -84,6 +107,14 @@ export default function LoginPage() {
           </Box>
         </Box>
 
+        {error && (
+          <Box className="p-3 border border-destructive/40 bg-destructive/10 rounded-md">
+            <Typography variant="body" className="text-destructive text-sm">
+              {(error as ApiError).message || "Não foi possível fazer login."}
+            </Typography>
+          </Box>
+        )}
+
         {/* Submit */}
         <Button
           type="submit"
@@ -91,8 +122,9 @@ export default function LoginPage() {
           size="lg"
           className="w-full"
           onClick={handleSubmit}
+          disabled={isPending}
         >
-          Entrar
+          {isPending ? "Entrando..." : "Entrar"}
         </Button>
       </Box>
     </Box>
