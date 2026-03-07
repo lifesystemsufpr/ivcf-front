@@ -10,3 +10,5 @@ export const frailtyClassificationList: FrailtyClassification[] = [
   "Frágil",
   "Todos",
 ];
+
+export type SystemRole = "HEALTH_PROFESSIONAL" | "PARTICIPANT";

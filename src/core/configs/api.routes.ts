@@ -5,5 +5,6 @@ export const apiRoutes = {
   AUTH: {
     LOGIN: `${API_URL_BASE}/auth/login`,
     REFRESH: `${API_URL_BASE}/auth/refresh`,
+    REGISTER: `${API_URL_BASE}/health-professional`,
   },
 };

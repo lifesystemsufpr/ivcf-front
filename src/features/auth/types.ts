@@ -1,3 +1,5 @@
+import type { SystemRole } from "@/core/types";
+
 export type LoginPayload = {
   email: string;
   password: string;
@@ -15,4 +17,32 @@ export interface JwtPayload {
   role: "MANAGER" | "ADMIN" | "USER";
   iat: number;
   exp: number;
+}
+
+export type Gender = "MALE" | "FEMALE";
+
+export interface RegisterPayload {
+  speciality: string;
+  user: {
+    name: string;
+    email: string;
+    telefone: string;
+    gender: Gender;
+    password: string;
+  };
+}
+
+export interface RegisterResponse {
+  id: string;
+  email: string;
+  fullName: string;
+  fullName_normalized: string;
+  active: boolean;
+  gender: Gender;
+  role: SystemRole;
+  phone: string;
+  createdAt: string;
+  updatedAt: string;
+  speciality: string;
+  speciality_normalized: string;
 }

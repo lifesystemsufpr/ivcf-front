@@ -5,6 +5,7 @@ export * from "./Separator";
 export * from "./Textarea";
 export * from "./Button";
 export * from "./Input";
+export * from "./Select";
 export * from "./Card";
 export * from "./Box";
 export * from "./Typography";

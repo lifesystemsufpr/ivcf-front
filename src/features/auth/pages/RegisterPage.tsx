@@ -4,17 +4,78 @@ import {
   Label,
   Separator,
   Input,
+  Select,
   Typography,
 } from "@/core/components/ui";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import type { ApiError } from "@/core/services/client.service";
+import type { Gender, RegisterPayload } from "../types";
+import { useRegisterAndLogin } from "../hooks/useRegisterAndLogin";
+
+interface FormData {
+  name: string;
+  email: string;
+  ocupacao: string;
+  telefone: string;
+  sexo: string;
+  password: string;
+}
 
 export default function RegisterPage() {
   const router = useNavigate();
+  const [formData, setFormData] = useState<FormData>({
+    name: "",
+    email: "",
+    ocupacao: "",
+    telefone: "",
+    sexo: "",
+    password: "",
+  });
+  const [error, setError] = useState<string>("");
+  const {
+    mutateAsync: registerAndLogin,
+    isPending,
+    error: registerError,
+  } = useRegisterAndLogin();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setError("");
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Lógica de cadastro aqui
-    router("/"); // Redireciona para a página inicial após o registro
+    setError("");
+
+    // Validação de senha
+    if (formData.password.length < 6) {
+      setError("A senha deve ter no mínimo 6 caracteres");
+      return;
+    }
+
+    try {
+      const payload: RegisterPayload = {
+        speciality: formData.ocupacao,
+        user: {
+          name: formData.name,
+          email: formData.email,
+          telefone: formData.telefone,
+          gender: formData.sexo as Gender,
+          password: formData.password,
+        },
+      };
+
+      await registerAndLogin(payload);
+
+      // Redireciona para a página inicial após o registro
+      router("/");
+    } catch (err) {
+      console.error("Erro ao realizar cadastro", err);
+    }
   };
 
   return (
@@ -50,12 +111,21 @@ export default function RegisterPage() {
 
           {/* Form - Somente campos de Responsável */}
           <form className="grid gap-6" onSubmit={handleSubmit}>
+            {(error || registerError) && (
+              <Box className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+                {error ||
+                  (registerError as ApiError)?.message ||
+                  "Erro ao realizar cadastro. Tente novamente."}
+              </Box>
+            )}
             <Box className="grid gap-4 md:grid-cols-1">
               <Box display="flex" direction="column" gap={6}>
                 <Label htmlFor="name">Nome Completo</Label>
                 <Input
                   id="name"
                   name="name"
+                  value={formData.name}
+                  onChange={handleChange}
                   placeholder="Seu nome completo"
                   required
                 />
@@ -69,6 +139,8 @@ export default function RegisterPage() {
                   id="email"
                   name="email"
                   type="email"
+                  value={formData.email}
+                  onChange={handleChange}
                   placeholder="seu@email.com"
                   required
                 />
@@ -78,9 +150,43 @@ export default function RegisterPage() {
                 <Input
                   id="ocupacao"
                   name="ocupacao"
+                  value={formData.ocupacao}
+                  onChange={handleChange}
                   placeholder="Ex: Médico, Filho(a), Cuidador"
                   required
                 />
+              </Box>
+            </Box>
+
+            <Box className="grid gap-4 md:grid-cols-2">
+              <Box display="flex" direction="column" gap={6}>
+                <Label htmlFor="telefone">Telefone</Label>
+                <Input
+                  id="telefone"
+                  name="telefone"
+                  type="text"
+                  mask="phone"
+                  value={formData.telefone}
+                  onChange={handleChange}
+                  placeholder="(00) 00000-0000"
+                  required
+                />
+              </Box>
+              <Box display="flex" direction="column" gap={6}>
+                <Label htmlFor="sexo">Sexo</Label>
+                <Select
+                  id="sexo"
+                  name="sexo"
+                  value={formData.sexo}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="" disabled>
+                    Selecione
+                  </option>
+                  <option value="MALE">Masculino</option>
+                  <option value="FEMALE">Feminino</option>
+                </Select>
               </Box>
             </Box>
 
@@ -90,7 +196,10 @@ export default function RegisterPage() {
                 id="password"
                 name="password"
                 type="password"
-                placeholder="Crie uma senha forte"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Mínimo 6 caracteres"
+                minLength={6}
                 required
               />
             </Box>
@@ -101,8 +210,9 @@ export default function RegisterPage() {
                 variant="default"
                 size="lg"
                 className="w-full"
+                disabled={isPending}
               >
-                Finalizar Cadastro
+                {isPending ? "Cadastrando..." : "Finalizar Cadastro"}
               </Button>
             </Box>
 
