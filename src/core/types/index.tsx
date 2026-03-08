@@ -12,3 +12,9 @@ export const frailtyClassificationList: FrailtyClassification[] = [
 ];
 
 export type SystemRole = "HEALTH_PROFESSIONAL" | "PARTICIPANT";
+
+export interface ErrorResponse {
+  status: number;
+  message: string;
+  data?: unknown;
+}

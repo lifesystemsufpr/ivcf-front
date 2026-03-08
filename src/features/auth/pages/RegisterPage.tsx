@@ -12,6 +12,7 @@ import { useState } from "react";
 import type { ApiError } from "@/core/services/client.service";
 import type { Gender, RegisterPayload } from "../types";
 import { useRegisterAndLogin } from "../hooks/useRegisterAndLogin";
+import { Bounce, toast } from "react-toastify";
 
 interface FormData {
   name: string;
@@ -61,7 +62,7 @@ export default function RegisterPage() {
       const payload: RegisterPayload = {
         speciality: formData.ocupacao,
         user: {
-          name: formData.name,
+          fullName: formData.name,
           email: formData.email,
           telefone: formData.telefone,
           gender: formData.sexo as Gender,
@@ -71,10 +72,32 @@ export default function RegisterPage() {
 
       await registerAndLogin(payload);
 
-      // Redireciona para a página inicial após o registro
+      toast.success("Registro realizado com sucesso!", {
+        position: "top-center",
+        autoClose: 2500,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: 1,
+        theme: "colored",
+        transition: Bounce,
+      });
       router("/");
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Erro ao realizar cadastro", err);
+      const errorMessage = (err as { message?: string }).message || "";
+      toast.error(`Erro ao realizar cadastro. ${errorMessage || ""}`, {
+        position: "top-center",
+        autoClose: 2500,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
     }
   };
 
@@ -111,13 +134,6 @@ export default function RegisterPage() {
 
           {/* Form - Somente campos de Responsável */}
           <form className="grid gap-6" onSubmit={handleSubmit}>
-            {(error || registerError) && (
-              <Box className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                {error ||
-                  (registerError as ApiError)?.message ||
-                  "Erro ao realizar cadastro. Tente novamente."}
-              </Box>
-            )}
             <Box className="grid gap-4 md:grid-cols-1">
               <Box display="flex" direction="column" gap={6}>
                 <Label htmlFor="name">Nome Completo</Label>

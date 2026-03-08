@@ -6,13 +6,13 @@ export type LoginPayload = {
 };
 
 export type LoginResponse = {
-  accessToken: string;
+  access_token: string;
   refreshToken?: string;
 };
 
 export interface JwtPayload {
   username: string;
-  cpf: string;
+  email: string;
   sub: string;
   role: "MANAGER" | "ADMIN" | "USER";
   iat: number;
@@ -24,7 +24,7 @@ export type Gender = "MALE" | "FEMALE";
 export interface RegisterPayload {
   speciality: string;
   user: {
-    name: string;
+    fullName: string;
     email: string;
     telefone: string;
     gender: Gender;

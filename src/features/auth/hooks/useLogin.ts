@@ -11,7 +11,7 @@ export function useLogin() {
   return useMutation<LoginResponse, ApiError, LoginPayload>({
     mutationFn: loginRequest,
     onSuccess: (data) => {
-      const user: JwtPayload | null = decodeJWT(data.accessToken);
+      const user: JwtPayload | null = decodeJWT(data.access_token);
 
       if (!user) {
         console.error("Failed to decode JWT");
@@ -21,10 +21,10 @@ export function useLogin() {
       auth.login({
         user: {
           id: user.sub,
-          email: user.cpf,
+          email: user.email,
           name: user.username,
         },
-        accessToken: data.accessToken,
+        accessToken: data.access_token,
         refreshToken: data.refreshToken,
       });
     },
