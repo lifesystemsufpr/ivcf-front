@@ -18,7 +18,10 @@ import { ProgressBar } from "../components/ProgressBar";
 import { QuestionCard } from "../components/QuestionCard";
 import { saveAssessment } from "../services/saveAssessment";
 import { useQuestionnaireStructure } from "../hooks/useQuestionnaireStructure";
-import { flattenQuestions, findQuestionByOrder } from "../utils/questionnaireHelpers";
+import {
+  flattenQuestions,
+  findQuestionByOrder,
+} from "../utils/questionnaireHelpers";
 import { useAuthContext } from "@/features/auth/contexts/AuthContext";
 
 export default function QuizScreen() {
@@ -60,7 +63,12 @@ export default function QuizScreen() {
       setQuestionnaireId(questionnaireStructure.id);
       setTotalQuestions(questions.length);
     }
-  }, [questionnaireStructure, questions.length, setQuestionnaireId, setTotalQuestions]);
+  }, [
+    questionnaireStructure,
+    questions.length,
+    setQuestionnaireId,
+    setTotalQuestions,
+  ]);
 
   useEffect(() => {
     if (selectedParticipant?.id) {
@@ -109,7 +117,9 @@ export default function QuizScreen() {
     }
 
     if (!questionnaireId) {
-      setErrorMessage("Erro ao identificar o questionário. Recarregue a página.");
+      setErrorMessage(
+        "Erro ao identificar o questionário. Recarregue a página.",
+      );
       return;
     }
 
@@ -167,7 +177,9 @@ export default function QuizScreen() {
         <Card className="w-full max-w-5xl" padding="lg">
           <CardContent className="p-6">
             <Alert className="border-destructive bg-destructive/10 text-destructive">
-              <Typography variant="h3">Erro ao carregar questionário</Typography>
+              <Typography variant="h3">
+                Erro ao carregar questionário
+              </Typography>
               <Typography variant="small">
                 Não foi possível carregar a estrutura do questionário. Tente
                 recarregar a página.
