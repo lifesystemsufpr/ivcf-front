@@ -9,16 +9,21 @@ import ParticipantAutocomplete from "../components/ParticipantAutocomplete";
 import ParticipantForm from "../components/ParticipantForm";
 import { ParticipantProvider } from "../context/ParticipantContext";
 import ParticipantList from "../containers/ParticipantsList";
-import type { Participant } from "../types";
+import type { ParticipantRequest } from "../types";
 import { Plus } from "lucide-react";
 import { useState } from "react";
+import { useCreateParticipant } from "../hooks/useCreateParticipant";
 
 export function PatientListPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const createParticipant = useCreateParticipant();
 
-  const handleCreateParticipant = (data: Participant) => {
-    console.log("Criar participante", data);
-    setIsCreateOpen(false);
+  const handleCreateParticipant = (data: ParticipantRequest) => {
+    createParticipant.mutate(data, {
+      onSuccess: () => {
+        setIsCreateOpen(false);
+      },
+    });
   };
 
   return (

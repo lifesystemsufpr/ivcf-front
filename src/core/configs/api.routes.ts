@@ -7,4 +7,8 @@ export const apiRoutes = {
     REFRESH: `${API_URL_BASE}/auth/refresh`,
     REGISTER: `${API_URL_BASE}/health-professional`,
   },
+
+  PARTICIPANTS: {
+    LIST: `${API_URL_BASE}/participant`,
+  },
 };

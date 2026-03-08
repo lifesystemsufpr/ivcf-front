@@ -9,7 +9,6 @@ import {
 } from "@/core/components/ui";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import type { ApiError } from "@/core/services/client.service";
 import type { Gender, RegisterPayload } from "../types";
 import { useRegisterAndLogin } from "../hooks/useRegisterAndLogin";
 import { Bounce, toast } from "react-toastify";
@@ -33,28 +32,32 @@ export default function RegisterPage() {
     sexo: "",
     password: "",
   });
-  const [error, setError] = useState<string>("");
-  const {
-    mutateAsync: registerAndLogin,
-    isPending,
-    error: registerError,
-  } = useRegisterAndLogin();
+
+  const { mutateAsync: registerAndLogin, isPending } = useRegisterAndLogin();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    setError("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
 
     // Validação de senha
     if (formData.password.length < 6) {
-      setError("A senha deve ter no mínimo 6 caracteres");
+      toast.error("A senha deve conter no mínimo 6 caracteres.", {
+        position: "top-center",
+        autoClose: 2500,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
       return;
     }
 

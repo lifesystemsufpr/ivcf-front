@@ -1,5 +1,4 @@
 import type { Assessment } from "@/features/assessment";
-import { ParticipantsService } from "@/features/participants/services/participants.service";
 import { useEffect, useState } from "react";
 
 export default function useFetchAssessments(participantId: string) {
@@ -10,15 +9,8 @@ export default function useFetchAssessments(participantId: string) {
   const actions = {
     async fetchAssessments() {
       setIsLoading(true);
-      ParticipantsService.getParticipantsAssessments(participantId)
-        .then((data) => {
-          setAssessments(data);
-          setIsLoading(false);
-        })
-        .catch((error) => {
-          setErrors(error.message);
-          setIsLoading(false);
-        });
+      setAssessments([]);
+      setErrors(null);
     },
   };
 

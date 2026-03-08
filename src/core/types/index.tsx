@@ -18,3 +18,15 @@ export interface ErrorResponse {
   message: string;
   data?: unknown;
 }
+
+export interface MetaPagination {
+  total: number;
+  page: number;
+  pageSize: number;
+  lastPage: number;
+}
+
+export interface SuccessResponse<T> {
+  meta?: MetaPagination;
+  data: T;
+}

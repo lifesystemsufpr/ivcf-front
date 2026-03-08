@@ -9,7 +9,6 @@ export interface Assessment {
   classification: FrailtyClassification;
   participantId: string;
   participantName: string;
-  participantCpf: string;
 }
 
 export interface SelectedOption {
