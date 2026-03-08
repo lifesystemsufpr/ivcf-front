@@ -51,3 +51,17 @@ export interface AssessmentResponse {
   updatedAt: string;
   answers: Answer[];
 }
+
+export interface QuestionnaireListItem {
+  id: string;
+  date: string;
+  totalScore: number;
+  classification: FrailtyClassification;
+  questionnaireTitle: string;
+  questionnaireSlug: string;
+  participantId: string;
+  participantName: string;
+  healthProfessionalId: string;
+  healthProfessionalName: string;
+  healthProfessionalSpeciality: string;
+}

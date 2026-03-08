@@ -11,4 +11,10 @@ export const apiRoutes = {
   PARTICIPANTS: {
     LIST: `${API_URL_BASE}/participant`,
   },
+
+  ASSESSMENTS: {
+    LIST: `${API_URL_BASE}/questionnaires`,
+    BY_PARTICIPANT: (participantId: string) =>
+      `${API_URL_BASE}/questionnaires/participant/${participantId}`,
+  },
 };
