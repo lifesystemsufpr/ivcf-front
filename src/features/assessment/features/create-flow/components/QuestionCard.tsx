@@ -7,12 +7,15 @@ import {
   CardTitle,
   Typography,
 } from "@/core/components/ui";
-import type { IvcfOption, IvcfQuestion } from "../questions";
+import type {
+  QuestionnaireQuestion,
+  QuestionnaireOption,
+} from "../types/questionnaire.types";
 
 interface QuestionCardProps {
-  question: IvcfQuestion;
+  question: QuestionnaireQuestion;
   selectedOptionId?: string;
-  onSelect: (option: IvcfOption) => void;
+  onSelect: (option: QuestionnaireOption) => void;
 }
 
 export function QuestionCard({

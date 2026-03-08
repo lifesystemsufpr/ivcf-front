@@ -1,18 +1,33 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { AssessmentService } from "../services/assessment.service";
 
-export function useListAssessments() {
+interface UseListAssessmentsOptions {
+  pageSize?: number;
+  startDate?: string;
+  endDate?: string;
+  participantName?: string;
+}
+
+export function useListAssessments({
+  pageSize = 10,
+  startDate,
+  endDate,
+  participantName,
+}: UseListAssessmentsOptions = {}) {
   return useInfiniteQuery({
-    queryKey: ["assessments"],
+    queryKey: ["assessments", { pageSize, startDate, endDate, participantName }],
     initialPageParam: 1,
     queryFn: async ({ pageParam = 1 }) => {
       const data = await AssessmentService.listAllAssessments({
         page: pageParam,
-        pageSize: 10,
+        pageSize,
+        startDate,
+        endDate,
+        participantName,
       });
 
       const totalItems = data.meta?.total ?? 0;
-      const totalPages = Math.ceil(totalItems / 10);
+      const totalPages = Math.ceil(totalItems / pageSize);
 
       return {
         items: data.data,

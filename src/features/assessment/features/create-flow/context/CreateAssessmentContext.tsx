@@ -6,7 +6,7 @@ import React, {
   useState,
   useCallback,
 } from "react";
-import { IVCF_TOTAL_QUESTIONS } from "../questions";
+
 export interface AssessmentAnswer {
   questionId: string;
   optionId: string;
@@ -17,13 +17,17 @@ export type AnswerMap = Record<string, AssessmentAnswer>;
 
 interface AssessmentState {
   participantId: string | null;
+  questionnaireId: string | null;
   answers: AnswerMap;
   currentQuestion: number;
+  totalQuestions: number;
 }
 
 interface AssessmentContextValue extends AssessmentState {
   totalScore: number;
   selectParticipant: (participantId: string) => void;
+  setQuestionnaireId: (questionnaireId: string) => void;
+  setTotalQuestions: (total: number) => void;
   updateAnswer: (answer: AssessmentAnswer) => void;
   nextQuestion: () => void;
   previousQuestion: () => void;
@@ -35,8 +39,10 @@ const STORAGE_KEY = "ivcf:create-state";
 
 const defaultState: AssessmentState = {
   participantId: null,
+  questionnaireId: null,
   answers: {},
   currentQuestion: 1,
+  totalQuestions: 20,
 };
 
 const calculateIvcfScore = (answers: AnswerMap): number => {
@@ -84,9 +90,6 @@ const calculateIvcfScore = (answers: AnswerMap): number => {
   return avdInstrumentalScore + mobilityScore + comorbidityScore + othersScore;
 };
 
-/**
- * Auxiliares de Storage
- */
 function loadInitialState(): AssessmentState {
   try {
     const stored = sessionStorage.getItem(STORAGE_KEY);
@@ -95,8 +98,10 @@ function loadInitialState(): AssessmentState {
     const parsed = JSON.parse(stored) as AssessmentState;
     return {
       participantId: parsed.participantId ?? null,
+      questionnaireId: parsed.questionnaireId ?? null,
       answers: parsed.answers ?? {},
       currentQuestion: parsed.currentQuestion ?? 1,
+      totalQuestions: parsed.totalQuestions ?? 20,
     };
   } catch (error) {
     console.error("Failed to restore assessment state", error);
@@ -128,6 +133,14 @@ export function AssessmentProvider({
     setState((prev) => ({ ...prev, participantId }));
   }, []);
 
+  const setQuestionnaireId = useCallback((questionnaireId: string) => {
+    setState((prev) => ({ ...prev, questionnaireId }));
+  }, []);
+
+  const setTotalQuestions = useCallback((total: number) => {
+    setState((prev) => ({ ...prev, totalQuestions: total }));
+  }, []);
+
   const updateAnswer = useCallback((answer: AssessmentAnswer) => {
     setState((prev) => ({
       ...prev,
@@ -141,7 +154,7 @@ export function AssessmentProvider({
   const nextQuestion = useCallback(() => {
     setState((prev) => ({
       ...prev,
-      currentQuestion: Math.min(prev.currentQuestion + 1, IVCF_TOTAL_QUESTIONS),
+      currentQuestion: Math.min(prev.currentQuestion + 1, prev.totalQuestions),
     }));
   }, []);
 
@@ -155,7 +168,7 @@ export function AssessmentProvider({
   const setCurrentQuestion = useCallback((question: number) => {
     setState((prev) => ({
       ...prev,
-      currentQuestion: Math.min(Math.max(question, 1), IVCF_TOTAL_QUESTIONS),
+      currentQuestion: Math.min(Math.max(question, 1), prev.totalQuestions),
     }));
   }, []);
 
@@ -169,6 +182,8 @@ export function AssessmentProvider({
       ...state,
       totalScore,
       selectParticipant,
+      setQuestionnaireId,
+      setTotalQuestions,
       updateAnswer,
       nextQuestion,
       previousQuestion,
@@ -179,6 +194,8 @@ export function AssessmentProvider({
       state,
       totalScore,
       selectParticipant,
+      setQuestionnaireId,
+      setTotalQuestions,
       updateAnswer,
       nextQuestion,
       previousQuestion,

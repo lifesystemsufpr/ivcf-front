@@ -16,5 +16,10 @@ export const apiRoutes = {
     LIST: `${API_URL_BASE}/questionnaires`,
     BY_PARTICIPANT: (participantId: string) =>
       `${API_URL_BASE}/questionnaires/participant/${participantId}`,
+    RESPONSE: (assessmentId: string) =>
+      `${API_URL_BASE}/questionnaires/response/${assessmentId}`,
+    IVCF_RESPONSE: () =>
+      `${API_URL_BASE}/questionnaires/response`,
+    IVCF_STRUCTURE: `${API_URL_BASE}/questionnaires/ivcf-20`,
   },
 };

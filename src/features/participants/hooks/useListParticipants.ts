@@ -6,7 +6,7 @@ interface UseListParticipantsOptions {
 }
 
 export function useListParticipants({
-  pageSize = 10,
+  pageSize = 30,
 }: UseListParticipantsOptions) {
   return useInfiniteQuery({
     queryKey: ["participants"],

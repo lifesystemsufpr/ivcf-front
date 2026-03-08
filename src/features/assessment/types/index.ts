@@ -45,11 +45,18 @@ export interface AssessmentResponse {
   classification: FrailtyClassification;
   date: string;
   participantId: string;
-  participantName: string;
+  participantName?: string;
   questionnaireId: string;
   createdAt: string;
   updatedAt: string;
   answers: Answer[];
+  participant?: {
+    user: {
+      fullName: string;
+    };
+  };
+  healthProfessionalId?: string;
+  healthcareUnitId?: string;
 }
 
 export interface QuestionnaireListItem {
