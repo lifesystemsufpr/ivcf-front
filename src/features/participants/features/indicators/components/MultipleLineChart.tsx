@@ -1,14 +1,13 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
-import { ResponsiveLine } from "@nivo/line";
-import type { IVCF_Assessment, IVCF_DomainScores } from "../types";
+import { useMemo } from "react";
 import {
-  nivoTheme,
-  exportElementAsPng,
-  exportElementAsPdf,
-} from "@/features/dashboard/utils/transforms";
-import { Button } from "@/core/components/ui/Button";
+  ResponsiveLine,
+  type SliceTooltipProps,
+  type DefaultSeries,
+} from "@nivo/line";
+import type { IVCF_Assessment, IVCF_DomainScores } from "../types";
+import { nivoTheme } from "@/features/dashboard/utils/transforms";
 
 type DomainKey = keyof IVCF_DomainScores;
 
@@ -21,10 +20,8 @@ export type DomainDefinition = {
 type MultipleLineChartProps = {
   assessments: IVCF_Assessment[];
   domains?: DomainDefinition[];
-  xLabel?: string;
-  yLabel?: string;
+  selectedDomainKeys?: DomainKey[];
   height?: number;
-  showExport?: boolean;
   onSelectAssessment?: (id: string) => void;
 };
 
@@ -40,37 +37,87 @@ const defaultDomains: DomainDefinition[] = [
 ];
 
 const colorPalette = [
-  "#2563eb",
-  "#7c3aed",
-  "#ea580c",
-  "#16a34a",
-  "#dc2626",
-  "#0d9488",
-  "#4f46e5",
-  "#ca8a04",
+  "#3B82F6",
+  "#8B5CF6",
+  "#F97316",
+  "#10B981",
+  "#EF4444",
+  "#14B8A6",
+  "#6366F1",
+  "#EAB308",
 ];
 
 function formatDateLabel(date: string) {
   return new Date(date).toLocaleDateString("pt-BR", {
+    month: "short",
+    year: "numeric",
     timeZone: "UTC",
   });
+}
+
+function SliceTooltip({ slice }: SliceTooltipProps<DefaultSeries>) {
+  return (
+    <div
+      style={{
+        background: "#fff",
+        border: "1px solid #e5e7eb",
+        borderRadius: 12,
+        padding: "12px 16px",
+        fontSize: 13,
+        boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
+        minWidth: 200,
+        whiteSpace: "nowrap",
+      }}
+    >
+      <div
+        style={{
+          fontWeight: 600,
+          fontSize: 11,
+          color: "#374151",
+          textTransform: "uppercase",
+          letterSpacing: "0.05em",
+          marginBottom: 8,
+        }}
+      >
+        {slice.points[0]?.data.xFormatted}
+      </div>
+      {slice.points.map((point) => (
+        <div
+          key={point.id}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "2px 0",
+          }}
+        >
+          <span
+            style={{
+              display: "inline-block",
+              width: 10,
+              height: 10,
+              borderRadius: "50%",
+              backgroundColor: point.seriesColor,
+              flexShrink: 0,
+            }}
+          />
+          <span style={{ color: "#374151" }}>
+            {String(point.seriesId)}:{" "}
+            <strong>{String(point.data.yFormatted)}</strong>
+          </span>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export function MultipleLineChart({
   assessments,
   domains = defaultDomains,
-  xLabel = "Data da avaliação",
-  yLabel = "Pontuação por domínio",
+  selectedDomainKeys,
   height = 420,
-  showExport = false,
   onSelectAssessment,
 }: MultipleLineChartProps) {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-
-  const [selectedDomains, setSelectedDomains] = useState<string[]>(
-    domains.map((d) => d.label),
-  );
-
   const sortedAssessments = useMemo(
     () =>
       [...assessments].sort(
@@ -88,164 +135,89 @@ export function MultipleLineChart({
     return map;
   }, [domains]);
 
+  const activeDomains = useMemo(() => {
+    if (!selectedDomainKeys) return domains;
+    return domains.filter((d) => selectedDomainKeys.includes(d.key));
+  }, [domains, selectedDomainKeys]);
+
   const series = useMemo(() => {
-    return domains
-      .filter((d) => selectedDomains.includes(d.label))
-      .map((domain) => ({
-        id: domain.label,
-        color: colorsByLabel[domain.label],
-        data: sortedAssessments.map((assessment) => ({
-          x: formatDateLabel(assessment.date),
-          y: assessment.domains[domain.key] ?? 0,
-          assessmentId: assessment.id,
-        })),
-      }));
-  }, [domains, sortedAssessments, selectedDomains, colorsByLabel]);
+    return activeDomains.map((domain) => ({
+      id: domain.label,
+      color: colorsByLabel[domain.label],
+      data: sortedAssessments.map((assessment) => ({
+        x: formatDateLabel(assessment.date),
+        y: assessment.domains[domain.key] ?? 0,
+        assessmentId: assessment.id,
+      })),
+    }));
+  }, [activeDomains, sortedAssessments, colorsByLabel]);
 
   const hasData = series.some((s) => s.data.length > 0);
 
-  const toggleDomain = (label: string) => {
-    setSelectedDomains((prev) =>
-      prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label],
-    );
-  };
-
-  const selectAll = () => {
-    setSelectedDomains(domains.map((d) => d.label));
-  };
-
-  const clearAll = () => {
-    setSelectedDomains([]);
-  };
-
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        {showExport && (
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() =>
-                exportElementAsPng(containerRef.current, "ivcf-dominios")
-              }
-            >
-              PNG
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() =>
-                exportElementAsPdf(containerRef.current, "ivcf-dominios")
-              }
-            >
-              PDF
-            </Button>
-          </div>
-        )}
-      </div>
-
-      {/* Domain Selector */}
-      <div className="flex flex-wrap items-center gap-3 rounded-lg border p-3">
-        <div className="flex gap-2">
-          <Button size="lg" variant="outline" onClick={selectAll}>
-            Selecionar todos
-          </Button>
-          <Button size="lg" variant="outline" onClick={clearAll}>
-            Limpar
-          </Button>
+    <div style={{ height }} className="w-full bg-gray-200 p-5 rounded-lg">
+      {!hasData ? (
+        <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+          Sem dados para exibir.
         </div>
-
-        {domains.map((domain) => (
-          <label
-            key={domain.label}
-            className="flex cursor-pointer items-center gap-2 text-sm"
-          >
-            <input
-              type="checkbox"
-              checked={selectedDomains.includes(domain.label)}
-              onChange={() => toggleDomain(domain.label)}
-            />
-            <span
-              className="h-3 w-3 rounded-full"
-              style={{ backgroundColor: colorsByLabel[domain.label] }}
-            />
-            {domain.label}
-          </label>
-        ))}
-      </div>
-
-      {/* Chart */}
-      <div ref={containerRef} style={{ height }} className="w-full">
-        {!hasData ? (
-          <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-            Sem dados para exibir.
-          </div>
-        ) : (
-          <ResponsiveLine
-            data={series}
-            theme={nivoTheme}
-            margin={{ top: 30, right: 30, bottom: 90, left: 70 }}
-            xScale={{ type: "point" }}
-            yScale={{ type: "linear", min: 0, max: "auto", stacked: false }}
-            enableGridX={false}
-            enableGridY
-            lineWidth={3.5}
-            enablePoints
-            pointSize={9}
-            pointBorderWidth={2}
-            pointBorderColor={{ from: "serieColor" }}
-            enableArea
-            areaOpacity={0.08}
-            useMesh
-            colors={({ id }) => colorsByLabel[id as string]}
-            onClick={(item) => {
-              if ("points" in item) return;
-
-              const assessmentId = item.data.assessmentId;
-
-              if (assessmentId) {
-                onSelectAssessment?.(assessmentId);
-              }
-            }}
-            axisBottom={{
-              tickRotation: -25,
-              legend: xLabel,
-              legendPosition: "middle",
-              legendOffset: 60,
-            }}
-            axisLeft={{
-              legend: yLabel,
-              legendPosition: "middle",
-              legendOffset: -55,
-            }}
-            tooltip={({ point }) => (
-              <div className="rounded-md border bg-white p-3 shadow-md text-sm">
-                <div
-                  className="font-semibold"
-                  style={{ color: point.seriesColor }}
-                >
-                  {point.seriesId}
-                </div>
-                <div>Data: {point.data.xFormatted}</div>
-                <div>Score: {point.data.yFormatted}</div>
-              </div>
-            )}
-            legends={[
-              {
-                anchor: "bottom",
-                direction: "row",
-                translateY: 55,
-                itemWidth: 110,
-                itemHeight: 20,
-                symbolSize: 12,
-                symbolShape: "circle",
+      ) : (
+        <ResponsiveLine
+          data={series}
+          theme={{
+            ...nivoTheme,
+            background: "transparent",
+            crosshair: {
+              line: {
+                stroke: "#94a3b8",
+                strokeWidth: 1,
+                strokeDasharray: "6 4",
               },
-            ]}
-          />
-        )}
-      </div>
+            },
+          }}
+          margin={{ top: 20, right: 30, bottom: 50, left: 55 }}
+          xScale={{ type: "point" }}
+          yScale={{ type: "linear", min: 0, max: "auto", stacked: false }}
+          curve="monotoneX"
+          enableGridX={false}
+          enableGridY
+          lineWidth={2.5}
+          enablePoints={false}
+          enableArea
+          areaOpacity={0.08}
+          enableSlices="x"
+          sliceTooltip={SliceTooltip}
+          colors={({ id }) => colorsByLabel[id as string]}
+          onClick={(item) => {
+            if ("points" in item) return;
+
+            const assessmentId = item.data.assessmentId;
+
+            if (assessmentId) {
+              onSelectAssessment?.(assessmentId);
+            }
+          }}
+          axisBottom={{
+            tickRotation: 0,
+            tickPadding: 10,
+          }}
+          axisLeft={{
+            tickSize: 0,
+            tickPadding: 12,
+          }}
+          legends={[
+            {
+              anchor: "top-left",
+              direction: "row",
+              translateY: -20,
+              itemWidth: 120,
+              itemHeight: 20,
+              symbolSize: 10,
+              symbolShape: "circle",
+              itemTextColor: "#64748b",
+            },
+          ]}
+        />
+      )}
     </div>
   );
 }
