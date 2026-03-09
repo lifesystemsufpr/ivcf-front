@@ -13,11 +13,16 @@ import { useMemo, useState, type MouseEvent } from "react";
 import { Pencil, PlusCircle, Trash } from "lucide-react";
 import ParticipantForm from "../components/ParticipantForm";
 import { useParticipantContext } from "../context/ParticipantContext";
-import type { Participant } from "../types";
+import type { Participant, ParticipantRequest } from "../types";
+import { useUpdateParticipant } from "../hooks/useUpdateParticipant";
+import { Bounce, toast } from "react-toastify";
+import { useDeleteParticipant } from "../hooks/useDeleteParticipant";
 
 export default function ParticipantList() {
   const { participants } = useParticipantContext();
   const navigate = useNavigate();
+  const updateParticipantMutation = useUpdateParticipant();
+  const deleteParticipantMutation = useDeleteParticipant();
 
   const [participantToDelete, setParticipantToDelete] =
     useState<Participant | null>(null);
@@ -33,8 +38,8 @@ export default function ParticipantList() {
         filterable: true,
       }),
       createColumn<Participant>({
-        field: "cpf",
-        header: "CPF",
+        field: "email",
+        header: "E-mail",
         sortable: true,
         filterable: true,
       }),
@@ -85,13 +90,73 @@ export default function ParticipantList() {
 
   const handleConfirmDelete = () => {
     if (!participantToDelete) return;
-    console.log("Confirmar exclusao", participantToDelete.fullName);
-    setParticipantToDelete(null);
+
+    deleteParticipantMutation.mutate(participantToDelete.id, {
+      onSuccess: () => {
+        toast.success("Participante excluido com sucesso.", {
+          position: "top-center",
+          autoClose: 2500,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+          transition: Bounce,
+        });
+        setParticipantToDelete(null);
+      },
+      onError: (error) => {
+        console.error("Erro ao excluir participante:", error);
+        const msg =
+          error.message ||
+          "Erro ao excluir participante. Por favor, tente novamente.";
+        toast.error(msg, {
+          position: "top-center",
+          autoClose: 2500,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+          transition: Bounce,
+        });
+      },
+    });
   };
 
-  const handleUpdateParticipant = (data: Participant) => {
-    console.log("Atualizar participante", data);
-    setParticipantToEdit(null);
+  const handleUpdateParticipant = async (data: ParticipantRequest) => {
+    if (!participantToEdit) return;
+
+    updateParticipantMutation.mutate(
+      {
+        id: participantToEdit.id,
+        data,
+      },
+      {
+        onSuccess: () => {
+          setParticipantToEdit(null);
+        },
+        onError: (error) => {
+          console.error("Erro ao atualizar participante:", error);
+          const msg =
+            error.message ||
+            "Erro ao atualizar participante. Por favor, tente novamente.";
+          toast.error(msg, {
+            position: "top-center",
+            autoClose: 2500,
+            hideProgressBar: false,
+            closeOnClick: false,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+            transition: Bounce,
+          });
+        },
+      },
+    );
   };
 
   return (
@@ -100,7 +165,7 @@ export default function ParticipantList() {
         data={participants}
         columns={columns}
         pageSize={8}
-        getRowId={(row) => row.id ?? row.cpf}
+        getRowId={(row) => row.id ?? row.email}
       >
         <Table.Header showActionsColumn actionsLabel="Ações" />
 
@@ -151,12 +216,17 @@ export default function ParticipantList() {
         <div className="flex w-full justify-end gap-3">
           <Button
             variant="outline"
+            disabled={deleteParticipantMutation.isPending}
             onClick={() => setParticipantToDelete(null)}
           >
             Cancelar
           </Button>
-          <Button variant="destructive" onClick={handleConfirmDelete}>
-            Excluir
+          <Button
+            variant="destructive"
+            disabled={deleteParticipantMutation.isPending}
+            onClick={handleConfirmDelete}
+          >
+            {deleteParticipantMutation.isPending ? "Excluindo..." : "Excluir"}
           </Button>
         </div>
       </Dialog>

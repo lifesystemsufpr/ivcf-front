@@ -4,7 +4,6 @@ export const participantsMock: Participant[] = [
   {
     id: "b6c1f9a4-1c4a-4f9e-9f3b-01a1a3e00101",
     fullName: "Carlos Henrique Souza",
-    cpf: "529.982.247-25",
     birthDate: "1990-05-14",
     address: {
       street: "Rua das Flores",
@@ -27,7 +26,6 @@ export const participantsMock: Participant[] = [
   {
     id: "c9e2a7d2-8b44-4e6f-92f1-01a1a3e00102",
     fullName: "Mariana Oliveira Lima",
-    cpf: "168.995.350-09",
     birthDate: "1995-09-22",
     address: {
       street: "Avenida Brasil",
@@ -49,7 +47,6 @@ export const participantsMock: Participant[] = [
   {
     id: "d1f3c8b5-6a2d-4e8a-83b2-01a1a3e00103",
     fullName: "Alex Nascimento Rocha",
-    cpf: "453.178.287-91",
     birthDate: "1992-03-11",
     address: {
       street: "Rua das Palmeiras",
@@ -71,7 +68,6 @@ export const participantsMock: Participant[] = [
   {
     id: "e4b8a9c7-3f21-4c1b-8a5d-01a1a3e00104",
     fullName: "Fernanda Rocha Mendes",
-    cpf: "321.654.987-00",
     birthDate: "1993-11-10",
     address: {
       street: "Avenida Getúlio Vargas",
@@ -94,7 +90,6 @@ export const participantsMock: Participant[] = [
   {
     id: "f7c2d3a9-5b66-4dcb-9d2e-01a1a3e00105",
     fullName: "Ricardo Pereira Nunes",
-    cpf: "742.896.130-45",
     birthDate: "1982-07-30",
     address: {
       street: "Rua dos Pinheiros",
@@ -115,8 +110,7 @@ export const participantsMock: Participant[] = [
   },
   {
     id: "a2d4e5f6-7b8c-4d9e-af01-01a1a3e00106",
-    fullName: "Beatriz Cavalcanti Melo",
-    cpf: "832.145.778-12",
+    fullName: "Beatriz Melo Santos",
     birthDate: "1998-12-05",
     address: {
       street: "Rua do Bom Jesus",
@@ -130,7 +124,7 @@ export const participantsMock: Participant[] = [
     email: "beatriz.melo@example.com",
     phone: "+55 81 99888-7777",
     gender: "FEMALE",
-    height: 1.60,
+    height: 1.6,
     weight: 58,
     password: "Bea#Recife98",
     createdAt: "2024-04-05T14:20:00.000Z",
@@ -139,7 +133,6 @@ export const participantsMock: Participant[] = [
   {
     id: "b3e5f6g7-8c9d-4e0f-bf12-01a1a3e00107",
     fullName: "Thiago Silva Santos",
-    cpf: "210.456.789-33",
     birthDate: "1988-02-28",
     address: {
       street: "Avenida Oceânica",
@@ -162,7 +155,6 @@ export const participantsMock: Participant[] = [
   {
     id: "c4f6g7h8-9d0e-4f1a-cf23-01a1a3e00108",
     fullName: "Larissa Machado Vieira",
-    cpf: "954.123.654-88",
     birthDate: "2000-08-15",
     address: {
       street: "Rua das Laranjeiras",
@@ -184,7 +176,6 @@ export const participantsMock: Participant[] = [
   {
     id: "d5g7h8i9-0e1f-4a2b-df34-01a1a3e00109",
     fullName: "Gabriel Mendes Oliveira",
-    cpf: "001.234.567-89",
     birthDate: "1985-06-10",
     address: {
       street: "Quadra 104 Sul",
@@ -197,7 +188,7 @@ export const participantsMock: Participant[] = [
     email: "gabriel.mendes@example.com",
     phone: "+55 63 91111-0000",
     gender: "MALE",
-    height: 1.80,
+    height: 1.8,
     weight: 85,
     password: "Gab#Palmas85",
     createdAt: "2024-01-15T09:30:00.000Z",
@@ -206,7 +197,6 @@ export const participantsMock: Participant[] = [
   {
     id: "e6h8i9j0-1f2a-4b3c-ef45-01a1a3e00110",
     fullName: "Camila Ferreira Lima",
-    cpf: "654.321.098-76",
     birthDate: "1994-04-02",
     address: {
       street: "Rua XV de Novembro",
@@ -220,10 +210,10 @@ export const participantsMock: Participant[] = [
     email: "camila.lima@example.com",
     phone: "+55 41 90000-9999",
     gender: "FEMALE",
-    height: 1.70,
+    height: 1.7,
     weight: 65,
     password: "Cami#CWB1994",
     createdAt: "2023-11-10T10:00:00.000Z",
     updatedAt: "2024-07-15T15:20:00.000Z",
-  }
+  },
 ];

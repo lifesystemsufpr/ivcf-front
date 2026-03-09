@@ -1,6 +1,7 @@
-import { useContext, createContext, useState } from "react";
-import { assessmentsListMock } from "../mocks";
+import { useContext, createContext, useMemo, useState } from "react";
 import type { Assessment } from "../types";
+import { useListAssessments } from "../hooks/useListAssessments";
+import { mapperDomainToUI } from "../utils/mapper";
 
 export interface AssessmentListProviderValue {
   filteredAssessments: Assessment[];
@@ -11,6 +12,11 @@ export interface AssessmentListProviderValue {
   endDate: string;
   setEndDate: (date: string) => void;
   onSubmitFilters: () => void;
+  clearFilters: () => void;
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
+  isLoading: boolean;
+  loadMoreAssessments: () => void;
 }
 
 export const AssessmentListContext = createContext<
@@ -22,30 +28,51 @@ export function AssessmentListProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const assessmentsList = assessmentsListMock;
-
   const [participantName, setParticipantName] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [filteredAssessments, setFilteredAssessments] =
-    useState(assessmentsList);
+  const [appliedFilters, setAppliedFilters] = useState({
+    participantName: "",
+    startDate: "",
+    endDate: "",
+  });
 
-  const onSubmitFilters = () => {
-    const filtered = assessmentsList.filter((assessment) => {
-      const matchesName = assessment.participantName
-        .toLowerCase()
-        .includes(participantName.toLowerCase());
-      const matchesStartDate = startDate
-        ? new Date(assessment.date) >= new Date(startDate)
-        : true;
-      const matchesEndDate = endDate
-        ? new Date(assessment.date) <= new Date(endDate)
-        : true;
-
-      return matchesName && matchesStartDate && matchesEndDate;
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+    useListAssessments({
+      pageSize: 10,
+      participantName: appliedFilters.participantName || undefined,
+      startDate: appliedFilters.startDate || undefined,
+      endDate: appliedFilters.endDate || undefined,
     });
 
-    setFilteredAssessments(filtered);
+  const filteredAssessments = useMemo<Assessment[]>(() => {
+    if (!data) return [];
+    const assessments = data.pages.flatMap((page) => page.items);
+    return assessments.map((assessment) => mapperDomainToUI(assessment));
+  }, [data]);
+
+  const onSubmitFilters = () => {
+    setAppliedFilters({
+      participantName,
+      startDate,
+      endDate,
+    });
+  };
+
+  const clearFilters = () => {
+    setParticipantName("");
+    setStartDate("");
+    setEndDate("");
+    setAppliedFilters({
+      participantName: "",
+      startDate: "",
+      endDate: "",
+    });
+  };
+
+  const loadMoreAssessments = () => {
+    if (!hasNextPage || isFetchingNextPage) return;
+    void fetchNextPage();
   };
 
   return (
@@ -59,6 +86,11 @@ export function AssessmentListProvider({
         endDate,
         setEndDate,
         onSubmitFilters,
+        clearFilters,
+        hasNextPage: !!hasNextPage,
+        isFetchingNextPage,
+        isLoading,
+        loadMoreAssessments,
       }}
     >
       {children}

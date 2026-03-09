@@ -12,7 +12,7 @@ import {
   formatGender,
   getIMCClassification,
 } from "../utils";
-import { formatDate } from "@/core/utils";
+import { formatDate, formatPhone } from "@/core/utils";
 import DataRow from "./DataRow";
 
 interface ParticipantDetailContentProps {
@@ -33,8 +33,7 @@ export default function ParticipantDetailContent({
         </CardHeader>
         <Separator />
         <CardContent className="grid grid-cols-2 gap-4 pt-6">
-          <DataRow label="Nome Completo" value={participant.fullName} />
-          <DataRow label="CPF" value={participant.cpf} />
+          <DataRow label="Nome Completo" value={participant.fullName} />{" "}
           <DataRow
             label="Data de Nascimento"
             value={formatDate(participant.birthDate)}
@@ -51,7 +50,7 @@ export default function ParticipantDetailContent({
         <Separator />
         <CardContent className="grid grid-cols-1 gap-4 pt-6">
           <DataRow label="E-mail" value={participant.email} />
-          <DataRow label="Telefone" value={participant.phone} />
+          <DataRow label="Telefone" value={formatPhone(participant.phone)} />
         </CardContent>
       </Card>
 

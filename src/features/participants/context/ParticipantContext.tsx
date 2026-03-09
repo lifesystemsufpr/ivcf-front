@@ -1,6 +1,7 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext, useMemo } from "react";
 import type { Participant } from "../types";
-import { participantsMock } from "../mocks";
+import { useListParticipants } from "../hooks/useListParticipants";
+import { parseParticipantResponse } from "../utils";
 
 export interface ParticipantContextValue {
   participants: Participant[];
@@ -15,7 +16,15 @@ export const ParticipantContext = createContext<
 >(undefined);
 
 export function ParticipantProvider({ children }: ParticipantProviderProps) {
-  const participants: Participant[] = participantsMock;
+  const { data } = useListParticipants({
+    pageSize: 15,
+  });
+
+  const participants: Participant[] = useMemo(() => {
+    if (!data) return [];
+    const flated = data.pages.flatMap((page) => page.data);
+    return flated.map((item) => parseParticipantResponse(item));
+  }, [data]);
 
   const value: ParticipantContextValue = {
     participants,
