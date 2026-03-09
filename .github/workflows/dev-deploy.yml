@@ -17,6 +17,10 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          
+      - name: Create .env file
+        run: |
+          echo "${{ secrets.ENV_FILE_DEV }}" > .env
 
       - name: Install dependencies
         run: npm ci
