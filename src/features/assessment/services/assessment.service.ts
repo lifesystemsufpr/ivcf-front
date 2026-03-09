@@ -38,7 +38,17 @@ export class AssessmentService {
     );
   }
 
-  static async fetchIVCFAssessments(): Promise<SuccessResponse<QuestionnaireListItem[]>> {
+  static async fetchIVCFAssessments(): Promise<
+    SuccessResponse<QuestionnaireListItem[]>
+  > {
     return http.get(apiRoutes.ASSESSMENTS.IVCF_STRUCTURE);
+  }
+
+  static async getParticipantResponses(
+    participanteId: string,
+  ): Promise<AssessmentResponse[]> {
+    return http.get<AssessmentResponse[]>(
+      apiRoutes.ASSESSMENTS.BY_PARTICIPANT(participanteId),
+    );
   }
 }

@@ -1,3 +1,5 @@
+import type { FrailtyClassification } from "@/core/types";
+
 export interface QuestionnaireOption {
   id: string;
   label: string;
@@ -65,7 +67,7 @@ export interface SubmitQuestionnaireRequest {
 export interface SubmitQuestionnaireResponse {
   id: string;
   totalScore: number;
-  classification: string;
+  classification: FrailtyClassification;
   date: string;
   participantId: string;
   questionnaireId: string;

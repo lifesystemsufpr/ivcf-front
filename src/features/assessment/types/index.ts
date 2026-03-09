@@ -45,7 +45,7 @@ export interface AssessmentResponse {
   classification: FrailtyClassification;
   date: string;
   participantId: string;
-  participantName?: string;
+  participantName: string;
   questionnaireId: string;
   createdAt: string;
   updatedAt: string;

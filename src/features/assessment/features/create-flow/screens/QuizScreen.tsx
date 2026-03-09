@@ -123,6 +123,8 @@ export default function QuizScreen() {
       return;
     }
 
+    console.log(user);
+
     if (!user?.id) {
       setErrorMessage("Usuário não autenticado. Faça login novamente.");
       return;

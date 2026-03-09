@@ -63,6 +63,8 @@ export async function saveAssessment({
     answers: apiAnswers,
   };
 
+  console.log(requestPayload);
+
   // Envia para a API
   const response =
     await QuestionnaireService.submitQuestionnaireResponse(requestPayload);

@@ -13,7 +13,7 @@ import {
   getStoredRefreshToken,
   setStoredTokens,
 } from "@/core/services/client.service";
-import { isTokenExpired } from "../utils/decoder";
+import { decodeJWT, isTokenExpired } from "../utils/decoder";
 
 export type AuthUser = {
   id: string;
@@ -56,6 +56,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (storedAccess && !isTokenExpired(storedAccess)) {
       setAccessToken(storedAccess);
+      const user = decodeJWT(storedAccess);
+
+      if (user) {
+        setUser({
+          email: user?.email,
+          id: user?.sub,
+          name: user?.username,
+        });
+      }
     } else {
       clearStoredTokens();
     }

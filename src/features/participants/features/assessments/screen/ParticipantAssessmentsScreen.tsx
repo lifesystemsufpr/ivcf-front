@@ -11,25 +11,32 @@ export default function ParticipantAssessmentsScreen({
   id,
 }: ParticipantAssessmentsScreenProps) {
   const participantId = id;
-  const { assessments, errors, isLoading } = useFetchAssessments(participantId);
+  const {
+    data: assessments,
+    error: errors,
+    isLoading,
+  } = useFetchAssessments(participantId);
+
   return (
     <Box display="flex" direction="column" gap={6}>
       <Filter />
 
       <Separator />
       {isLoading && <Typography>Carregando avaliações...</Typography>}
-      {errors && <Typography color="accent">{errors}</Typography>}
-      {!isLoading && !errors && assessments.length === 0 && (
+      {errors && <Typography color="accent">{errors.message}</Typography>}
+
+      {!isLoading && !errors && (!assessments || assessments.length === 0) ? (
         <Typography>
           Nenhuma avaliação encontrada para este paciente.
         </Typography>
-      )}
-      {!isLoading && !errors && assessments.length > 0 && (
-        <Box display="flex" direction="column" gap={3}>
-          {assessments.map((assessment) => (
-            <AssesmentCard key={assessment.id} assessment={assessment} />
-          ))}
-        </Box>
+      ) : (
+        assessments && (
+          <Box display="flex" direction="column" gap={3}>
+            {assessments.map((assessment) => (
+              <AssesmentCard key={assessment.id} assessment={assessment} />
+            ))}
+          </Box>
+        )
       )}
     </Box>
   );

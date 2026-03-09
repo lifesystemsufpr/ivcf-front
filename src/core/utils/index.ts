@@ -21,7 +21,8 @@ export function formatDate(dateString: string) {
   return date.toLocaleDateString("pt-BR");
 }
 
-export function formatPhone(phone: string) {
+export function formatPhone(phone: string | null) {
+  if (!phone) return "Sem telefone";
   const cleaned = phone.replace(/\D/g, "");
   const match = cleaned.match(/^(\d{2})(\d{5})(\d{4})$/);
   if (match) {
