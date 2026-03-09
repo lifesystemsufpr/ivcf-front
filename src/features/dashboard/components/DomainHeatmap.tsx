@@ -125,7 +125,7 @@ export function DomainHeatmap({ data, stratification }: DomainHeatmapProps) {
                     <strong>Domínio:</strong> {cell.serieId}
                   </div>
                   <div>
-                    <strong>Score médio:</strong> {cell.value?.toFixed(2)}
+                    <strong>Score médio:</strong> {cell.value?.toFixed(1)}
                   </div>
                 </Box>
               )}
