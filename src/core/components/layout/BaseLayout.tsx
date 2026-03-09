@@ -6,12 +6,19 @@ import { Menu, User, Moon, Sun, LogOut } from "lucide-react";
 import { useTheme } from "@/core/theme/ThemeContext";
 import { clientRoutes } from "@/core/configs/client.routes";
 import { AuthGuard } from "@/core/guards/AuthGuard";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export function BaseLayout() {
   const router = useNavigate();
+  const { logout } = useAuth();
   const [navOpen, setNavOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const [openDropdown, setOpenDropdown] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    router(clientRoutes.AUTH.LOGIN);
+  };
 
   return (
     <AuthGuard>
@@ -60,7 +67,7 @@ export function BaseLayout() {
                   label: "Logout",
                   Icon: LogOut,
                   onSelect: () => {
-                    router(clientRoutes.AUTH.LOGIN);
+                    handleLogout();
                   },
                 },
               ]}

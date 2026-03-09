@@ -55,7 +55,7 @@ function getSubLabel(
   return sub?.label ?? null;
 }
 
-const questionMap = new Map(ivcfQuestions.map((q) => [q.id, q]));
+const questionMapByOrder = new Map(ivcfQuestions.map((q) => [q.order, q]));
 
 export function buildGroupedTree(assessment: AssessmentResponse): GroupNode[] {
   const groups = new Map<string, GroupNode>();
@@ -76,9 +76,10 @@ export function buildGroupedTree(assessment: AssessmentResponse): GroupNode[] {
   };
 
   assessment.answers.forEach((answer) => {
-    const meta = questionMap.get(answer.questionId);
-    const sectionId = meta?.groupId ?? answer.question.groupId ?? "ungrouped";
-    const subId = meta?.subGroupId ?? answer.question.subGroupId ?? null;
+    // Use order to map to the correct local question metadata
+    const meta = questionMapByOrder.get(answer.question.order);
+    const sectionId = meta?.groupId ?? "ungrouped";
+    const subId = meta?.subGroupId ?? null;
     const sectionLabel = getSectionLabel(sectionId);
     const subgroupLabel = getSubLabel(sectionId, subId);
 

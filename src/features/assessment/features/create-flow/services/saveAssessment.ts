@@ -64,16 +64,15 @@ export async function saveAssessment({
   };
 
   // Envia para a API
-  const response = await QuestionnaireService.submitQuestionnaireResponse(
-    requestPayload,
-  );
+  const response =
+    await QuestionnaireService.submitQuestionnaireResponse(requestPayload);
 
   // Cria versão local para cache
   const totalScore = Object.values(answers).reduce(
     (sum, answer) => sum + answer.score,
     0,
   );
-  
+
   const classification = computeClassification(totalScore);
 
   const payload: SavedAssessment = {

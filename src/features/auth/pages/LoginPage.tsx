@@ -93,6 +93,11 @@ export default function LoginPage() {
                          transition"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleSubmit(e);
+                }
+              }}
               required
             />
           </Box>
