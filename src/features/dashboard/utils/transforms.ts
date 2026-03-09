@@ -6,6 +6,7 @@ import type { FrailtyClassification } from "@/core/types";
 export const riskColorMap: Record<FrailtyClassification, string> = {
   Robusto: "#22c55e",
   "Pré-frágil": "#fbbf24",
+  "Em Risco de Fragilização": "#fbbf24",
   Frágil: "#f87171",
   Todos: "#6b7280",
 };

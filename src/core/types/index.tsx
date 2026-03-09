@@ -1,12 +1,14 @@
 export type FrailtyClassification =
   | "Robusto"
   | "Pré-frágil"
+  | "Em Risco de Fragilização"
   | "Frágil"
   | "Todos";
 
 export const frailtyClassificationList: FrailtyClassification[] = [
   "Robusto",
   "Pré-frágil",
+  "Em Risco de Fragilização",
   "Frágil",
   "Todos",
 ];
