@@ -64,7 +64,7 @@ export function PatientDetailPage() {
           <ParticipantDetailContent participant={participant} />
         </TabPanel>
         <TabPanel value="indicators">
-          <ParticipantDashboard />
+          <ParticipantDashboard participantId={participant.id} />
         </TabPanel>
         <TabPanel value="assessments">
           <ParticipantAssessmentsScreen id={participant.id} />

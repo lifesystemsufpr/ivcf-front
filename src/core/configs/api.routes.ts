@@ -10,6 +10,8 @@ export const apiRoutes = {
 
   PARTICIPANTS: {
     LIST: `${API_URL_BASE}/participant`,
+    INDICATORS: ({ id }: { id: string }) =>
+      `/questionnaires/participant/${id}/evolution`,
   },
 
   ASSESSMENTS: {
@@ -18,8 +20,7 @@ export const apiRoutes = {
       `${API_URL_BASE}/questionnaires/participant/${participantId}`,
     RESPONSE: (assessmentId: string) =>
       `${API_URL_BASE}/questionnaires/response/${assessmentId}`,
-    IVCF_RESPONSE: () =>
-      `${API_URL_BASE}/questionnaires/response`,
+    IVCF_RESPONSE: () => `${API_URL_BASE}/questionnaires/response`,
     IVCF_STRUCTURE: `${API_URL_BASE}/questionnaires/ivcf-20`,
   },
 };

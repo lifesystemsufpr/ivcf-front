@@ -2,6 +2,7 @@ import { apiRoutes } from "@/core/configs/api.routes";
 import { http } from "@/core/services/client.service";
 import type { ParticipantRequest, ParticipantResponse } from "../types";
 import type { SuccessResponse } from "@/core/types";
+import type { ParticipantEvolutionData } from "../features/indicators/types";
 
 export type PaginationParams = {
   page?: number;
@@ -40,6 +41,15 @@ export class ParticipantsService {
 
   static async deleteParticipant(id: string) {
     const resp = await http.delete(`${apiRoutes.PARTICIPANTS.LIST}/${id}`);
+    return resp;
+  }
+
+  static async getParticipantIndicators(
+    id: string,
+  ): Promise<ParticipantEvolutionData> {
+    const resp = await http.get<ParticipantEvolutionData>(
+      apiRoutes.PARTICIPANTS.INDICATORS({ id }),
+    );
     return resp;
   }
 }
