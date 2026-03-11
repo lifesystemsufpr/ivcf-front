@@ -23,7 +23,6 @@ export function DomainDrilldownBars({
 
   const currentView = history[history.length - 1];
 
-  // Transforma os dados para o formato do Nivo
   const chartData = useMemo(
     () =>
       currentView.data.map((node) => ({
@@ -31,6 +30,7 @@ export function DomainDrilldownBars({
         label: node.label,
         Sim: node.counts.sim,
         Não: node.counts.nao,
+        children: node.children,
       })),
     [currentView],
   );
@@ -55,6 +55,7 @@ export function DomainDrilldownBars({
     }
   };
 
+  const dynamicPadding = chartData.length < 3 ? 0.8 : 0.3;
   return (
     <Card className="h-125">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -78,10 +79,10 @@ export function DomainDrilldownBars({
           keys={["Sim", "Não"]}
           indexBy="label"
           margin={{ top: 20, right: 30, bottom: 80, left: 60 }}
-          padding={0.3}
           valueScale={{ type: "linear" }}
-          colors={{ scheme: "set2" }} // Verde para Não (menor risco), Laranja/Vermelho para Sim
+          colors={{ scheme: "set2" }}
           theme={nivoTheme}
+          padding={dynamicPadding}
           axisBottom={{
             tickRotation: -10,
             legend: "Categorias/Questões",
