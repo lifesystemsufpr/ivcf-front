@@ -1,5 +1,4 @@
 import { Link as RouterLink, useParams } from "react-router-dom";
-import { participantsMock } from "../mocks";
 import ParticipantHeader from "../components/ParticipantHeader";
 import {
   Box,
@@ -12,17 +11,26 @@ import {
   Typography,
 } from "@/core/components/ui";
 import { clientRoutes } from "@/core/configs/client.routes";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import ParticipantDetailContent from "../components/ParticipantDetailContent";
 import type { ParticipantDetailTabs } from "../types";
 import { ParticipantDashboard } from "../features/indicators";
 import ParticipantAssessmentsScreen from "../features/assessments/screen/ParticipantAssessmentsScreen";
+import { useFetchParticipant } from "../hooks/useFetchParticipant";
+import { parseParticipantResponse } from "../utils";
 
 export function PatientDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState<ParticipantDetailTabs>("details");
 
-  const participant = participantsMock.find((p) => p.id === id);
+  const { data: participantResponse, isLoading } = useFetchParticipant({
+    participantId: id!,
+  });
+
+  const participant = useMemo(() => {
+    if (isLoading || !participantResponse) return null;
+    return parseParticipantResponse(participantResponse);
+  }, [participantResponse, isLoading]);
 
   if (!participant) {
     return null;
@@ -56,7 +64,7 @@ export function PatientDetailPage() {
           <ParticipantDetailContent participant={participant} />
         </TabPanel>
         <TabPanel value="indicators">
-          <ParticipantDashboard />
+          <ParticipantDashboard participantId={participant.id} />
         </TabPanel>
         <TabPanel value="assessments">
           <ParticipantAssessmentsScreen id={participant.id} />

@@ -10,4 +10,13 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    proxy: {
+      "/backend": {
+        target: "http://200.236.3.109",
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
 });

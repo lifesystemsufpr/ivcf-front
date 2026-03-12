@@ -12,6 +12,7 @@ export default function ListFilters() {
     endDate,
     setParticipantName,
     onSubmitFilters,
+    clearFilters,
   } = useAssessmentList();
 
   return (
@@ -57,15 +58,7 @@ export default function ListFilters() {
       </Box>
 
       <Box>
-        <Button
-          variant="outline"
-          onClick={() => {
-            setStartDate("");
-            setEndDate("");
-            setParticipantName("");
-            onSubmitFilters();
-          }}
-        >
+        <Button variant="outline" onClick={clearFilters}>
           <Typography variant="small" color="accent">
             Limpar filtros
           </Typography>

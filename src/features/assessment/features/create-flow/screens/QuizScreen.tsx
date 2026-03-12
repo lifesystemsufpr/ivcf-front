@@ -16,26 +16,59 @@ import type { Participant } from "@/features/participants/types";
 import { useAssessmentContext } from "../context/CreateAssessmentContext";
 import { ProgressBar } from "../components/ProgressBar";
 import { QuestionCard } from "../components/QuestionCard";
-import { IVCF_TOTAL_QUESTIONS, ivcfQuestions } from "../questions";
 import { saveAssessment } from "../services/saveAssessment";
+import { useQuestionnaireStructure } from "../hooks/useQuestionnaireStructure";
+import {
+  flattenQuestions,
+  findQuestionByOrder,
+} from "../utils/questionnaireHelpers";
+import { useAuthContext } from "@/features/auth/contexts/AuthContext";
 
 export default function QuizScreen() {
   const navigate = useNavigate();
+  const { user } = useAuthContext();
   const {
     participantId,
+    questionnaireId,
     answers,
     currentQuestion,
+    totalQuestions,
     updateAnswer,
     nextQuestion,
     previousQuestion,
     selectParticipant,
+    setQuestionnaireId,
+    setTotalQuestions,
     reset,
   } = useAssessmentContext();
+
+  const {
+    data: questionnaireStructure,
+    isLoading: isLoadingStructure,
+    error: structureError,
+  } = useQuestionnaireStructure();
 
   const [selectedParticipant, setSelectedParticipant] =
     useState<Participant | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const questions = useMemo(() => {
+    if (!questionnaireStructure) return [];
+    return flattenQuestions(questionnaireStructure);
+  }, [questionnaireStructure]);
+
+  useEffect(() => {
+    if (questionnaireStructure?.id) {
+      setQuestionnaireId(questionnaireStructure.id);
+      setTotalQuestions(questions.length);
+    }
+  }, [
+    questionnaireStructure,
+    questions.length,
+    setQuestionnaireId,
+    setTotalQuestions,
+  ]);
 
   useEffect(() => {
     if (selectedParticipant?.id) {
@@ -44,18 +77,15 @@ export default function QuizScreen() {
   }, [selectedParticipant, selectParticipant]);
 
   const question = useMemo(() => {
-    return (
-      ivcfQuestions.find((item) => item.order === currentQuestion) ??
-      ivcfQuestions[0]
-    );
-  }, [currentQuestion]);
+    return findQuestionByOrder(questions, currentQuestion) ?? questions[0];
+  }, [questions, currentQuestion]);
 
   const selectedOptionId = question
     ? answers[question.id]?.optionId
     : undefined;
   const answeredCount = Object.keys(answers).length;
-  const hasAllAnswers = answeredCount === IVCF_TOTAL_QUESTIONS;
-  const isLastQuestion = currentQuestion === IVCF_TOTAL_QUESTIONS;
+  const hasAllAnswers = answeredCount === totalQuestions;
+  const isLastQuestion = currentQuestion === totalQuestions;
 
   const handleSelectOption = (optionId: string, score: number) => {
     if (!question) return;
@@ -86,6 +116,20 @@ export default function QuizScreen() {
       return;
     }
 
+    if (!questionnaireId) {
+      setErrorMessage(
+        "Erro ao identificar o questionário. Recarregue a página.",
+      );
+      return;
+    }
+
+    console.log(user);
+
+    if (!user?.id) {
+      setErrorMessage("Usuário não autenticado. Faça login novamente.");
+      return;
+    }
+
     if (!hasAllAnswers) {
       setErrorMessage("Responda todas as perguntas antes de finalizar.");
       return;
@@ -94,7 +138,12 @@ export default function QuizScreen() {
     setErrorMessage(null);
     setIsSubmitting(true);
     try {
-      const result = await saveAssessment({ participantId, answers });
+      const result = await saveAssessment({
+        participantId,
+        healthProfessionalId: user.id,
+        questionnaireId,
+        answers,
+      });
       reset();
       navigate(clientRoutes.IVCF.RESULT({ id: result.id }), { replace: true });
     } catch (error) {
@@ -112,6 +161,38 @@ export default function QuizScreen() {
     (isLastQuestion && !hasAllAnswers);
   const previousDisabled = currentQuestion === 1 || isSubmitting;
 
+  if (isLoadingStructure) {
+    return (
+      <Box className="min-h-screen p-6 flex items-center justify-center">
+        <Card className="w-full max-w-5xl" padding="lg">
+          <CardContent className="p-6">
+            <Typography variant="h3">Carregando questionário...</Typography>
+          </CardContent>
+        </Card>
+      </Box>
+    );
+  }
+
+  if (structureError || !questionnaireStructure || questions.length === 0) {
+    return (
+      <Box className="min-h-screen p-6 flex items-center justify-center">
+        <Card className="w-full max-w-5xl" padding="lg">
+          <CardContent className="p-6">
+            <Alert className="border-destructive bg-destructive/10 text-destructive">
+              <Typography variant="h3">
+                Erro ao carregar questionário
+              </Typography>
+              <Typography variant="small">
+                Não foi possível carregar a estrutura do questionário. Tente
+                recarregar a página.
+              </Typography>
+            </Alert>
+          </CardContent>
+        </Card>
+      </Box>
+    );
+  }
+
   return (
     <Box className="min-h-screen p-6 flex items-center justify-center">
       <Card className="w-full max-w-5xl" padding="lg">
@@ -122,7 +203,7 @@ export default function QuizScreen() {
               Responda cada questão. Suas respostas são salvas automaticamente.
             </Typography>
           </div>
-          <ProgressBar current={currentQuestion} total={IVCF_TOTAL_QUESTIONS} />
+          <ProgressBar current={currentQuestion} total={totalQuestions} />
         </CardHeader>
 
         <CardContent className="space-y-6 p-2">
@@ -159,7 +240,7 @@ export default function QuizScreen() {
 
           <Box className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <Typography variant="small" className="text-muted-foreground">
-              {answeredCount}/{IVCF_TOTAL_QUESTIONS} respondidas
+              {answeredCount}/{totalQuestions} respondidas
             </Typography>
             <Box className="flex gap-3">
               <Button

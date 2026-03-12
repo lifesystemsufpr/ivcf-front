@@ -29,7 +29,6 @@ export const assessmentsListMock: Assessment[] = participantsMock.flatMap(
       classification: getClassification(scores[index + i]),
       participantId: participant.id,
       participantName: participant.fullName,
-      participantCpf: participant.cpf,
     }));
   },
 );

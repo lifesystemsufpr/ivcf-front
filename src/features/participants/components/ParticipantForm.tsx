@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Box, Button, Input, Label, Typography } from "@/core/components/ui";
-import type { Participant } from "../types";
+import type { Participant, ParticipantRequest } from "../types";
+import { fetchAddressByCep } from "@/core/utils";
+import { mapStateToUF } from "../utils";
 
 type ParticipantFormValues = Omit<Participant, "height" | "weight"> & {
   height: string;
@@ -10,14 +12,13 @@ type ParticipantFormValues = Omit<Participant, "height" | "weight"> & {
 type ParticipantFormProps = {
   initialValues?: Partial<Participant>;
   title?: string;
-  onSubmit?: (data: Participant) => void;
+  onSubmit?: (data: ParticipantRequest) => void;
   onCancel?: () => void;
 };
 
 const defaultValues: ParticipantFormValues = {
   id: "",
   fullName: "",
-  cpf: "",
   birthDate: "",
   email: "",
   phone: "",
@@ -36,12 +37,23 @@ const defaultValues: ParticipantFormValues = {
   },
 };
 
+function normalizeDateForInput(value?: string) {
+  if (!value) return "";
+
+  // Accepts both yyyy-MM-dd and ISO date-time strings.
+  const datePrefixMatch = value.match(/^(\d{4}-\d{2}-\d{2})/);
+  if (datePrefixMatch) return datePrefixMatch[1];
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "";
+
+  return parsed.toISOString().slice(0, 10);
+}
+
 function buildInitialValues(initialValues?: Partial<Participant>) {
   const base: ParticipantFormValues = {
     ...defaultValues,
-    address: {
-      ...defaultValues.address,
-    },
+    address: { ...defaultValues.address },
   };
 
   if (!initialValues) return base;
@@ -53,6 +65,7 @@ function buildInitialValues(initialValues?: Partial<Participant>) {
       ...base.address,
       ...initialValues.address,
     },
+    birthDate: normalizeDateForInput(initialValues.birthDate),
     height:
       initialValues.height !== undefined
         ? String(initialValues.height)
@@ -95,10 +108,7 @@ export default function ParticipantForm({
     key: K,
     value: ParticipantFormValues[K],
   ) => {
-    setValues((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
+    setValues((prev) => ({ ...prev, [key]: value }));
   };
 
   const updateAddressField = (
@@ -107,10 +117,7 @@ export default function ParticipantForm({
   ) => {
     setValues((prev) => ({
       ...prev,
-      address: {
-        ...prev.address,
-        [key]: value,
-      },
+      address: { ...prev.address, [key]: value },
     }));
   };
 
@@ -122,13 +129,53 @@ export default function ParticipantForm({
       return;
     }
 
-    const payload: Participant = {
-      ...values,
-      height: parseNumber(values.height),
+    // --- MAPEAMENTO PARA PARTICIPANT REQUEST ---
+    const payload: ParticipantRequest = {
+      birthday: values.birthDate,
+      scholarship: "HIGHER_EDUCATION_COMPLETE",
+      socio_economic_level: "C",
       weight: parseNumber(values.weight),
+      height: parseNumber(values.height),
+      zipCode: values.address.zipCode,
+      street: values.address.street,
+      number: values.address.number,
+      complement: values.address.complement,
+      neighborhood: values.address.neighborhood,
+      city: values.address.city,
+      state: values.address.state,
+      user: {
+        fullName: values.fullName,
+        email: values.email,
+        phone: values.phone,
+        gender: values.gender,
+        active: true,
+      },
     };
 
     onSubmit?.(payload);
+  };
+
+  const handleFetchAddress = async () => {
+    if (values.address.zipCode.length < 8) return;
+    console.log("Buscando endereço para CEP:", values.address.zipCode);
+    try {
+      const address = await fetchAddressByCep(values.address.zipCode);
+      console.log("Endereço encontrado:", address);
+      if (address) {
+        setValues((prev) => ({
+          ...prev,
+          address: {
+            ...prev.address,
+            street: address.logradouro,
+            neighborhood: address.bairro,
+            city: address.localidade,
+            state: mapStateToUF(address.estado),
+          },
+        }));
+      }
+    } catch (err) {
+      console.error("Erro ao buscar endereço:", err);
+    }
   };
 
   return (
@@ -148,21 +195,8 @@ export default function ParticipantForm({
               <Input
                 id="fullName"
                 value={values.fullName}
-                onChange={(event) =>
-                  updateField("fullName", event.target.value)
-                }
+                onChange={(e) => updateField("fullName", e.target.value)}
                 placeholder="Digite o nome completo"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="cpf">CPF</Label>
-              <Input
-                id="cpf"
-                value={values.cpf}
-                onChange={(event) => updateField("cpf", event.target.value)}
-                placeholder="000.000.000-00"
                 required
               />
             </div>
@@ -173,9 +207,7 @@ export default function ParticipantForm({
                 id="birthDate"
                 type="date"
                 value={values.birthDate}
-                onChange={(event) =>
-                  updateField("birthDate", event.target.value)
-                }
+                onChange={(e) => updateField("birthDate", e.target.value)}
                 required
               />
             </div>
@@ -185,17 +217,11 @@ export default function ParticipantForm({
               <select
                 id="gender"
                 value={values.gender}
-                onChange={(event) =>
-                  updateField(
-                    "gender",
-                    event.target.value as Participant["gender"],
-                  )
-                }
+                onChange={(e) => updateField("gender", e.target.value as any)}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <option value="MALE">Masculino</option>
                 <option value="FEMALE">Feminino</option>
-                <option value="OTHER">Outro</option>
               </select>
             </div>
 
@@ -205,7 +231,7 @@ export default function ParticipantForm({
                 id="email"
                 type="email"
                 value={values.email}
-                onChange={(event) => updateField("email", event.target.value)}
+                onChange={(e) => updateField("email", e.target.value)}
                 placeholder="email@exemplo.com"
               />
             </div>
@@ -214,8 +240,9 @@ export default function ParticipantForm({
               <Label htmlFor="phone">Telefone</Label>
               <Input
                 id="phone"
+                mask="phone"
                 value={values.phone}
-                onChange={(event) => updateField("phone", event.target.value)}
+                onChange={(e) => updateField("phone", e.target.value)}
                 placeholder="(00) 00000-0000"
               />
             </div>
@@ -231,9 +258,15 @@ export default function ParticipantForm({
               <Input
                 id="zipCode"
                 value={values.address.zipCode}
-                onChange={(event) =>
-                  updateAddressField("zipCode", event.target.value)
-                }
+                mask="cep"
+                onChange={(e) => {
+                  const cep = e.target.value;
+                  console.log("Atualizando CEP para:", cep);
+                  updateAddressField("zipCode", cep);
+                  if (cep.length === 8) {
+                    handleFetchAddress();
+                  }
+                }}
                 placeholder="00000-000"
               />
             </div>
@@ -243,9 +276,7 @@ export default function ParticipantForm({
               <Input
                 id="street"
                 value={values.address.street}
-                onChange={(event) =>
-                  updateAddressField("street", event.target.value)
-                }
+                onChange={(e) => updateAddressField("street", e.target.value)}
                 placeholder="Nome da rua"
               />
             </div>
@@ -255,9 +286,7 @@ export default function ParticipantForm({
               <Input
                 id="number"
                 value={values.address.number}
-                onChange={(event) =>
-                  updateAddressField("number", event.target.value)
-                }
+                onChange={(e) => updateAddressField("number", e.target.value)}
                 placeholder="000"
               />
             </div>
@@ -267,8 +296,8 @@ export default function ParticipantForm({
               <Input
                 id="complement"
                 value={values.address.complement ?? ""}
-                onChange={(event) =>
-                  updateAddressField("complement", event.target.value)
+                onChange={(e) =>
+                  updateAddressField("complement", e.target.value)
                 }
                 placeholder="Apto, bloco, casa"
               />
@@ -279,8 +308,8 @@ export default function ParticipantForm({
               <Input
                 id="neighborhood"
                 value={values.address.neighborhood}
-                onChange={(event) =>
-                  updateAddressField("neighborhood", event.target.value)
+                onChange={(e) =>
+                  updateAddressField("neighborhood", e.target.value)
                 }
                 placeholder="Nome do bairro"
               />
@@ -291,9 +320,7 @@ export default function ParticipantForm({
               <Input
                 id="city"
                 value={values.address.city}
-                onChange={(event) =>
-                  updateAddressField("city", event.target.value)
-                }
+                onChange={(e) => updateAddressField("city", e.target.value)}
                 placeholder="Cidade"
               />
             </div>
@@ -303,9 +330,7 @@ export default function ParticipantForm({
               <Input
                 id="state"
                 value={values.address.state}
-                onChange={(event) =>
-                  updateAddressField("state", event.target.value)
-                }
+                onChange={(e) => updateAddressField("state", e.target.value)}
                 placeholder="UF"
               />
             </div>
@@ -316,7 +341,7 @@ export default function ParticipantForm({
                 id="height"
                 type="number"
                 value={values.height}
-                onChange={(event) => updateField("height", event.target.value)}
+                onChange={(e) => updateField("height", e.target.value)}
                 placeholder="170"
               />
             </div>
@@ -327,7 +352,7 @@ export default function ParticipantForm({
                 id="weight"
                 type="number"
                 value={values.weight}
-                onChange={(event) => updateField("weight", event.target.value)}
+                onChange={(e) => updateField("weight", e.target.value)}
                 placeholder="70"
               />
             </div>
@@ -338,9 +363,7 @@ export default function ParticipantForm({
                 id="password"
                 type="password"
                 value={values.password}
-                onChange={(event) =>
-                  updateField("password", event.target.value)
-                }
+                onChange={(e) => updateField("password", e.target.value)}
                 placeholder="Defina uma senha"
                 required
               />

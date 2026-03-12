@@ -12,6 +12,7 @@ import InstructionsScreen from "@/features/assessment/features/create-flow/scree
 import QuizScreen from "@/features/assessment/features/create-flow/screens/QuizScreen";
 import ResultScreen from "@/features/assessment/features/create-flow/screens/ResultScreen";
 import { DashboardProvider } from "@/features/dashboard/contexts/DashboardContext";
+import ForgotPasswordPage from "@/features/auth/pages/ForgotPassword";
 
 export function AppRoutes() {
   return (
@@ -48,8 +49,12 @@ export function AppRoutes() {
           </Route>
         </Route>
         <Route element={<AuthLayout />}>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
+          <Route path={clientRoutes.AUTH.LOGIN} element={<LoginPage />} />
+          <Route path={clientRoutes.AUTH.REGISTER} element={<RegisterPage />} />
+          <Route
+            path={clientRoutes.AUTH.FORGOT_PASSWORD}
+            element={<ForgotPasswordPage />}
+          />
         </Route>
       </Routes>
     </BrowserRouter>

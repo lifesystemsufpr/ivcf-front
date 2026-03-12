@@ -1,5 +1,4 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import { MOCK_EVOLUTION_DATA } from "../mocks/participant.indicators.mock";
 import {
   MultipleLineChart,
   type DomainDefinition,
@@ -10,6 +9,7 @@ import { LinearScoreChart } from "../components/LinearScoreChart";
 import { WebChart } from "../components/WebChart";
 import { AssessmentDetailModal } from "@/features/assessment/containers/AssessmentDetailModal";
 import type { IVCF_DomainScores } from "../types";
+import { useFetchIndicators } from "../hooks/useFetchIndicators";
 
 type DomainKey = keyof IVCF_DomainScores;
 
@@ -26,20 +26,21 @@ const ALL_DOMAINS: DomainDefinition[] = [
 
 const ALL_DOMAIN_KEYS: DomainKey[] = ALL_DOMAINS.map((d) => d.key);
 
-export function ParticipantDashboard() {
-  const EVOLUTION_DATA = MOCK_EVOLUTION_DATA;
-  const assessments = EVOLUTION_DATA.assessments;
+export function ParticipantDashboard({
+  participantId,
+}: {
+  participantId: string;
+}) {
+  const { data, isLoading, error } = useFetchIndicators(participantId);
 
-  const sortedAssessments = useMemo(
-    () =>
-      [...assessments].sort(
-        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
-      ),
-    [assessments],
-  );
+  const assessments = useMemo(() => {
+    if (isLoading || error || !data?.assessments) return [];
+    return data.assessments;
+  }, [data, isLoading, error]);
 
-  const firstAssessment = sortedAssessments[0];
-  const lastAssessment = sortedAssessments[sortedAssessments.length - 1];
+  const firstAssessment = assessments.length > 0 ? assessments[0] : null;
+  const lastAssessment =
+    assessments.length > 0 ? assessments[assessments.length - 1] : null;
 
   const [selectedId, setSelectedId] = useState("");
   const contentRef = useRef<HTMLDivElement | null>(null);
@@ -52,17 +53,37 @@ export function ParticipantDashboard() {
   const aggregateScore = lastAssessment.totalScore;
   const deltaAbsolute = aggregateScore - firstAssessment.totalScore;
   const deltaPercent =
-    firstAssessment.totalScore > 0
+    firstAssessment && firstAssessment.totalScore > 0
       ? ((Math.abs(deltaAbsolute) / firstAssessment.totalScore) * 100).toFixed(
           1,
         )
       : "0";
 
+  if (isLoading) {
+    return <div className="p-6">Carregando indicadores...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 text-red-500">
+        Erro ao carregar indicadores do participante.
+      </div>
+    );
+  }
+
+  if (!assessments.length) {
+    return (
+      <div className="p-6 text-muted-foreground">
+        Nenhuma avaliação encontrada para este participante.
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <EvolutionPulseHeader
-        riskLevel={lastAssessment.riskLevel}
-        participantId={EVOLUTION_DATA.participantId}
+        riskLevel={lastAssessment?.riskLevel ?? "Todos"}
+        participantId={participantId}
         totalScore={aggregateScore}
         deltaAbsolute={deltaAbsolute}
         deltaPercent={deltaPercent}
@@ -72,20 +93,21 @@ export function ParticipantDashboard() {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <div className="rounded-lg border bg-card p-5">
           <LinearScoreChart
-            assessments={sortedAssessments}
+            assessments={assessments}
             height={320}
             onSelectAssessment={handleSelectAssessment}
           />
         </div>
+
         <div className="rounded-lg border bg-card p-5">
-          <WebChart assessments={sortedAssessments} height={320} />
+          <WebChart assessments={assessments} height={320} />
         </div>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div ref={contentRef} className="flex-1 min-w-0 space-y-6">
           <MultipleLineChart
-            assessments={sortedAssessments}
+            assessments={assessments}
             domains={ALL_DOMAINS}
             selectedDomainKeys={ALL_DOMAIN_KEYS}
             height={380}
@@ -93,7 +115,7 @@ export function ParticipantDashboard() {
           />
 
           <DomainComparisonTable
-            assessments={sortedAssessments}
+            assessments={assessments}
             allDomains={ALL_DOMAINS}
             selectedDomainKeys={ALL_DOMAIN_KEYS}
           />

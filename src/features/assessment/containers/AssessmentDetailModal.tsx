@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import { detailedAssessmentsMock } from "../mocks";
 import { getStylesByClassification } from "../utils";
 import {
   Badge,
@@ -11,6 +10,7 @@ import {
 } from "@/core/components/ui";
 import { buildGroupedTree } from "../utils/build-tree";
 import GroupSection from "../components/GroupSection";
+import { useAssessmentResponse } from "../hooks/useAssessmentResponse";
 
 interface AssessmentDetailModalProps {
   assessmentId: string;
@@ -23,18 +23,31 @@ export function AssessmentDetailModal({
   open,
   onClose,
 }: AssessmentDetailModalProps) {
-  const assessment = useMemo(
-    () =>
-      detailedAssessmentsMock.find((item) => item.id === assessmentId) ?? null,
-    [assessmentId],
-  );
+  const {
+    data: assessment,
+    isLoading,
+    error,
+  } = useAssessmentResponse(open ? assessmentId : null);
 
   const grouped = useMemo(
     () => (assessment ? buildGroupedTree(assessment) : []),
     [assessment],
   );
 
-  if (!assessment) {
+  const participantName =
+    assessment?.participant?.user?.fullName ||
+    assessment?.participantName ||
+    "N/A";
+
+  if (isLoading) {
+    return (
+      <Modal open={open} onClose={onClose} title="Detalhes da avaliação">
+        <Typography>Carregando detalhes da avaliação...</Typography>
+      </Modal>
+    );
+  }
+
+  if (error || !assessment) {
     return (
       <Modal open={open} onClose={onClose} title="Detalhes da avaliação">
         <Typography>
@@ -65,7 +78,7 @@ export function AssessmentDetailModal({
             >
               <Box display="flex" direction="row" gap={1} align="center">
                 <Typography variant="h3" className="font-semibold">
-                  {assessment.participantName}
+                  {participantName}
                 </Typography>
                 <Typography variant="small" className="text-muted-foreground">
                   {new Date(assessment.date).toLocaleDateString("pt-BR")} Total:{" "}

@@ -50,6 +50,11 @@ export const classificationStyles: Record<
     border: "border-yellow-500",
     text: "text-yellow-700",
   },
+  "Em Risco de Fragilização": {
+    bg: "bg-yellow-100",
+    border: "border-yellow-500",
+    text: "text-yellow-700",
+  },
   Robusto: {
     bg: "bg-green-100",
     border: "border-green-500",
