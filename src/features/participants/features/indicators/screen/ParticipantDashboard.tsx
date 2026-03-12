@@ -4,7 +4,6 @@ import {
   MultipleLineChart,
   type DomainDefinition,
 } from "../components/MultipleLineChart";
-import { DomainFiltersSidebar } from "../components/DomainFiltersSidebar";
 import { DomainComparisonTable } from "../components/DomainComparisonTable";
 import { EvolutionPulseHeader } from "../components/EvolutionPulseHeader";
 import { LinearScoreChart } from "../components/LinearScoreChart";
@@ -43,22 +42,10 @@ export function ParticipantDashboard() {
   const lastAssessment = sortedAssessments[sortedAssessments.length - 1];
 
   const [selectedId, setSelectedId] = useState("");
-  const [selectedDomainKeys, setSelectedDomainKeys] =
-    useState<DomainKey[]>(ALL_DOMAIN_KEYS);
   const contentRef = useRef<HTMLDivElement | null>(null);
 
   const handleSelectAssessment = useCallback((id: string) => {
     setSelectedId(id);
-  }, []);
-
-  const handleToggleDomain = useCallback((key: DomainKey) => {
-    setSelectedDomainKeys((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
-    );
-  }, []);
-
-  const handleResetAll = useCallback(() => {
-    setSelectedDomainKeys(ALL_DOMAIN_KEYS);
   }, []);
 
   // Aggregate stats
@@ -74,20 +61,20 @@ export function ParticipantDashboard() {
   return (
     <div className="flex flex-col gap-6">
       <EvolutionPulseHeader
-          riskLevel={lastAssessment.riskLevel}
-          participantId={EVOLUTION_DATA.participantId}
-          totalScore={aggregateScore}
-          deltaAbsolute={deltaAbsolute}
-          deltaPercent={deltaPercent}
-          exportRef={contentRef}
+        riskLevel={lastAssessment.riskLevel}
+        participantId={EVOLUTION_DATA.participantId}
+        totalScore={aggregateScore}
+        deltaAbsolute={deltaAbsolute}
+        deltaPercent={deltaPercent}
+        exportRef={contentRef}
       />
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <div className="rounded-lg border bg-card p-5">
           <LinearScoreChart
-              assessments={sortedAssessments}
-              height={320}
-              onSelectAssessment={handleSelectAssessment}
+            assessments={sortedAssessments}
+            height={320}
+            onSelectAssessment={handleSelectAssessment}
           />
         </div>
         <div className="rounded-lg border bg-card p-5">
@@ -96,19 +83,11 @@ export function ParticipantDashboard() {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
-        <DomainFiltersSidebar
-          assessments={sortedAssessments}
-          allDomains={ALL_DOMAINS}
-          selectedDomainKeys={selectedDomainKeys}
-          onToggleDomain={handleToggleDomain}
-          onResetAll={handleResetAll}
-        />
-
         <div ref={contentRef} className="flex-1 min-w-0 space-y-6">
           <MultipleLineChart
             assessments={sortedAssessments}
             domains={ALL_DOMAINS}
-            selectedDomainKeys={selectedDomainKeys}
+            selectedDomainKeys={ALL_DOMAIN_KEYS}
             height={380}
             onSelectAssessment={handleSelectAssessment}
           />
@@ -116,7 +95,7 @@ export function ParticipantDashboard() {
           <DomainComparisonTable
             assessments={sortedAssessments}
             allDomains={ALL_DOMAINS}
-            selectedDomainKeys={selectedDomainKeys}
+            selectedDomainKeys={ALL_DOMAIN_KEYS}
           />
         </div>
 
