@@ -4,21 +4,19 @@ import {
   Label,
   Separator,
   Input,
-  Select,
   Typography,
 } from "@/core/components/ui";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import type { Gender, RegisterPayload } from "../types";
+import type { RegisterPayload } from "../types";
 import { useRegisterAndLogin } from "../hooks/useRegisterAndLogin";
 import { Bounce, toast } from "react-toastify";
+import { getErrorMessage } from "../utils/error";
 
 interface FormData {
   name: string;
   email: string;
   ocupacao: string;
-  telefone: string;
-  sexo: string;
   password: string;
 }
 
@@ -28,8 +26,6 @@ export default function RegisterPage() {
     name: "",
     email: "",
     ocupacao: "",
-    telefone: "",
-    sexo: "",
     password: "",
   });
 
@@ -67,8 +63,6 @@ export default function RegisterPage() {
         user: {
           fullName: formData.name,
           email: formData.email,
-          telefone: formData.telefone,
-          gender: formData.sexo as Gender,
           password: formData.password,
         },
       };
@@ -77,7 +71,7 @@ export default function RegisterPage() {
 
       toast.success("Registro realizado com sucesso!", {
         position: "top-center",
-        autoClose: 2500,
+        autoClose: 800,
         hideProgressBar: false,
         closeOnClick: false,
         pauseOnHover: true,
@@ -86,18 +80,21 @@ export default function RegisterPage() {
         theme: "colored",
         transition: Bounce,
       });
-      router("/");
+
+      setTimeout(() => {
+        router("/");
+      }, 1000);
     } catch (err: unknown) {
-      console.error("Erro ao realizar cadastro", err);
-      const errorMessage = (err as { message?: string }).message || "";
-      toast.error(`Erro ao realizar cadastro. ${errorMessage || ""}`, {
+      const errorMessage = getErrorMessage(err);
+
+      toast.error(`Erro ao realizar cadastro. ${errorMessage}`, {
+        toastId: "register-error",
         position: "top-center",
-        autoClose: 2500,
+        autoClose: 1500,
         hideProgressBar: false,
         closeOnClick: false,
         pauseOnHover: true,
         draggable: true,
-        progress: undefined,
         theme: "light",
         transition: Bounce,
       });
@@ -174,38 +171,6 @@ export default function RegisterPage() {
                   placeholder="Ex: Médico, Filho(a), Cuidador"
                   required
                 />
-              </Box>
-            </Box>
-
-            <Box className="grid gap-4 md:grid-cols-2">
-              <Box display="flex" direction="column" gap={6}>
-                <Label htmlFor="telefone">Telefone</Label>
-                <Input
-                  id="telefone"
-                  name="telefone"
-                  type="text"
-                  mask="phone"
-                  value={formData.telefone}
-                  onChange={handleChange}
-                  placeholder="(00) 00000-0000"
-                  required
-                />
-              </Box>
-              <Box display="flex" direction="column" gap={6}>
-                <Label htmlFor="sexo">Sexo</Label>
-                <Select
-                  id="sexo"
-                  name="sexo"
-                  value={formData.sexo}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="" disabled>
-                    Selecione
-                  </option>
-                  <option value="MALE">Masculino</option>
-                  <option value="FEMALE">Feminino</option>
-                </Select>
               </Box>
             </Box>
 
