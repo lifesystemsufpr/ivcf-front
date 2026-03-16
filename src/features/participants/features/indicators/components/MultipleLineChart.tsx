@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   ResponsiveLine,
   type SliceTooltipProps,
@@ -24,6 +24,25 @@ type MultipleLineChartProps = {
   height?: number;
   onSelectAssessment?: (id: string) => void;
 };
+
+// Maximum raw score for each domain
+const domainMaxScores: Record<DomainKey, number> = {
+  age: 3,
+  selfPerception: 1,
+  functionalCapacity: 10,
+  cognition: 4,
+  mood: 4,
+  mobility: 10,
+  communication: 4,
+  comorbidities: 4,
+};
+
+// Normalizes a raw score to a 0–10 scale based on the domain's max
+function normalizeScore(raw: number, domainKey: DomainKey): number {
+  const max = domainMaxScores[domainKey];
+  if (!max) return 0;
+  return parseFloat(((raw / max) * 10).toFixed(2));
+}
 
 const defaultDomains: DomainDefinition[] = [
   { key: "age", label: "Idade" },
@@ -55,6 +74,13 @@ function formatDateLabel(date: string) {
   });
 }
 
+// Extended point data stored alongside each chart point
+type PointExtraData = {
+  assessmentId: string;
+  rawScore: number;
+  maxScore: number;
+};
+
 function SliceTooltip({ slice }: SliceTooltipProps<DefaultSeries>) {
   return (
     <div
@@ -65,7 +91,7 @@ function SliceTooltip({ slice }: SliceTooltipProps<DefaultSeries>) {
         padding: "12px 16px",
         fontSize: 13,
         boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
-        minWidth: 200,
+        minWidth: 220,
         whiteSpace: "nowrap",
       }}
     >
@@ -81,32 +107,55 @@ function SliceTooltip({ slice }: SliceTooltipProps<DefaultSeries>) {
       >
         {slice.points[0]?.data.xFormatted}
       </div>
-      {slice.points.map((point) => (
-        <div
-          key={point.id}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "2px 0",
-          }}
-        >
-          <span
+      {slice.points.map((point) => {
+        const extra = point.data as unknown as PointExtraData &
+          Record<string, unknown>;
+        const normalizedScore = Number(point.data.y).toFixed(1);
+        const rawScore = extra.rawScore;
+        const maxScore = extra.maxScore;
+
+        return (
+          <div
+            key={point.id}
             style={{
-              display: "inline-block",
-              width: 10,
-              height: 10,
-              borderRadius: "50%",
-              backgroundColor: point.seriesColor,
-              flexShrink: 0,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "4px 0",
+              borderBottom: "1px solid #f3f4f6",
             }}
-          />
-          <span style={{ color: "#374151" }}>
-            {String(point.seriesId)}:{" "}
-            <strong>{String(point.data.yFormatted)}</strong>
-          </span>
-        </div>
-      ))}
+          >
+            <span
+              style={{
+                display: "inline-block",
+                width: 10,
+                height: 10,
+                borderRadius: "50%",
+                backgroundColor: point.seriesColor,
+                flexShrink: 0,
+              }}
+            />
+            <span style={{ color: "#374151", flex: 1 }}>
+              {String(point.seriesId)}
+            </span>
+            <span
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-end",
+                gap: 1,
+              }}
+            >
+              <strong style={{ color: "#111827" }}>
+                {normalizedScore} / 10
+              </strong>
+              <span style={{ fontSize: 11, color: "#6b7280" }}>
+                {rawScore} de {maxScore} pts
+              </span>
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -118,6 +167,20 @@ export function MultipleLineChart({
   height = 420,
   onSelectAssessment,
 }: MultipleLineChartProps) {
+  const [hiddenLabels, setHiddenLabels] = useState<Set<string>>(new Set());
+
+  const toggleLabel = (label: string) => {
+    setHiddenLabels((prev) => {
+      const next = new Set(prev);
+      if (next.has(label)) {
+        next.delete(label);
+      } else {
+        next.add(label);
+      }
+      return next;
+    });
+  };
+
   const sortedAssessments = useMemo(
     () =>
       [...assessments].sort(
@@ -140,24 +203,80 @@ export function MultipleLineChart({
     return domains.filter((d) => selectedDomainKeys.includes(d.key));
   }, [domains, selectedDomainKeys]);
 
+  const visibleDomains = useMemo(
+    () => activeDomains.filter((d) => !hiddenLabels.has(d.label)),
+    [activeDomains, hiddenLabels],
+  );
+
   const series = useMemo(() => {
-    return activeDomains.map((domain) => ({
+    return visibleDomains.map((domain) => ({
       id: domain.label,
       color: colorsByLabel[domain.label],
-      data: sortedAssessments.map((assessment) => ({
-        x: formatDateLabel(assessment.date),
-        y: assessment.domains[domain.key] ?? 0,
-        assessmentId: assessment.id,
-      })),
+      data: sortedAssessments.map((assessment) => {
+        const rawScore = assessment.domains[domain.key] ?? 0;
+        const maxScore = domainMaxScores[domain.key];
+        return {
+          x: formatDateLabel(assessment.date),
+          // Y axis uses the normalized 0–10 value
+          y: normalizeScore(rawScore, domain.key),
+          // Extra data surfaced in the tooltip
+          assessmentId: assessment.id,
+          rawScore,
+          maxScore,
+        };
+      }),
     }));
-  }, [activeDomains, sortedAssessments, colorsByLabel]);
+  }, [visibleDomains, sortedAssessments, colorsByLabel]);
 
   const hasData = series.some((s) => s.data.length > 0);
 
   return (
-    <div style={{ height }} className="w-full bg-gray-200 p-5 rounded-lg">
+    <div className="w-full bg-gray-200 p-5 rounded-lg" style={{ height }}>
+      {/* Toggle legend */}
+      <div className="flex flex-wrap gap-2 mb-3">
+        {activeDomains.map((domain) => {
+          const isVisible = !hiddenLabels.has(domain.label);
+          const color = colorsByLabel[domain.label];
+          return (
+            <button
+              key={domain.key}
+              onClick={() => toggleLabel(domain.label)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "3px 10px",
+                borderRadius: 9999,
+                border: `1.5px solid ${isVisible ? color : "#d1d5db"}`,
+                backgroundColor: isVisible ? `${color}18` : "transparent",
+                cursor: "pointer",
+                fontSize: 12,
+                fontWeight: 500,
+                color: isVisible ? color : "#9ca3af",
+                transition: "all 0.15s ease",
+              }}
+            >
+              <span
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  backgroundColor: isVisible ? color : "#d1d5db",
+                  flexShrink: 0,
+                  transition: "background-color 0.15s ease",
+                }}
+              />
+              {domain.label}
+            </button>
+          );
+        })}
+      </div>
+
       {!hasData ? (
-        <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+        <div
+          className="flex items-center justify-center text-sm text-muted-foreground"
+          style={{ height: height - 60 }}
+        >
           Sem dados para exibir.
         </div>
       ) : (
@@ -174,12 +293,15 @@ export function MultipleLineChart({
               },
             },
           }}
-          margin={{ top: 20, right: 30, bottom: 50, left: 55 }}
+          margin={{ top: 10, right: 30, bottom: 50, left: 55 }}
           xScale={{ type: "point" }}
-          yScale={{ type: "linear", min: 0, max: "auto", stacked: false }}
+          // Fixed 0–10 scale on Y axis
+          yScale={{ type: "linear", min: 0, max: 10, stacked: false }}
+          yFormat=".1f"
           curve="monotoneX"
           enableGridX={false}
           enableGridY
+          gridYValues={[0, 2, 4, 6, 8, 10]}
           lineWidth={2.5}
           enablePoints={false}
           enableArea
@@ -189,9 +311,8 @@ export function MultipleLineChart({
           colors={({ id }) => colorsByLabel[id as string]}
           onClick={(item) => {
             if ("points" in item) return;
-
-            const assessmentId = item.data.assessmentId;
-
+            const assessmentId = (item.data as unknown as PointExtraData)
+              .assessmentId;
             if (assessmentId) {
               onSelectAssessment?.(assessmentId);
             }
@@ -203,19 +324,9 @@ export function MultipleLineChart({
           axisLeft={{
             tickSize: 0,
             tickPadding: 12,
+            tickValues: [0, 2, 4, 6, 8, 10],
+            format: (v) => `${v}`,
           }}
-          legends={[
-            {
-              anchor: "top-left",
-              direction: "row",
-              translateY: -20,
-              itemWidth: 120,
-              itemHeight: 20,
-              symbolSize: 10,
-              symbolShape: "circle",
-              itemTextColor: "#64748b",
-            },
-          ]}
         />
       )}
     </div>
