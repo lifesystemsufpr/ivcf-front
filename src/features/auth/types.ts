@@ -26,8 +26,6 @@ export interface RegisterPayload {
   user: {
     fullName: string;
     email: string;
-    telefone: string;
-    gender: Gender;
     password: string;
   };
 }
