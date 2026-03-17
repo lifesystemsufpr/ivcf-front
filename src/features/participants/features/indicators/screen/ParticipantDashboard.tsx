@@ -50,8 +50,8 @@ export function ParticipantDashboard({
   }, []);
 
   // Aggregate stats
-  const aggregateScore = lastAssessment.totalScore;
-  const deltaAbsolute = aggregateScore - firstAssessment.totalScore;
+  const aggregateScore = lastAssessment?.totalScore ?? 0;
+  const deltaAbsolute = aggregateScore - (firstAssessment?.totalScore ?? 0);
   const deltaPercent =
     firstAssessment && firstAssessment.totalScore > 0
       ? ((Math.abs(deltaAbsolute) / firstAssessment.totalScore) * 100).toFixed(

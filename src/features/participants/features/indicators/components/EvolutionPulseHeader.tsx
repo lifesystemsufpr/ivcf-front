@@ -29,16 +29,17 @@ export function EvolutionPulseHeader({
     <div className="flex flex-col sm:flex-row items-start justify-between gap-4 bg-gray-200 p-5 rounded-lg">
       <div>
         <div className="flex items-center gap-3 mb-1">
-          <Badge className={cn(riskStyle.bg, riskStyle.text)}>
+          <Badge
+            className={cn(
+              riskStyle?.bg ?? "bg-gray-200",
+              riskStyle?.text ?? "text-gray-500",
+            )}
+          >
             {riskLevel}
           </Badge>
-          <span className="text-sm text-gray-500">
-            ID: #{participantId}
-          </span>
+          <span className="text-sm text-gray-500">ID: #{participantId}</span>
         </div>
-        <h2 className="text-2xl font-bold text-gray-900">
-          Pulso de Evolução
-        </h2>
+        <h2 className="text-2xl font-bold text-gray-900">Pulso de Evolução</h2>
       </div>
 
       <div className="flex items-center gap-6">
