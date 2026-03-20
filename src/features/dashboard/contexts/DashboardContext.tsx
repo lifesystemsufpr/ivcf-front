@@ -2,7 +2,6 @@ import {
   createContext,
   useContext,
   useState,
-  useEffect,
   useCallback,
   type ReactNode,
 } from "react";
@@ -11,7 +10,7 @@ import type {
   FragilityFilters,
   AggregationDimension,
 } from "../types";
-import { fragilityService } from "../services/fragilityService";
+import { useFragilityData } from "../hooks/useFragilityData";
 
 interface DashboardContextData {
   data: FragilityDashboardResponse | null;
@@ -27,7 +26,7 @@ interface DashboardContextData {
   ) => void;
   setStratification: (value: AggregationDimension) => void;
   setTrendBySex: (value: boolean) => void;
-  refresh: () => Promise<void>;
+  refresh: () => void;
 }
 
 const DashboardContext = createContext<DashboardContextData | undefined>(
@@ -39,40 +38,20 @@ interface DashboardProviderProps {
 }
 
 export function DashboardProvider({ children }: DashboardProviderProps) {
-  const [data, setData] = useState<FragilityDashboardResponse | null>(null);
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [stratification, setStratification] =
     useState<AggregationDimension>("sex");
+
   const [trendBySex, setTrendBySex] = useState(true);
+
   const [filters, setFilters] = useState<FragilityFilters>({
     sex: "all",
   });
 
-  const fetchDashboard = useCallback(async () => {
-    setIsRefreshing(true);
-    setError(null);
+  const { data, isLoading, isFetching, error, refetch } = useFragilityData(
+    filters,
+    stratification,
+  );
 
-    try {
-      const response = await fragilityService.getDashboardData(
-        filters,
-        stratification,
-      );
-      setData(response);
-    } catch (err: unknown) {
-      setError("Erro ao atualizar dados.");
-    } finally {
-      setIsInitialLoading(false);
-      setIsRefreshing(false);
-    }
-  }, [filters, stratification]);
-
-  useEffect(() => {
-    fetchDashboard();
-  }, [fetchDashboard]);
-
-  // 🔥 Correção aqui
   const setFilter: DashboardContextData["setFilter"] = useCallback(
     (key, value) => {
       setFilters((prev) => ({
@@ -86,24 +65,23 @@ export function DashboardProvider({ children }: DashboardProviderProps) {
   return (
     <DashboardContext.Provider
       value={{
-        data,
-        loading: isInitialLoading,
-        isRefreshing,
-        error,
+        data: data ?? null,
+        loading: isLoading,
+        isRefreshing: isFetching,
+        error: error ? "Erro ao carregar dados." : null,
         filters,
         stratification,
         trendBySex,
         setFilter,
         setStratification,
         setTrendBySex,
-        refresh: fetchDashboard,
+        refresh: refetch,
       }}
     >
       {children}
     </DashboardContext.Provider>
   );
 }
-
 export function useDashboard(): DashboardContextData {
   const context = useContext(DashboardContext);
 

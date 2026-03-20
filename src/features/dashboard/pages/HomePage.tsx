@@ -4,15 +4,14 @@ import { FilterToolbar } from "../components/FilterToolbar";
 import { SummaryStats } from "../components/SummaryStats";
 import { DomainHeatmap } from "../components/DomainHeatmap";
 import { RiskPyramid } from "../components/RiskPyramid";
-import { useFragilityData } from "../hooks/useFragilityData";
 import { RiskAmountBar } from "../components/RiskAmountBar";
 import { ComorbidityScatter } from "../components/ComorbidityScatter";
 import { DomainDrilldownBars } from "../components/DomainDrilldownBars";
+import { useDashboard } from "../contexts/DashboardContext";
 
 export default function HomePage() {
   const {
-    summary,
-    charts,
+    data,
     loading,
     error,
     filters,
@@ -21,8 +20,9 @@ export default function HomePage() {
     setStratification,
     trendBySex,
     setTrendBySex,
-    metadata,
-  } = useFragilityData();
+  } = useDashboard();
+
+  const { charts, metadata, summary } = data || {};
 
   if (loading && !summary) {
     return <div className="p-10 text-center">Iniciando Dashboard...</div>;
@@ -49,14 +49,14 @@ export default function HomePage() {
           setStratification={setStratification}
           trendBySex={trendBySex}
           setTrendBySex={setTrendBySex}
-          ageBounds={metadata.ageBounds}
+          ageBounds={metadata?.ageBounds ?? { min: 0, max: 100 }}
         />
       </div>
 
       <SummaryStats summary={summary} />
 
       <div className="grid gap-6 xl:grid-cols-2">
-        <RiskAmountBar data={charts.riskBar} />
+        <RiskAmountBar data={charts.riskBar} total={summary.total} />
         <RiskPyramid data={charts.riskPyramid} />
       </div>
 

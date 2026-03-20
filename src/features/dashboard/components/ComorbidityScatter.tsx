@@ -90,11 +90,19 @@ export function ComorbidityScatter({ data }: ComorbidityScatterProps) {
             data={data}
             theme={nivoTheme}
             colors={(series) =>
-              data.find((d) => d.id === series.serieId)?.color ?? "#000000"
+              series.serieId === "Masculino" ? "#38bdf8" : "#a855f7"
             }
             margin={{ top: 30, right: 40, bottom: 60, left: 70 }}
             blendMode="multiply"
-            nodeSize={({ data }) => data.size}
+            nodeSize={({ data }) => {
+              if (data.size) return data.size;
+              const sizeMap: Record<string, number> = {
+                Frágil: 16,
+                "Pré-frágil": 10,
+                Robusto: 6,
+              };
+              return sizeMap[data.riskLevel] ?? 10;
+            }}
             axisBottom={{
               legend: "Idade (anos)",
               legendOffset: 42,

@@ -103,3 +103,8 @@ export async function exportElementAsPdf(
   pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
   pdf.save(`${fileName}.pdf`);
 }
+
+export function calcPercentage(part: number, total: number): number {
+  if (total === 0) return 0;
+  return Number(((part / total) * 100).toFixed(1));
+}
