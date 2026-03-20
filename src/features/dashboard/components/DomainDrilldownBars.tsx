@@ -12,7 +12,7 @@ type ViewLevel = {
   parentId: string | null;
 };
 
-const BAR_WIDTH = 80;
+const BAR_WIDTH = 70;
 const NUM_KEYS = 2;
 const CHART_HEIGHT = 400;
 const MARGIN = { top: 20, right: 140, bottom: 80, left: 60 };
@@ -72,13 +72,9 @@ export function DomainDrilldownBars({
     }
   };
 
-  // Largura interna disponível para os grupos de barras
   const innerWidth = containerWidth - MARGIN.left - MARGIN.right;
   const numGroups = chartData.length;
 
-  // Padding necessário para que cada barra tenha exatamente BAR_WIDTH
-  // groupWidth = innerWidth / numGroups
-  // barWidth   = groupWidth * (1 - padding) / NUM_KEYS  → resolve padding:
   const idealPadding =
     numGroups > 0 && innerWidth > 0
       ? 1 - (BAR_WIDTH * NUM_KEYS * numGroups) / innerWidth
@@ -86,7 +82,6 @@ export function DomainDrilldownBars({
 
   const needsScroll = idealPadding < MIN_PADDING;
 
-  // Se não cabe na tela, fixamos o padding mínimo e calculamos a largura necessária
   const fixedGroupWidth = (BAR_WIDTH * NUM_KEYS) / (1 - MIN_PADDING);
   const scrollWidth = MARGIN.left + MARGIN.right + numGroups * fixedGroupWidth;
 
@@ -113,45 +108,44 @@ export function DomainDrilldownBars({
         )}
       </CardHeader>
 
-      <CardContent
-        className="h-100 overflow-x-auto overflow-y-hidden"
-        ref={containerRef}
-      >
-        {containerWidth > 0 && (
-          <div style={{ width: chartWidth, height: CHART_HEIGHT }}>
-            <Bar
-              width={chartWidth}
-              height={CHART_HEIGHT}
-              data={chartData}
-              keys={["Sim", "Não"]}
-              indexBy="label"
-              margin={MARGIN}
-              valueScale={{ type: "linear" }}
-              colors={{ scheme: "set2" }}
-              theme={nivoTheme}
-              padding={padding}
-              groupMode="grouped"
-              axisBottom={{
-                tickRotation: -4,
-                legend: "Categorias/Questões",
-                legendPosition: "middle",
-                legendOffset: 60,
-              }}
-              onClick={handleDrillDown}
-              labelSkipHeight={12}
-              legends={[
-                {
-                  dataFrom: "keys",
-                  anchor: "bottom-right",
-                  direction: "column",
-                  translateX: 120,
-                  itemWidth: 100,
-                  itemHeight: 20,
-                },
-              ]}
-            />
-          </div>
-        )}
+      <CardContent className="h-100 overflow-x-auto overflow-y-hidden">
+        <div ref={containerRef} className="w-full h-full">
+          {containerWidth > 0 && (
+            <div style={{ width: chartWidth, height: CHART_HEIGHT }}>
+              <Bar
+                width={chartWidth}
+                height={CHART_HEIGHT}
+                data={chartData}
+                keys={["Sim", "Não"]}
+                indexBy="label"
+                margin={MARGIN}
+                valueScale={{ type: "linear" }}
+                colors={{ scheme: "set2" }}
+                theme={nivoTheme}
+                padding={padding}
+                groupMode="grouped"
+                axisBottom={{
+                  tickRotation: -4,
+                  legend: "Categorias/Questões",
+                  legendPosition: "middle",
+                  legendOffset: 60,
+                }}
+                onClick={handleDrillDown}
+                labelSkipHeight={12}
+                legends={[
+                  {
+                    dataFrom: "keys",
+                    anchor: "bottom-right",
+                    direction: "column",
+                    translateX: 120,
+                    itemWidth: 100,
+                    itemHeight: 20,
+                  },
+                ]}
+              />
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
