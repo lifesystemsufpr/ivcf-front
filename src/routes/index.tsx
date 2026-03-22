@@ -13,6 +13,7 @@ import QuizScreen from "@/features/assessment/features/create-flow/screens/QuizS
 import ResultScreen from "@/features/assessment/features/create-flow/screens/ResultScreen";
 import { DashboardProvider } from "@/features/dashboard/contexts/DashboardContext";
 import ForgotPasswordPage from "@/features/auth/pages/ForgotPassword";
+import ResetPasswordPage from "@/features/auth/pages/ResetPassword";
 
 export function AppRoutes() {
   return (
@@ -54,6 +55,10 @@ export function AppRoutes() {
           <Route
             path={clientRoutes.AUTH.FORGOT_PASSWORD}
             element={<ForgotPasswordPage />}
+          />
+          <Route
+            path={clientRoutes.AUTH.RESET_PASSWORD}
+            element={<ResetPasswordPage />}
           />
         </Route>
       </Routes>

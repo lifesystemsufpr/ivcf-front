@@ -1,5 +1,12 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { Box, Button, Input, Label, Typography } from "@/core/components/ui";
+import {
+  Box,
+  Button,
+  Input,
+  Label,
+  Select,
+  Typography,
+} from "@/core/components/ui";
 import type { Participant, ParticipantRequest } from "../types";
 import { fetchAddressByCep } from "@/core/utils";
 import { mapStateToUF } from "../utils";
@@ -22,7 +29,7 @@ const defaultValues: ParticipantFormValues = {
   birthDate: "",
   email: "",
   phone: "",
-  gender: "OTHER",
+  gender: "MALE",
   height: "",
   weight: "",
   password: "",
@@ -213,16 +220,17 @@ export default function ParticipantForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="gender">Genero</Label>
-              <select
+              <Label htmlFor="gender">Gênero</Label>
+              <Select
                 id="gender"
                 value={values.gender}
-                onChange={(e) => updateField("gender", e.target.value as any)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                onChange={(e) =>
+                  updateField("gender", e.target.value as Participant["gender"])
+                }
               >
                 <option value="MALE">Masculino</option>
                 <option value="FEMALE">Feminino</option>
-              </select>
+              </Select>
             </div>
 
             <div className="space-y-2">

@@ -5,6 +5,8 @@ export const apiRoutes = {
   AUTH: {
     LOGIN: `${API_URL_BASE}/auth/login`,
     REFRESH: `${API_URL_BASE}/auth/refresh`,
+    FORGOT_PASSWORD: `${API_URL_BASE}/auth/forgot-password`,
+    RESET_PASSWORD: `${API_URL_BASE}/auth/reset-password`,
     REGISTER: `${API_URL_BASE}/health-professional`,
   },
 
@@ -22,5 +24,6 @@ export const apiRoutes = {
       `${API_URL_BASE}/questionnaires/response/${assessmentId}`,
     IVCF_RESPONSE: () => `${API_URL_BASE}/questionnaires/response`,
     IVCF_STRUCTURE: `${API_URL_BASE}/questionnaires/ivcf-20`,
+    DASHBOARD: `${API_URL_BASE}/questionnaires/dashboard`,
   },
 };

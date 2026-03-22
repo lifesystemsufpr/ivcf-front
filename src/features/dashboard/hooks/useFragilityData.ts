@@ -1,13 +1,38 @@
-import { useDashboard } from "../contexts/DashboardContext";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { fragilityService } from "../services/fragilityService";
+import type {
+  AggregationDimension,
+  FragilityDashboardResponse,
+  FragilityFilters,
+} from "../types";
 
-export function useFragilityData() {
-  const { data, loading, error, ...actions } = useDashboard();
-  return {
-    loading,
-    error,
-    summary: data?.summary,
-    charts: data?.charts,
-    metadata: data?.metadata || { ageBounds: { min: 0, max: 100 } },
-    ...actions,
-  };
+type FragilityQueryKey = [
+  "fragilityDashboard",
+  FragilityFilters,
+  AggregationDimension,
+];
+
+export function useFragilityData(
+  filters: FragilityFilters,
+  stratification: AggregationDimension,
+) {
+  return useQuery<
+    FragilityDashboardResponse,
+    Error,
+    FragilityDashboardResponse,
+    FragilityQueryKey
+  >({
+    queryKey: [
+      "fragilityDashboard",
+      filters,
+      stratification,
+    ] as FragilityQueryKey,
+    queryFn: ({ queryKey }) => {
+      const [, filters, stratification] = queryKey;
+      return fragilityService.getDashboardData(filters, stratification);
+    },
+    placeholderData: keepPreviousData,
+    enabled: true,
+    staleTime: 60 * 1000,
+  });
 }

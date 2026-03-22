@@ -10,10 +10,11 @@ import {
   exportElementAsPng,
 } from "../utils/transforms";
 import { Box } from "@/core/components/ui";
+import { normalizeToPercentage } from "../utils/normalize";
 
 const keys = ["Robusto", "Pré-frágil", "Frágil"] as const;
 
-type RiskPyramidProps = {
+export type RiskPyramidProps = {
   data: {
     group: string;
     Robusto: number;
@@ -24,7 +25,7 @@ type RiskPyramidProps = {
 
 export function RiskPyramid({ data }: RiskPyramidProps) {
   const chartRef = useRef<HTMLDivElement | null>(null);
-
+  const normalizedData = normalizeToPercentage(data);
   return (
     <Card className="h-full">
       <CardHeader className="flex flex-row items-start justify-between gap-4">
@@ -68,7 +69,7 @@ export function RiskPyramid({ data }: RiskPyramidProps) {
             </div>
           ) : (
             <ResponsiveBar
-              data={data}
+              data={normalizedData}
               keys={keys as unknown as string[]}
               indexBy="group"
               layout="horizontal"

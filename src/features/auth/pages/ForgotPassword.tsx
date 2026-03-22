@@ -9,17 +9,32 @@ import {
 } from "@/core/components/ui";
 import { useNavigate } from "react-router-dom";
 import { MailCheck, ArrowLeft } from "lucide-react";
+import type { ForgotPasswordPayload } from "../types";
+import { forgotRequest } from "../services/forgotRequest";
+import { toast } from "react-toastify";
 
 export default function ForgotPasswordPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [email, setEmail] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulação de envio
-    console.log("Enviando recuperação para:", email);
-    setIsSubmitted(true);
+    const payload: ForgotPasswordPayload = {
+      email,
+    };
+    try {
+      const resp = await forgotRequest(payload);
+      toast.success(
+        resp.message || "E-mail de recuperação enviado com sucesso!",
+      );
+    } catch (error) {
+      toast.error(
+        "Ocorreu um erro ao enviar o e-mail de recuperação. Por favor, tente novamente.",
+      );
+    } finally {
+      setIsSubmitted(true);
+    }
   };
 
   return (

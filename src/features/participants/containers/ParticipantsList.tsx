@@ -129,6 +129,8 @@ export default function ParticipantList() {
   const handleUpdateParticipant = async (data: ParticipantRequest) => {
     if (!participantToEdit) return;
 
+    console.log("Atualizando participante com dados:", data);
+
     updateParticipantMutation.mutate(
       {
         id: participantToEdit.id,

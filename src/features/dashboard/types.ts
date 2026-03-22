@@ -21,9 +21,7 @@ export interface DomainDrilldownData {
 export interface RiskBarDatum {
   category: FrailtyClassification;
   count: number;
-  percentage: number;
-  color: string;
-  [key: string]: string | number;
+  percentage?: number;
 }
 
 export interface HeatMapSerie {

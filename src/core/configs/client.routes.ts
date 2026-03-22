@@ -3,6 +3,7 @@ export const clientRoutes = {
     LOGIN: "/login",
     REGISTER: "/register",
     FORGOT_PASSWORD: "/forgot-password",
+    RESET_PASSWORD: "/reset-password",
   },
 
   DASHBOARD: {
