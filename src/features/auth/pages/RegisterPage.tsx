@@ -12,6 +12,7 @@ import type { RegisterPayload } from "../types";
 import { useRegisterAndLogin } from "../hooks/useRegisterAndLogin";
 import { Bounce, toast } from "react-toastify";
 import { getErrorMessage } from "../utils/error";
+import { useScreenInfo } from "@/core/hooks/useScreenInfo";
 
 interface FormData {
   name: string;
@@ -22,12 +23,15 @@ interface FormData {
 
 export default function RegisterPage() {
   const router = useNavigate();
+  const { isMobile, isShortHeight } = useScreenInfo();
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
     ocupacao: "",
     password: "",
   });
+
+  const useCompactLayout = isMobile || isShortHeight;
 
   const { mutateAsync: registerAndLogin, isPending } = useRegisterAndLogin();
 
@@ -105,19 +109,33 @@ export default function RegisterPage() {
     <Box
       display="flex"
       justify="center"
-      align="center"
-      className="min-h-screen p-4 min-w-[80%]"
+      align={useCompactLayout ? "flex-start" : "center"}
+      className="min-h-[100dvh] w-full p-3 sm:p-4"
     >
       <Box
-        className="w-full max-w-2xl overflow-hidden rounded-2xl border bg-background/80 shadow-2xl backdrop-blur"
+        className={`w-full max-w-2xl overflow-hidden border bg-background/80 backdrop-blur ${
+          useCompactLayout
+            ? "max-h-[calc(100dvh-1.5rem)] rounded-xl shadow-xl"
+            : "rounded-2xl shadow-2xl"
+        }`}
         display="flex"
         direction="column"
       >
-        <Box className="p-6 md:p-10">
+        <Box
+          className={useCompactLayout ? "overflow-y-auto p-4" : "p-6 md:p-10"}
+        >
           {/* Header do Formulário */}
-          <Box display="flex" direction="column" gap={8}>
-            <Box display="flex" justify="space-between" align="center">
-              <Typography variant="h2" className="text-foreground">
+          <Box display="flex" direction="column" gap={useCompactLayout ? 6 : 8}>
+            <Box
+              display="flex"
+              justify="space-between"
+              align={useCompactLayout ? "flex-start" : "center"}
+              className={useCompactLayout ? "flex-col gap-2" : ""}
+            >
+              <Typography
+                variant="h2"
+                className={`text-foreground ${useCompactLayout ? "text-2xl" : ""}`}
+              >
                 Cadastro de Responsável
               </Typography>
               <a href="/login" className="text-sm text-primary hover:underline">
@@ -130,25 +148,14 @@ export default function RegisterPage() {
             </Typography>
           </Box>
 
-          <Separator className="my-6" />
+          <Separator className={useCompactLayout ? "my-4" : "my-6"} />
 
           {/* Form - Somente campos de Responsável */}
-          <form className="grid gap-6" onSubmit={handleSubmit}>
+          <form
+            className={useCompactLayout ? "grid gap-4" : "grid gap-6"}
+            onSubmit={handleSubmit}
+          >
             <Box className="grid gap-4 md:grid-cols-1">
-              <Box display="flex" direction="column" gap={6}>
-                <Label htmlFor="name">Nome Completo</Label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="Seu nome completo"
-                  required
-                />
-              </Box>
-            </Box>
-
-            <Box className="grid gap-4 md:grid-cols-2">
               <Box display="flex" direction="column" gap={6}>
                 <Label htmlFor="email">E-mail Profissional/Pessoal</Label>
                 <Input
@@ -158,6 +165,20 @@ export default function RegisterPage() {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="seu@email.com"
+                  required
+                />
+              </Box>
+            </Box>
+
+            <Box className="grid gap-4 md:grid-cols-2">
+              <Box display="flex" direction="column" gap={6}>
+                <Label htmlFor="name">Nome Completo</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Seu nome completo"
                   required
                 />
               </Box>
