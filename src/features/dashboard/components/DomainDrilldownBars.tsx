@@ -11,9 +11,6 @@ type ViewLevel = {
   parentId: string | null;
 };
 
-type SortKey = "label" | "compliance" | "total";
-type SortDir = "asc" | "desc";
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 /**
@@ -272,8 +269,6 @@ export function DomainDrilldownBars({
     { data: fullData, title: "Visão Geral por Domínio", parentId: null },
   ]);
   const [search, setSearch] = useState("");
-  const [sortKey, setSortKey] = useState<SortKey>("compliance");
-  const [sortDir, setSortDir] = useState<SortDir>("asc");
 
   const currentView = history[history.length - 1];
   const isTopLevel = history.length === 1;
@@ -292,17 +287,8 @@ export function DomainDrilldownBars({
       list = list.filter((n) => n.label.toLowerCase().includes(q));
     }
 
-    list.sort((a, b) => {
-      let cmp = 0;
-      if (sortKey === "label") cmp = a.label.localeCompare(b.label);
-      else if (sortKey === "compliance") cmp = simRate(a) - simRate(b);
-      else if (sortKey === "total")
-        cmp = a.counts.sim + a.counts.nao - (b.counts.sim + b.counts.nao);
-      return sortDir === "asc" ? cmp : -cmp;
-    });
-
     return list;
-  }, [currentView, search, sortKey, sortDir]);
+  }, [currentView, search]);
 
   const handleDrillDown = (node: DrilldownNode) => {
     if (!node.children?.length) return;
@@ -319,28 +305,6 @@ export function DomainDrilldownBars({
       setSearch("");
     }
   };
-
-  const toggleSort = (key: SortKey) => {
-    if (sortKey === key) {
-      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-    } else {
-      setSortKey(key);
-      setSortDir("asc");
-    }
-  };
-
-  const SortBtn = ({ k, label }: { k: SortKey; label: string }) => (
-    <button
-      onClick={() => toggleSort(k)}
-      className={`text-xs px-2 py-1 rounded-md transition-colors ${
-        sortKey === k
-          ? "bg-primary-soft text-primary font-semibold"
-          : "text-muted-foreground hover:bg-muted"
-      }`}
-    >
-      {label} {sortKey === k ? (sortDir === "asc" ? "↑" : "↓") : ""}
-    </button>
-  );
 
   const overallRisk = riskLevel(stats.rate);
 
