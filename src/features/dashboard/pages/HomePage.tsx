@@ -48,7 +48,7 @@ export default function HomePage() {
 
       <div
         className={`sticky z-30 bg-background/95 backdrop-blur-sm py-2 -mx-2 px-2 ${
-          isCompact ? "top-0" : "top-15"
+          isCompact ? "top-15" : "top-15"
         }`}
       >
         <FilterToolbar
@@ -74,11 +74,7 @@ export default function HomePage() {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-2">
-        <DomainHeatmap
-          data={charts.heatmap}
-          stratification={stratification}
-          isCompact={isCompact}
-        />
+        <DomainHeatmap data={charts.heatmap} stratification={stratification} />
         <ComorbidityScatter data={charts.scatter} isCompact={isCompact} />
       </div>
 

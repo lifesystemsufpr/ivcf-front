@@ -24,25 +24,16 @@ const dimensionLabel: Record<AggregationDimension, string> = {
 type DomainHeatmapProps = {
   data: { id: string; data: { x: string; y: number }[] }[];
   stratification: AggregationDimension;
-  isCompact?: boolean;
 };
 
-export function DomainHeatmap({
-  data,
-  stratification,
-  isCompact = false,
-}: DomainHeatmapProps) {
+export function DomainHeatmap({ data, stratification }: DomainHeatmapProps) {
   const chartRef = useRef<HTMLDivElement | null>(null);
 
   const hasData = data.some((d) => d.data.length > 0);
 
   return (
     <Card className="h-full">
-      <CardHeader
-        className={`flex items-start justify-between gap-4 ${
-          isCompact ? "flex-col" : "flex-row"
-        }`}
-      >
+      <CardHeader className="flex flex-row items-start justify-between gap-4">
         <div>
           <Typography
             variant="caption"
@@ -77,57 +68,49 @@ export function DomainHeatmap({
         </div>
       </CardHeader>
       <CardContent>
-        <div ref={chartRef} className={isCompact ? "h-80" : "h-105"}>
+        <div ref={chartRef} className="h-105">
           {hasData ? (
             <ResponsiveHeatMap
               data={data}
               colors={heatmapColors}
               theme={nivoTheme}
-              enableLabels={!isCompact}
+              enableLabels={true}
               label={(cell) => cell.value?.toFixed(1) ?? ""}
               labelTextColor={(cell) => {
                 return (cell.value ?? 0) > 2 ? "#ffffff" : "#333333";
               }}
-              margin={
-                isCompact
-                  ? { top: 20, right: 20, bottom: 55, left: 70 }
-                  : { top: 40, right: 80, bottom: 80, left: 120 }
-              }
+              margin={{ top: 40, right: 80, bottom: 80, left: 120 }}
               valueFormat=".2f"
               axisTop={null}
               axisRight={null}
               axisBottom={{
-                tickRotation: isCompact ? -35 : -20,
+                tickRotation: -20,
                 legend: dimensionLabel[stratification],
-                legendOffset: isCompact ? 40 : 46,
+                legendOffset: 46,
                 legendPosition: "middle",
               }}
               axisLeft={{
                 legend: "Domínios",
-                legendOffset: isCompact ? -56 : -90,
+                legendOffset: -90,
                 legendPosition: "middle",
               }}
-              legends={
-                isCompact
-                  ? []
-                  : [
-                      {
-                        anchor: "bottom",
-                        translateX: 0,
-                        translateY: 50,
-                        length: 240,
-                        thickness: 10,
-                        direction: "row",
-                        tickPosition: "after",
-                        tickSize: 6,
-                        tickSpacing: 4,
-                        tickOverlap: false,
-                        title: "Score médio →",
-                        titleAlign: "start",
-                        titleOffset: 4,
-                      },
-                    ]
-              }
+              legends={[
+                {
+                  anchor: "bottom",
+                  translateX: 0,
+                  translateY: 50,
+                  length: 240,
+                  thickness: 10,
+                  direction: "row",
+                  tickPosition: "after",
+                  tickSize: 6,
+                  tickSpacing: 4,
+                  tickOverlap: false,
+                  title: "Score médio →",
+                  titleAlign: "start",
+                  titleOffset: 4,
+                },
+              ]}
               emptyColor="#f5f5f5"
               inactiveOpacity={0.25}
               hoverTarget="cell"
