@@ -150,11 +150,11 @@ export default function ParticipantForm({
       neighborhood: values.address.neighborhood,
       city: values.address.city,
       state: values.address.state,
+      gender: values.gender,
       user: {
         fullName: values.fullName,
         email: values.email,
         phone: values.phone,
-        gender: values.gender,
         active: true,
       },
     };

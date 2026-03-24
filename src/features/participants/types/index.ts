@@ -42,11 +42,11 @@ export interface ParticipantRequest {
   neighborhood: string;
   city: string;
   state: string;
+  gender: Gender;
   user: {
     fullName: string;
     email: string;
     phone: string;
-    gender: Gender;
     active: boolean;
   };
 }
