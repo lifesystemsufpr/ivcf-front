@@ -5,13 +5,17 @@ import { Card, CardContent } from "@/core/components/ui/Card";
 import { Box, Typography } from "@/core/components/ui";
 import { calcPercentage } from "../utils/transforms";
 
+type RiskAmountBarProps = {
+  data: RiskBarDatum[];
+  total: number;
+  isCompact?: boolean;
+};
+
 export function RiskAmountBar({
   data,
   total,
-}: {
-  data: RiskBarDatum[];
-  total: number;
-}) {
+  isCompact = false,
+}: RiskAmountBarProps) {
   const dataWithPercentages = data.map((item) => ({
     ...item,
     percentage: calcPercentage(item.count, total),
@@ -28,13 +32,17 @@ export function RiskAmountBar({
         </Typography>
 
         {/* container que ocupa o resto */}
-        <div className="flex-1 w-full min-h-75">
+        <div className={`flex-1 w-full ${isCompact ? "min-h-60" : "min-h-75"}`}>
           <ResponsiveBar
             data={dataWithPercentages}
             keys={["percentage"]}
             indexBy="category"
             layout="vertical"
-            margin={{ top: 20, right: 20, bottom: 40, left: 50 }}
+            margin={
+              isCompact
+                ? { top: 12, right: 10, bottom: 30, left: 35 }
+                : { top: 20, right: 20, bottom: 40, left: 50 }
+            }
             padding={0.3}
             colors={({ data }) => riskColorMap[data.category]}
             theme={nivoTheme}
@@ -46,9 +54,10 @@ export function RiskAmountBar({
             }}
             axisLeft={{
               tickSize: 0,
-              tickPadding: 5,
+              tickPadding: isCompact ? 2 : 5,
               format: (value) => `${value}%`,
             }}
+            enableLabel={!isCompact}
             label={({ data }) => `${data.percentage}%`}
             labelSkipHeight={12}
             labelTextColor="#ffffff"

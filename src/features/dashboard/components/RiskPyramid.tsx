@@ -21,14 +21,19 @@ export type RiskPyramidProps = {
     "Pré-frágil": number;
     Frágil: number;
   }[];
+  isCompact?: boolean;
 };
 
-export function RiskPyramid({ data }: RiskPyramidProps) {
+export function RiskPyramid({ data, isCompact = false }: RiskPyramidProps) {
   const chartRef = useRef<HTMLDivElement | null>(null);
   const normalizedData = normalizeToPercentage(data);
   return (
     <Card className="h-full">
-      <CardHeader className="flex flex-row items-start justify-between gap-4">
+      <CardHeader
+        className={`flex items-start justify-between gap-4 ${
+          isCompact ? "flex-col" : "flex-row"
+        }`}
+      >
         <div>
           <Typography
             variant="caption"
@@ -62,7 +67,7 @@ export function RiskPyramid({ data }: RiskPyramidProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <div ref={chartRef} className="h-95">
+        <div ref={chartRef} className={isCompact ? "h-75" : "h-95"}>
           {data.length === 0 ? (
             <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
               Sem dados para os filtros atuais.
@@ -75,33 +80,41 @@ export function RiskPyramid({ data }: RiskPyramidProps) {
               layout="horizontal"
               colors={({ id }) => riskColorMap[id as keyof typeof riskColorMap]}
               theme={nivoTheme}
-              margin={{ top: 30, right: 30, bottom: 60, left: 120 }}
+              margin={
+                isCompact
+                  ? { top: 20, right: 10, bottom: 45, left: 75 }
+                  : { top: 30, right: 30, bottom: 60, left: 120 }
+              }
               padding={0.3}
               innerPadding={4}
               valueFormat=".1f"
               enableGridX
               axisBottom={{
                 legend: "% na coorte",
-                legendOffset: 50,
+                legendOffset: isCompact ? 38 : 50,
                 legendPosition: "middle",
               }}
               axisLeft={{
                 legend: "Estrato",
-                legendOffset: -110,
+                legendOffset: isCompact ? -64 : -110,
                 legendPosition: "middle",
               }}
-              legends={[
-                {
-                  dataFrom: "keys",
-                  anchor: "bottom",
-                  direction: "row",
-                  translateX: 0,
-                  translateY: 40,
-                  itemWidth: 100,
-                  itemHeight: 14,
-                  itemDirection: "left-to-right",
-                },
-              ]}
+              legends={
+                isCompact
+                  ? []
+                  : [
+                      {
+                        dataFrom: "keys",
+                        anchor: "bottom",
+                        direction: "row",
+                        translateX: 0,
+                        translateY: 40,
+                        itemWidth: 100,
+                        itemHeight: 14,
+                        itemDirection: "left-to-right",
+                      },
+                    ]
+              }
               labelSkipWidth={12}
               labelSkipHeight={12}
               tooltip={({ id, value, indexValue }) => (

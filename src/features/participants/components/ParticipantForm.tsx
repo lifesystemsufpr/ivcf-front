@@ -198,6 +198,17 @@ export default function ParticipantForm({
         <Box display="flex" direction="column" gap={4}>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={values.email}
+                onChange={(e) => updateField("email", e.target.value)}
+                placeholder="email@exemplo.com"
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="fullName">Nome completo</Label>
               <Input
                 id="fullName"
@@ -231,17 +242,6 @@ export default function ParticipantForm({
                 <option value="MALE">Masculino</option>
                 <option value="FEMALE">Feminino</option>
               </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={values.email}
-                onChange={(e) => updateField("email", e.target.value)}
-                placeholder="email@exemplo.com"
-              />
             </div>
 
             <div className="space-y-2">

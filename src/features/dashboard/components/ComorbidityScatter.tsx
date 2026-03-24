@@ -27,9 +27,13 @@ type ComorbidityScatterProps = {
       date: string;
     }[];
   }[];
+  isCompact?: boolean;
 };
 
-export function ComorbidityScatter({ data }: ComorbidityScatterProps) {
+export function ComorbidityScatter({
+  data,
+  isCompact = false,
+}: ComorbidityScatterProps) {
   const chartRef = useRef<HTMLDivElement | null>(null);
   const useCanvas =
     data.reduce((acc, series) => acc + series.data.length, 0) > 5000;
@@ -51,7 +55,11 @@ export function ComorbidityScatter({ data }: ComorbidityScatterProps) {
 
   return (
     <Card className="h-full">
-      <CardHeader className="flex flex-row items-start justify-between gap-4">
+      <CardHeader
+        className={`flex items-start justify-between gap-4 ${
+          isCompact ? "flex-col" : "flex-row"
+        }`}
+      >
         <div>
           <Typography
             variant="caption"
@@ -85,14 +93,18 @@ export function ComorbidityScatter({ data }: ComorbidityScatterProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <div ref={chartRef} className="h-105">
+        <div ref={chartRef} className={isCompact ? "h-80" : "h-105"}>
           <ChartComponent
             data={data}
             theme={nivoTheme}
             colors={(series) =>
               series.serieId === "Masculino" ? "#38bdf8" : "#a855f7"
             }
-            margin={{ top: 30, right: 40, bottom: 60, left: 70 }}
+            margin={
+              isCompact
+                ? { top: 20, right: 20, bottom: 45, left: 50 }
+                : { top: 30, right: 40, bottom: 60, left: 70 }
+            }
             blendMode="multiply"
             nodeSize={({ data }) => {
               if (data.size) return data.size;
@@ -105,13 +117,13 @@ export function ComorbidityScatter({ data }: ComorbidityScatterProps) {
             }}
             axisBottom={{
               legend: "Idade (anos)",
-              legendOffset: 42,
+              legendOffset: isCompact ? 32 : 42,
               legendPosition: "middle",
               tickSize: 6,
             }}
             axisLeft={{
               legend: "Score total IVCF-20",
-              legendOffset: -56,
+              legendOffset: isCompact ? -44 : -56,
               legendPosition: "middle",
               tickSize: 6,
             }}
@@ -125,16 +137,20 @@ export function ComorbidityScatter({ data }: ComorbidityScatterProps) {
               min: 0,
               max: maxScore + 5,
             }}
-            legends={[
-              {
-                anchor: "bottom-right",
-                direction: "column",
-                translateX: 30,
-                translateY: 0,
-                itemWidth: 80,
-                itemHeight: 18,
-              },
-            ]}
+            legends={
+              isCompact
+                ? []
+                : [
+                    {
+                      anchor: "bottom-right",
+                      direction: "column",
+                      translateX: 30,
+                      translateY: 0,
+                      itemWidth: 80,
+                      itemHeight: 18,
+                    },
+                  ]
+            }
             tooltip={({ node }) => (
               <Box
                 display="flex"
