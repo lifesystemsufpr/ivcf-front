@@ -34,7 +34,7 @@ export function useCreateParticipant() {
             fullName: newParticipant.user.fullName,
             email: newParticipant.user.email,
             phone: newParticipant.user.phone,
-            gender: newParticipant.user.gender,
+            gender: newParticipant.gender,
             active: newParticipant.user.active,
             birthday: newParticipant.birthday,
             weight: newParticipant.weight,
