@@ -1,6 +1,12 @@
 import { apiRoutes } from "@/core/configs/api.routes";
 import { http } from "@/core/services/client.service";
-import type { ParticipantRequest, ParticipantResponse } from "../types";
+import type { ApiError } from "@/core/services/client.service";
+import type {
+  CheckEmailResponse,
+  LinkParticipantRequest,
+  ParticipantRequest,
+  ParticipantResponse,
+} from "../types";
 import type { SuccessResponse } from "@/core/types";
 import type { ParticipantEvolutionData } from "../features/indicators/types";
 
@@ -51,5 +57,35 @@ export class ParticipantsService {
       apiRoutes.PARTICIPANTS.INDICATORS({ id }),
     );
     return resp;
+  }
+
+  static async checkEmailExists(email: string) {
+    try {
+      const resp = await http.get<CheckEmailResponse>(
+        apiRoutes.PARTICIPANTS.CHECK_EMAIL({ email }),
+      );
+      return resp;
+    } catch (error) {
+      if ((error as ApiError)?.status === 404) {
+        return { participantId: null };
+      }
+      throw error;
+    }
+  }
+
+  static async linkParticipantToProfessional({
+    participantId,
+  }: LinkParticipantRequest) {
+    try {
+      const resp = await http.post(apiRoutes.PROFESSIONALS.LINK_PARTICIPANT, {
+        participantId,
+      });
+      return resp;
+    } catch (error) {
+      if ((error as ApiError)?.status === 404) {
+        throw new Error("Participante não encontrado");
+      }
+      throw error;
+    }
   }
 }

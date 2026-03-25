@@ -82,3 +82,11 @@ export interface ParticipantResponse {
 
   hasRelations: boolean;
 }
+
+export interface CheckEmailResponse {
+  participantId: string | null;
+}
+
+export interface LinkParticipantRequest {
+  participantId: string;
+}

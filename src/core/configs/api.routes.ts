@@ -14,6 +14,12 @@ export const apiRoutes = {
     LIST: `${API_URL_BASE}/participant`,
     INDICATORS: ({ id }: { id: string }) =>
       `/questionnaires/participant/${id}/evolution`,
+    CHECK_EMAIL: ({ email }: { email: string }) =>
+      `${API_URL_BASE}/participant/check-email/${email}`,
+  },
+
+  PROFESSIONALS: {
+    LINK_PARTICIPANT: `${API_URL_BASE}/health-professional/link-participant`,
   },
 
   ASSESSMENTS: {

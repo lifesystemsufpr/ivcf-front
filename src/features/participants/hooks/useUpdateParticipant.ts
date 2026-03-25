@@ -41,7 +41,7 @@ export function useUpdateParticipant() {
             fullName: newParticipantData.user.fullName,
             email: newParticipantData.user.email,
             phone: newParticipantData.user.phone,
-            gender: newParticipantData.user.gender,
+            gender: newParticipantData.gender,
             active: newParticipantData.user.active,
             birthday: newParticipantData.birthday,
             weight: newParticipantData.weight,
