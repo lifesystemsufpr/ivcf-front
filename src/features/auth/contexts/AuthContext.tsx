@@ -14,6 +14,7 @@ import {
   setStoredTokens,
 } from "@/core/services/client.service";
 import { decodeJWT, isTokenExpired } from "../utils/decoder";
+import { useQueryClient } from "@tanstack/react-query";
 
 export type AuthUser = {
   id: string;
@@ -45,6 +46,7 @@ export type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
@@ -102,6 +104,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const logout = useCallback(() => {
+    queryClient.cancelQueries();
+    queryClient.clear();
     setUser(null);
     setAccessToken(null);
     setRefreshToken(null);
