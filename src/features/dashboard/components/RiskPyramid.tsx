@@ -39,7 +39,7 @@ export function RiskPyramid({ data, isCompact = false }: RiskPyramidProps) {
             variant="caption"
             className="text-primary font-medium uppercase mb-2"
           >
-            Pirâmide de risco
+            Risco por Idade
           </Typography>
           <Typography variant="caption">
             Percentual de Robusto → Pré-Frágil → Frágil em cada estrato.
