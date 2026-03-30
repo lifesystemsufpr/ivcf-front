@@ -13,7 +13,7 @@ export function SummaryStats({ summary }: SummaryStatsProps) {
     <div className="grid gap-3 md:grid-cols-3 xl:grid-cols-4">
       <Card className="shadow-sm">
         <CardContent className="p-4">
-          <Typography variant="caption">Total na coorte</Typography>
+          <Typography variant="caption">Total de Participantes</Typography>
           <Typography variant="h3">{total}</Typography>
         </CardContent>
       </Card>

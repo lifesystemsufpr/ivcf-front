@@ -247,7 +247,7 @@ function QuestionRow({
               Não: <b className="text-foreground">{node.counts.nao}</b>
             </span>
             <span className={`ml-auto font-semibold ${risk.color}`}>
-              {(rate * 100).toFixed(0)}% não-conformidade
+              {(rate * 100).toFixed(0)}% indicam fragilidade
             </span>
           </div>
         </div>
@@ -339,7 +339,7 @@ export function DomainDrilldownBars({
         {/* Stats pills */}
         <div className="flex flex-wrap gap-2">
           <StatPill
-            label="Não-conformidade"
+            label="Indicam Fragilidade"
             value={`${(stats.rate * 100).toFixed(1)}%`}
             highlight
           />
