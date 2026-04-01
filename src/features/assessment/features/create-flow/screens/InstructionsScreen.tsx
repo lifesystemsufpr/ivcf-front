@@ -37,7 +37,7 @@ export default function InstructionsScreen({
   const canStart = Boolean(selectedLocalId);
 
   return (
-    <Box className="max-h-screen flex flex-col">
+    <Box className="h-[90vh] flex align-middle justify-center flex-col">
       {/* Conteúdo Branco Arredondado */}
       <Box className="max-w-2xl mx-auto bg-popover rounded-[2.5rem] shadow-xl p-8 md:p-12 flex flex-col gap-8">
         <Typography variant="h3" className="text-3xl font-bold mb-1">

@@ -123,8 +123,6 @@ export default function QuizScreen() {
       return;
     }
 
-    console.log(user);
-
     if (!user?.id) {
       setErrorMessage("Usuário não autenticado. Faça login novamente.");
       return;
@@ -163,7 +161,7 @@ export default function QuizScreen() {
 
   if (isLoadingStructure) {
     return (
-      <Box className="min-h-screen p-6 flex items-center justify-center">
+      <Box className="h-[90vh] p-6 flex items-center justify-center">
         <Card className="w-full max-w-5xl" padding="lg">
           <CardContent className="p-6">
             <Typography variant="h3">Carregando questionário...</Typography>
@@ -175,7 +173,7 @@ export default function QuizScreen() {
 
   if (structureError || !questionnaireStructure || questions.length === 0) {
     return (
-      <Box className="min-h-screen p-6 flex items-center justify-center">
+      <Box className="h-[90vh] p-6 flex items-center justify-center">
         <Card className="w-full max-w-5xl" padding="lg">
           <CardContent className="p-6">
             <Alert className="border-destructive bg-destructive/10 text-destructive">
@@ -194,7 +192,7 @@ export default function QuizScreen() {
   }
 
   return (
-    <Box className="min-h-screen p-6 flex items-center justify-center">
+    <Box className="h-[90vh] p-6 flex items-center justify-center">
       <Card className="w-full max-w-5xl" padding="lg">
         <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between p-2">
           <div>

@@ -225,7 +225,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             aria-describedby={helperId}
             aria-invalid={status === "error" || undefined}
             className={cn(
-              "flex-1 min-w-0 bg-transparent outline-none",
+              "flex-1 min-w-0 bg-transparent outline-none text-foreground",
               "placeholder:text-foreground-subtle",
               "disabled:cursor-not-allowed",
               className,

@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Input,
   Label,
   Separator,
   Typography,
@@ -67,14 +68,11 @@ export default function LoginPage() {
         >
           <Box display="flex" direction="column" gap={6}>
             <Label htmlFor="email">Email</Label>
-            <input
+            <Input
               type="email"
               id="email"
               name="email"
               placeholder="seu.email@exemplo.com"
-              className="w-full h-11 px-3 rounded-md border border-border bg-background text-sm
-                         focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
-                         transition"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               required
@@ -83,14 +81,11 @@ export default function LoginPage() {
 
           <Box display="flex" direction="column" gap={6}>
             <Label htmlFor="password">Senha</Label>
-            <input
+            <Input
               type="password"
               id="password"
               name="password"
               placeholder="Digite sua senha"
-              className="w-full h-11 px-3 rounded-md border border-border bg-background text-sm
-                         focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
-                         transition"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               onKeyDown={(e) => {
