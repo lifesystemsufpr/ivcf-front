@@ -24,7 +24,10 @@ export default function NavBar({ open, onClose }: NavBarProps) {
       <Box display="flex" direction="column" gap={10} my={10}>
         <Button
           variant={activeRoute === "/" ? "secondary" : "default"}
-          onClick={() => router("/")}
+          onClick={() => {
+            router("/");
+            onClose();
+          }}
         >
           Home
         </Button>
@@ -34,7 +37,10 @@ export default function NavBar({ open, onClose }: NavBarProps) {
               ? "secondary"
               : "default"
           }
-          onClick={() => router(clientRoutes.PARTICIPANTS.LIST)}
+          onClick={() => {
+            router(clientRoutes.PARTICIPANTS.LIST);
+            onClose();
+          }}
         >
           Participantes
         </Button>
@@ -42,7 +48,10 @@ export default function NavBar({ open, onClose }: NavBarProps) {
           variant={
             activeRoute === clientRoutes.IVCF.LIST ? "secondary" : "default"
           }
-          onClick={() => router(clientRoutes.IVCF.LIST)}
+          onClick={() => {
+            router(clientRoutes.IVCF.LIST);
+            onClose();
+          }}
         >
           Avaliações
         </Button>

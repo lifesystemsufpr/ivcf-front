@@ -8,6 +8,7 @@ import {
 } from "@nivo/line";
 import type { IVCF_Assessment, IVCF_DomainScores } from "../types";
 import { nivoTheme } from "@/features/dashboard/utils/transforms";
+import { Typography } from "@/core/components/ui/Typography";
 
 type DomainKey = keyof IVCF_DomainScores;
 
@@ -229,106 +230,127 @@ export function MultipleLineChart({
   }, [visibleDomains, sortedAssessments, colorsByLabel]);
 
   const hasData = series.some((s) => s.data.length > 0);
+  const chartHeight = Math.max(height - 108, 240);
 
   return (
-    <div className="w-full bg-gray-200 p-5 rounded-lg" style={{ height }}>
-      {/* Toggle legend */}
-      <div className="flex flex-wrap gap-2 mb-3">
-        {activeDomains.map((domain) => {
-          const isVisible = !hiddenLabels.has(domain.label);
-          const color = colorsByLabel[domain.label];
-          return (
-            <button
-              key={domain.key}
-              onClick={() => toggleLabel(domain.label)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "3px 10px",
-                borderRadius: 9999,
-                border: `1.5px solid ${isVisible ? color : "#d1d5db"}`,
-                backgroundColor: isVisible ? `${color}18` : "transparent",
-                cursor: "pointer",
-                fontSize: 12,
-                fontWeight: 500,
-                color: isVisible ? color : "#9ca3af",
-                transition: "all 0.15s ease",
-              }}
-            >
-              <span
+    <div className="w-full rounded-lg bg-gray-200 p-5" style={{ height }}>
+      <div className="mb-3 space-y-2">
+        <div>
+          <Typography variant="small" className="text-muted-foreground">
+            Evolução por domínio
+          </Typography>
+          <h3 className="text-lg font-semibold text-gray-900">
+            Comparativo das avaliações por domínio
+          </h3>
+        </div>
+
+        <p className="text-sm text-gray-600">
+          A pontuação é normalizada para uma escala de 0 a 10. Clique nos
+          domínios para mostrar ou ocultar cada linha.
+        </p>
+
+        <div className="flex flex-wrap gap-2">
+          {activeDomains.map((domain) => {
+            const isVisible = !hiddenLabels.has(domain.label);
+            const color = colorsByLabel[domain.label];
+            return (
+              <button
+                key={domain.key}
+                onClick={() => toggleLabel(domain.label)}
                 style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: "50%",
-                  backgroundColor: isVisible ? color : "#d1d5db",
-                  flexShrink: 0,
-                  transition: "background-color 0.15s ease",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "3px 10px",
+                  borderRadius: 9999,
+                  border: `1.5px solid ${isVisible ? color : "#d1d5db"}`,
+                  backgroundColor: isVisible ? `${color}18` : "transparent",
+                  cursor: "pointer",
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: isVisible ? color : "#9ca3af",
+                  transition: "all 0.15s ease",
                 }}
-              />
-              {domain.label}
-            </button>
-          );
-        })}
+              >
+                <span
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: "50%",
+                    backgroundColor: isVisible ? color : "#d1d5db",
+                    flexShrink: 0,
+                    transition: "background-color 0.15s ease",
+                  }}
+                />
+                {domain.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {!hasData ? (
-        <div
-          className="flex items-center justify-center text-sm text-muted-foreground"
-          style={{ height: height - 60 }}
-        >
-          Sem dados para exibir.
-        </div>
-      ) : (
-        <ResponsiveLine
-          data={series}
-          theme={{
-            ...nivoTheme,
-            background: "transparent",
-            crosshair: {
-              line: {
-                stroke: "#94a3b8",
-                strokeWidth: 1,
-                strokeDasharray: "6 4",
+      <div style={{ height: chartHeight }}>
+        {!hasData ? (
+          <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+            Sem dados para exibir.
+          </div>
+        ) : (
+          <ResponsiveLine
+            data={series}
+            theme={{
+              ...nivoTheme,
+              background: "transparent",
+              crosshair: {
+                line: {
+                  stroke: "#94a3b8",
+                  strokeWidth: 1,
+                  strokeDasharray: "6 4",
+                },
               },
-            },
-          }}
-          margin={{ top: 10, right: 30, bottom: 50, left: 55 }}
-          xScale={{ type: "point" }}
-          // Fixed 0–10 scale on Y axis
-          yScale={{ type: "linear", min: 0, max: 10, stacked: false }}
-          yFormat=".1f"
-          curve="monotoneX"
-          enableGridX={false}
-          enableGridY
-          gridYValues={[0, 2, 4, 6, 8, 10]}
-          lineWidth={2.5}
-          enablePoints={false}
-          enableArea
-          areaOpacity={0.08}
-          enableSlices="x"
-          sliceTooltip={SliceTooltip}
-          colors={({ id }) => colorsByLabel[id as string]}
-          onClick={(item) => {
-            if ("points" in item) return;
-            const assessmentId = (item.data as unknown as PointExtraData)
-              .assessmentId;
-            if (assessmentId) {
-              onSelectAssessment?.(assessmentId);
-            }
-          }}
-          axisBottom={{
-            tickRotation: 0,
-            tickPadding: 10,
-          }}
-          axisLeft={{
-            tickSize: 0,
-            tickPadding: 12,
-            tickValues: [0, 2, 4, 6, 8, 10],
-            format: (v) => `${v}`,
-          }}
-        />
-      )}
+            }}
+            margin={{ top: 10, right: 30, bottom: 70, left: 70 }}
+            xScale={{ type: "point" }}
+            // Fixed 0–10 scale on Y axis
+            yScale={{ type: "linear", min: 0, max: 10, stacked: false }}
+            yFormat=".1f"
+            curve="monotoneX"
+            enableGridX={false}
+            enableGridY
+            gridYValues={[0, 2, 4, 6, 8, 10]}
+            lineWidth={2.5}
+            enablePoints={false}
+            enableArea
+            areaOpacity={0.08}
+            enableSlices="x"
+            sliceTooltip={SliceTooltip}
+            colors={({ id }) => colorsByLabel[id as string]}
+            onClick={(item) => {
+              if ("points" in item) return;
+              const assessmentId = (item.data as unknown as PointExtraData)
+                .assessmentId;
+              if (assessmentId) {
+                onSelectAssessment?.(assessmentId);
+              }
+            }}
+            axisBottom={{
+              tickRotation: 0,
+              tickPadding: 10,
+              legend: "Data da avaliação",
+              legendOffset: 46,
+              legendPosition: "middle",
+            }}
+            axisLeft={{
+              tickSize: 0,
+              tickPadding: 12,
+              tickValues: [0, 2, 4, 6, 8, 10],
+              format: (v) => `${v}`,
+              legend: "Pontuação normalizada (0–10)",
+              legendOffset: -56,
+              legendPosition: "middle",
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 }
