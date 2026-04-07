@@ -11,12 +11,13 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useLogin } from "../hooks/useLogin";
 import type { ApiError } from "@/core/services/client.service";
+import { toast } from "react-toastify";
 
 export default function LoginPage() {
   const router = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { mutateAsync: login, isPending, error } = useLogin();
+  const { mutateAsync: login, isPending } = useLogin();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +25,17 @@ export default function LoginPage() {
       await login({ email, password });
       router("/");
     } catch (err) {
-      console.error("Falha no login", err);
+      const message =
+        (err as ApiError).message || "Não foi possível fazer login.";
+      toast.error(message, {
+        position: "top-center",
+        autoClose: 2500,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "light",
+      });
     }
   };
 
@@ -106,14 +117,6 @@ export default function LoginPage() {
             </a>
           </Box>
         </Box>
-
-        {error && (
-          <Box className="p-3 border border-destructive/40 bg-destructive/10 rounded-md">
-            <Typography variant="body" className="text-destructive text-sm">
-              {(error as ApiError).message || "Não foi possível fazer login."}
-            </Typography>
-          </Box>
-        )}
 
         {/* Submit */}
         <Button
