@@ -36,6 +36,12 @@ export function BaseLayout() {
               onClick={() => setNavOpen(true)}
             />
 
+            <img
+              src="/logo.png"
+              alt="IVCF-20 Logo"
+              className="h-9 object-contain"
+            />
+
             <Dropdown
               trigger={({ open, toggle }) => (
                 <IconButton
