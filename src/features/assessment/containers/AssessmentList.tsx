@@ -1,4 +1,4 @@
-import { Box, Typography } from "@/core/components/ui";
+import { Box, Separator, Typography } from "@/core/components/ui";
 import type { UIEvent } from "react";
 import AssesmentCard from "../components/AssesmentCard";
 import { useAssessmentList } from "../contexts/AssessmentListContext";
@@ -26,6 +26,7 @@ export default function AssessmentList() {
     <Box
       display="flex"
       direction="column"
+      align="center"
       gap={8}
       my={4}
       onScroll={handleScroll}
@@ -36,8 +37,10 @@ export default function AssessmentList() {
                   [&::-webkit-scrollbar-thumb]:rounded-full
                   hover:[&::-webkit-scrollbar-thumb]:bg-slate-400"
     >
+      <Separator className="w-full my-2" />
+
       {isLoading && (
-        <Typography variant="small" color="secondary">
+        <Typography variant="h3" color="secondary">
           Carregando avaliações...
         </Typography>
       )}
@@ -47,19 +50,19 @@ export default function AssessmentList() {
       ))}
 
       {!isLoading && filteredAssessments.length === 0 && (
-        <Typography variant="small" color="secondary">
+        <Typography variant="h3" color="secondary">
           Nenhuma avaliação encontrada.
         </Typography>
       )}
 
       {isFetchingNextPage && (
-        <Typography variant="small" color="secondary">
+        <Typography variant="h4" color="secondary">
           Carregando mais avaliações...
         </Typography>
       )}
 
       {!hasNextPage && filteredAssessments.length > 0 && (
-        <Typography variant="small" color="secondary">
+        <Typography variant="h4" color="secondary">
           Você chegou ao fim da lista.
         </Typography>
       )}
