@@ -173,8 +173,7 @@ export function PatientListPage() {
           justify="space-between"
           align="center"
         >
-          <Typography variant="h4">Lista de Participantes</Typography>
-          <ParticipantAutocomplete />
+          <Typography variant="h1">Lista de Participantes</Typography>
         </Box>
         <Separator className="mt-3 mb-3" />
         <Box
@@ -187,7 +186,7 @@ export function PatientListPage() {
         >
           <ParticipantList />
         </Box>
-        <Box className="self-end radius-full absolute bottom-4 right-4">
+        <Box className="self-end radius-full absolute bottom-10 right-10">
           <IconButton
             variant="accent"
             icon={Plus}

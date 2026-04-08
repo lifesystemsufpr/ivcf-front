@@ -35,7 +35,7 @@ export function AssessmentListProvider({
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(5);
   const [appliedFilters, setAppliedFilters] = useState({
     participantName: "",
     startDate: "",

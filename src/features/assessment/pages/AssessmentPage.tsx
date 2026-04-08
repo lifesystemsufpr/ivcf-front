@@ -10,7 +10,7 @@ export function AssessmentPage() {
       <Box>
         <ListFilters />
         <AssessmentList />
-        <Box className="fixed self-end radius-full bottom-4 right-4">
+        <Box className="fixed self-end radius-full bottom-10 right-10">
           <NewAssessment />
         </Box>
       </Box>
