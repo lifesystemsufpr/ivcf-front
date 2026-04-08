@@ -42,8 +42,10 @@ export function DomainHeatmap({ data, stratification }: DomainHeatmapProps) {
   }, [data]);
 
   return (
-    <Card className="h-full">
-      <CardHeader className="flex flex-row items-start justify-between gap-4">
+    <Card className="group relative h-full overflow-hidden border border-border/70 bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+      <div className="absolute inset-x-0 top-0 h-1 bg-primary/70" />
+
+      <CardHeader className="flex flex-row items-start justify-between gap-4 pb-3 pt-6">
         <div>
           <Typography
             variant="caption"
@@ -77,8 +79,11 @@ export function DomainHeatmap({ data, stratification }: DomainHeatmapProps) {
           </Button>
         </div>
       </CardHeader>
-      <CardContent>
-        <div ref={chartRef} className="h-105">
+      <CardContent className="pt-0">
+        <div
+          ref={chartRef}
+          className="h-105 rounded-xl border border-border/60 bg-muted/20 p-2"
+        >
           {hasData ? (
             <ResponsiveHeatMap
               data={data}
@@ -127,7 +132,7 @@ export function DomainHeatmap({ data, stratification }: DomainHeatmapProps) {
               inactiveOpacity={0.25}
               hoverTarget="cell"
               tooltip={({ cell }) => (
-                <Box className="bg-background text-sm rounded p-3 w-40 shadow-md border">
+                <Box className="w-40 rounded-lg border border-border/60 bg-background p-3 text-sm shadow-md">
                   <div>
                     {/* Acessamos cell.data.x para pegar o valor real da string do eixo X */}
                     <strong>{dimensionLabel[stratification]}:</strong>{" "}

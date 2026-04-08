@@ -71,17 +71,26 @@ export function RiskAmountBar({
   };
 
   return (
-    <Card className="shadow-sm col-span-1 md:col-span-1 xl:col-span-1 flex flex-col">
-      <CardContent className="p-4 flex flex-col flex-1">
+    <Card className="group relative col-span-1 flex flex-col overflow-hidden border border-border/70 bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg md:col-span-1 xl:col-span-1">
+      <div className="absolute inset-x-0 top-0 h-1 bg-primary/70" />
+
+      <CardContent className="flex flex-1 flex-col p-5 pt-6">
         <Typography
           variant="caption"
-          className="text-primary font-medium uppercase mb-2"
+          className="mb-1 font-medium uppercase tracking-wide text-primary"
         >
           Distribuição de Risco
         </Typography>
+        <Typography variant="caption" className="text-muted-foreground">
+          Percentual por classificação clínica na amostra filtrada.
+        </Typography>
 
         {/* container que ocupa o resto */}
-        <div className={`flex-1 w-full ${isCompact ? "min-h-60" : "min-h-75"}`}>
+        <div
+          className={`mt-3 flex-1 w-full rounded-xl border border-border/60 bg-muted/20 p-2 ${
+            isCompact ? "min-h-60" : "min-h-75"
+          }`}
+        >
           <ResponsiveBar
             data={dataWithPercentages}
             keys={["percentage"]}
@@ -125,7 +134,7 @@ export function RiskAmountBar({
                 direction="column"
                 align="center"
                 p={5}
-                className="bg-background rounded w-30 border"
+                className="w-30 rounded-lg border border-border/60 bg-background shadow-md"
               >
                 <Typography color="secondary" variant="body">
                   {data.category}

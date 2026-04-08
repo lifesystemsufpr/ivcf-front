@@ -309,9 +309,15 @@ export function DomainDrilldownBars({
   const overallRisk = riskLevel(stats.rate);
 
   return (
-    <Card className={`flex flex-col ${isCompact ? "h-95" : "h-125"}`}>
+    <Card
+      className={`group relative flex flex-col overflow-hidden border border-border/70 bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg ${
+        isCompact ? "h-95" : "h-125"
+      }`}
+    >
+      <div className="absolute inset-x-0 top-0 h-1 bg-primary/70" />
+
       {/* ── Header ── */}
-      <CardHeader className="shrink-0 pb-2">
+      <CardHeader className="shrink-0 pb-2 pt-6">
         {/* Breadcrumb */}
         <div className="flex items-center gap-1.5 flex-wrap mb-2">
           {history.map((level, i) => (
@@ -356,13 +362,13 @@ export function DomainDrilldownBars({
       </CardHeader>
 
       {/* ── Content ── */}
-      <CardContent className="flex-1 overflow-y-auto px-4 pb-4">
+      <CardContent className="flex-1 overflow-y-auto px-4 pb-4 pt-2">
         {processedData.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
+          <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-border/60 bg-muted/20 text-sm text-muted-foreground">
             Nenhum resultado encontrado.
           </div>
         ) : isQuestionsView ? (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 rounded-xl border border-border/60 bg-muted/20 p-2">
             {processedData.map((node, i) => (
               <QuestionRow
                 key={node.id}
@@ -373,7 +379,7 @@ export function DomainDrilldownBars({
             ))}
           </div>
         ) : (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 rounded-xl border border-border/60 bg-muted/20 p-2">
             {processedData.map((node) => (
               <DomainRow
                 key={node.id}
@@ -388,7 +394,7 @@ export function DomainDrilldownBars({
 
       {/* ── Footer back button ── */}
       {history.length > 1 && (
-        <div className="shrink-0 px-4 pb-4 pt-1 border-t border-border">
+        <div className="shrink-0 border-t border-border/70 px-4 pb-4 pt-2">
           <Button
             variant="outline"
             size="sm"

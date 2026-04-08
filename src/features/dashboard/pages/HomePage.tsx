@@ -67,7 +67,7 @@ export default function HomePage() {
       <div className="grid gap-6 xl:grid-cols-2">
         <RiskAmountBar
           data={charts.riskBar}
-          total={summary.totalParticipants}
+          total={summary.totalEvaluated}
           isCompact={isCompact}
         />
         <RiskPyramid data={charts.riskPyramid} isCompact={isCompact} />

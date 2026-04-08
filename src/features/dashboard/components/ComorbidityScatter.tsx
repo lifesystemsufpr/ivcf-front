@@ -54,9 +54,11 @@ export function ComorbidityScatter({
   );
 
   return (
-    <Card className="h-full">
+    <Card className="group relative h-full overflow-hidden border border-border/70 bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+      <div className="absolute inset-x-0 top-0 h-1 bg-primary/70" />
+
       <CardHeader
-        className={`flex items-start justify-between gap-4 ${
+        className={`flex items-start justify-between gap-4 pb-3 pt-6 ${
           isCompact ? "flex-col" : "flex-row"
         }`}
       >
@@ -92,8 +94,13 @@ export function ComorbidityScatter({
           </Button>
         </div>
       </CardHeader>
-      <CardContent>
-        <div ref={chartRef} className={isCompact ? "h-80" : "h-105"}>
+      <CardContent className="pt-0">
+        <div
+          ref={chartRef}
+          className={`rounded-xl border border-border/60 bg-muted/20 p-2 ${
+            isCompact ? "h-80" : "h-105"
+          }`}
+        >
           <ChartComponent
             data={data}
             theme={nivoTheme}
@@ -157,7 +164,7 @@ export function ComorbidityScatter({
                 direction="column"
                 align="center"
                 p={5}
-                className="bg-background rounded w-35 border"
+                className="w-35 rounded-lg border border-border/60 bg-background shadow-md"
               >
                 <div className="font-semibold">Sexo: {node.data.sex}</div>
                 <div>Idade: {node.data.x} anos</div>
