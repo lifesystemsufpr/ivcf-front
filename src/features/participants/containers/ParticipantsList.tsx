@@ -2,7 +2,9 @@ import {
   Box,
   Button,
   Dialog,
+  type FilterState,
   Modal,
+  type SortState,
   Table,
   createColumn,
 } from "@/core/components/ui";
@@ -25,7 +27,12 @@ export default function ParticipantList() {
   const deleteParticipantMutation = useDeleteParticipant();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(8);
-  const { data } = useListParticipants({ page, pageSize });
+  const [sort, setSort] = useState<SortState>({
+    field: null,
+    direction: "asc",
+  });
+  const [filters, setFilters] = useState<FilterState>({});
+  const { data } = useListParticipants({ page, pageSize, sort, filters });
 
   const [participantToDelete, setParticipantToDelete] =
     useState<Participant | null>(null);
@@ -177,10 +184,23 @@ export default function ParticipantList() {
           total: data?.meta?.total ?? 0,
           page: data?.meta?.page ?? page,
           pageSize: data?.meta?.pageSize ?? pageSize,
+          sort,
+          filters,
           onPageChange: setPage,
           onPageSizeChange: (nextPageSize) => {
             setPage(1);
             setPageSize(nextPageSize);
+          },
+          onSortChange: (nextSort) => {
+            setPage(1);
+            setSort(nextSort);
+          },
+          onFilterChange: (field, value) => {
+            setPage(1);
+            setFilters((current) => ({
+              ...current,
+              [field]: value,
+            }));
           },
         }}
         getRowId={(row) => row.id ?? row.email}
