@@ -9,7 +9,8 @@ import type {
 } from "../types";
 import type { SuccessResponse } from "@/core/types";
 import type { ParticipantEvolutionData } from "../features/indicators/types";
-import type { FilterState, SortDirection } from "@/core/components/ui";
+import type { FilterState } from "@/core/components/ui";
+import type { SortDirection } from "@/core/components/ui/table/header/TableColumn";
 
 export type PaginationParams = {
   page?: number;

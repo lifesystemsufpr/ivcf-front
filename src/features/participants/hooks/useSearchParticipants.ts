@@ -11,7 +11,6 @@ interface UseSearchParticipantsOptions {
 
 export function useSearchParticipants({
   searchTerm = "",
-  debounceMs = 300,
 }: UseSearchParticipantsOptions = {}) {
   const { data, isLoading } = useQuery({
     queryKey: ["participants-search", searchTerm],

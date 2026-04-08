@@ -8,7 +8,6 @@ import {
   Separator,
   Typography,
 } from "@/core/components/ui";
-import ParticipantAutocomplete from "../components/ParticipantAutocomplete";
 import ParticipantForm from "../components/ParticipantForm";
 import { ParticipantProvider } from "../context/ParticipantContext";
 import ParticipantList from "../containers/ParticipantsList";
