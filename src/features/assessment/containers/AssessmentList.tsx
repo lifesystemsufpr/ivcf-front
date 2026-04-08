@@ -20,7 +20,7 @@ export default function AssessmentList() {
   const canNext = page < totalPages;
 
   return (
-    <Box display="flex" direction="column" gap={4} my={4}>
+    <Box display="flex" direction="column" gap={4} my={4} align="center">
       <Separator className="w-full" />
 
       {isLoading && (
@@ -31,12 +31,12 @@ export default function AssessmentList() {
 
       {!isLoading && filteredAssessments.length === 0 && (
         <Typography variant="h3" color="secondary">
-          Nenhuma avaliação encontrada.
+          Opssss. Nenhuma avaliação encontrada.
         </Typography>
       )}
 
       {filteredAssessments.length > 0 && (
-        <Box display="flex" direction="column" gap={4}>
+        <Box display="flex" direction="column" gap={4} className="w-full">
           <div className="space-y-3">
             {filteredAssessments.map((assessment) => (
               <AssesmentCard key={assessment.id} assessment={assessment} />

@@ -1,32 +1,87 @@
 import { Autocomplete, Input } from "@/core/components/ui";
-import { useParticipantContext } from "../context/ParticipantContext";
+import { useSearchParticipants } from "../hooks/useSearchParticipants";
 import type { Participant } from "../types";
+import { useCallback, useEffect, useState } from "react";
 
 interface ParticipantAutocompleteProps {
   onChange?: (value: Participant | null) => void;
   initialId?: string | null;
+  initialValue?: Participant | null;
   className?: string;
 }
 
 export default function ParticipantAutocomplete({
   onChange,
   initialId,
+  initialValue,
   className,
 }: ParticipantAutocompleteProps) {
-  const { participants } = useParticipantContext();
-  const value = participants.find((p) => p.id === initialId) || null;
+  const [searchTerm, setSearchTerm] = useState("");
+  const [inputValue, setInputValue] = useState(initialValue?.fullName ?? "");
+  const [value, setValue] = useState<Participant | null>(initialValue ?? null);
+
+  const { participants, isLoading } = useSearchParticipants({
+    searchTerm,
+  });
+
+  // Sincronizar com initialId/initialValue
+  useEffect(() => {
+    if (initialValue) {
+      setValue(initialValue);
+      setInputValue(initialValue.fullName);
+    } else if (initialId) {
+      const found = participants.find((p) => p.id === initialId);
+      if (found) {
+        setValue(found);
+        setInputValue(found.fullName);
+      }
+    }
+  }, [initialId, initialValue, participants]);
+
+  const handleInputChange = useCallback((newInputValue: string) => {
+    setInputValue(newInputValue);
+    setSearchTerm(newInputValue);
+  }, []);
+
+  const handleChange = useCallback(
+    (selectedParticipant: Participant | null) => {
+      setValue(selectedParticipant);
+      if (selectedParticipant) {
+        setInputValue(selectedParticipant.fullName);
+        setSearchTerm("");
+      } else {
+        setInputValue("");
+      }
+      onChange?.(selectedParticipant);
+    },
+    [onChange],
+  );
 
   return (
-    <Autocomplete
+    <Autocomplete<Participant>
       options={participants}
-      renderInput={(params) => (
-        <Input {...params} placeholder="Pesquise um participante" />
-      )}
-      getOptionLabel={(option) => option.fullName}
-      onChange={(value: Participant | null) => {
-        onChange?.(value);
-      }}
       value={value}
+      onChange={handleChange}
+      inputValue={inputValue}
+      onInputChange={handleInputChange}
+      loading={isLoading}
+      getOptionLabel={(option) => option.fullName}
+      isOptionEqualToValue={(a, b) => a.id === b.id}
+      renderInput={(params) => (
+        <Input
+          {...params}
+          placeholder="Pesquise um participante por nome..."
+          disabled={params.disabled}
+        />
+      )}
+      renderOption={(option) => (
+        <div className="flex flex-col">
+          <span className="font-medium">{option.fullName}</span>
+          <span className="text-xs text-muted-foreground">{option.email}</span>
+        </div>
+      )}
+      noOptionsText="Nenhum participante encontrado"
+      loadingText="Buscando participantes..."
       className={className}
     />
   );
