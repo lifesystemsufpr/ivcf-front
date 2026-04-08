@@ -12,7 +12,7 @@ import {
 import { Box } from "@/core/components/ui";
 import { normalizeToPercentage } from "../utils/normalize";
 
-const keys = ["Frágil", "Pré-frágil", "Robusto"] as const;
+const keys = ["Robusto", "Pré-frágil", "Frágil"] as const;
 
 export type RiskPyramidProps = {
   data: {

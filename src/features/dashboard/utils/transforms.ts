@@ -24,41 +24,153 @@ export const ageBrackets = [
 ];
 
 export const nivoTheme = {
+  // Cor base herdada por textos que não têm regra específica
   textColor: "hsl(var(--foreground))",
+  fontSize: 12,
+
+  // ── Fundo dos elementos internos do gráfico ──────────────────────────────
+  background: "transparent",
+
   labels: {
     text: {
-      fontSize: 14,
-      fontWeight: 700,
+      fontSize: 12,
+      fontWeight: 600,
+      fill: "#ffffff", // sempre branco — labels ficam sobre as barras
     },
   },
+
+  // ── Eixos ────────────────────────────────────────────────────────────────
   axis: {
+    domain: {
+      line: {
+        stroke: "hsl(var(--border))",
+        strokeWidth: 1,
+        strokeOpacity: 0.6,
+      },
+    },
     ticks: {
+      line: {
+        stroke: "hsl(var(--border))",
+        strokeWidth: 1,
+        strokeOpacity: 0.4,
+      },
       text: {
+        fontSize: 11,
+        fontWeight: 400,
         fill: "hsl(var(--muted-foreground))",
+        fontFamily: "inherit",
       },
     },
     legend: {
       text: {
+        fontSize: 12,
+        fontWeight: 500,
         fill: "hsl(var(--foreground))",
+        fontFamily: "inherit",
       },
     },
   },
+
+  // ── Grid ─────────────────────────────────────────────────────────────────
   grid: {
     line: {
-      stroke: "hsl(var(--muted))",
+      stroke: "hsl(var(--border))",
       strokeWidth: 1,
+      strokeOpacity: 0.5, // sutil nos dois modos
+      strokeDasharray: "4 4", // pontilhado refinado
     },
   },
+
+  // ── Legenda (opcional, usada em pie/line charts) ──────────────────────────
+  legends: {
+    title: {
+      text: {
+        fontSize: 11,
+        fontWeight: 500,
+        fill: "hsl(var(--muted-foreground))",
+      },
+    },
+    text: {
+      fontSize: 11,
+      fontWeight: 400,
+      fill: "hsl(var(--foreground))",
+    },
+    ticks: {
+      line: {},
+      text: {
+        fontSize: 10,
+        fill: "hsl(var(--muted-foreground))",
+      },
+    },
+  },
+
+  // ── Anotações ─────────────────────────────────────────────────────────────
+  annotations: {
+    text: {
+      fontSize: 12,
+      fontWeight: 400,
+      fill: "hsl(var(--foreground))",
+      outlineWidth: 2,
+      outlineColor: "hsl(var(--background))",
+    },
+    link: {
+      stroke: "hsl(var(--muted-foreground))",
+      strokeWidth: 1,
+      outlineWidth: 2,
+      outlineColor: "hsl(var(--background))",
+    },
+    outline: {
+      stroke: "hsl(var(--muted-foreground))",
+      strokeWidth: 2,
+      outlineWidth: 2,
+      outlineColor: "hsl(var(--background))",
+    },
+    symbol: {
+      fill: "hsl(var(--muted-foreground))",
+      outlineWidth: 2,
+      outlineColor: "hsl(var(--background))",
+    },
+  },
+
+  // ── Crosshair (line/scatter charts) ──────────────────────────────────────
+  crosshair: {
+    line: {
+      stroke: "hsl(var(--foreground))",
+      strokeWidth: 1,
+      strokeOpacity: 0.2,
+      strokeDasharray: "4 4",
+    },
+  },
+
+  // ── Tooltip ───────────────────────────────────────────────────────────────
   tooltip: {
+    wrapper: {},
     container: {
       background: "hsl(var(--card))",
-      color: "hsl(var(--foreground))",
+      color: "hsl(var(--card-foreground))",
+      fontSize: 12,
+      fontFamily: "inherit",
       borderRadius: 8,
-      boxShadow: "0 12px 40px rgba(0,0,0,0.18)",
       border: "1px solid hsl(var(--border))",
+      boxShadow:
+        "0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1)",
+      padding: "8px 12px",
+    },
+    basic: {},
+    chip: {
+      width: 10,
+      height: 10,
+      borderRadius: 2,
+    },
+    table: {},
+    tableCell: {
+      padding: "3px 6px",
+    },
+    tableCellValue: {
+      fontWeight: 600,
     },
   },
-};
+} as const;
 
 export function getAgeGroup(age: number): string {
   const match = ageBrackets.find(

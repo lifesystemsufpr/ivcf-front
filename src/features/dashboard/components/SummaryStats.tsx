@@ -11,6 +11,7 @@ import {
 import { Card, CardContent } from "@/core/components/ui/Card";
 import { Typography } from "@/core/components/ui/Typography";
 import type { SummaryStats } from "../types";
+import { getSummaryInsights } from "../utils/summaryInsights";
 
 type SummaryStatsProps = {
   summary: SummaryStats;
@@ -20,11 +21,13 @@ function StatCard({
   icon: Icon,
   label,
   value,
+  insight,
   highlight = false,
 }: {
   icon: LucideIcon;
   label: string;
   value: React.ReactNode;
+  insight: string;
   highlight?: boolean;
 }) {
   return (
@@ -65,7 +68,7 @@ function StatCard({
           </span>
         </div>
 
-        <div className="flex flex-col gap-0.5">
+        <div className="flex flex-col flex-1 gap-3">
           <Typography
             variant="caption"
             className="text-muted-foreground/90 uppercase tracking-wide text-[10px]"
@@ -76,6 +79,13 @@ function StatCard({
           <Typography variant="h3" className="leading-tight text-xl">
             {value}
           </Typography>
+
+          <Typography
+            variant="small"
+            className="line-clamp-2 text-xs leading-snug text-muted-foreground"
+          >
+            {insight}
+          </Typography>
         </div>
       </CardContent>
     </Card>
@@ -85,6 +95,7 @@ function StatCard({
 export function SummaryStats({ summary }: SummaryStatsProps) {
   const { totalParticipants, totalEvaluated, avgScore, avgAge, topAgeGroups } =
     summary;
+  const insights = getSummaryInsights(summary);
 
   return (
     <section>
@@ -93,20 +104,28 @@ export function SummaryStats({ summary }: SummaryStatsProps) {
           icon={Users}
           label="Total de Participantes"
           value={totalParticipants ?? 0}
+          insight={insights.participants.message}
         />
 
         <StatCard
           icon={UserCheck}
           label="Participantes Avaliados"
           value={totalEvaluated ?? 0}
+          insight={insights.evaluated.message}
         />
 
-        <StatCard icon={BarChart3} label="Score médio" value={avgScore ?? 0} />
+        <StatCard
+          icon={BarChart3}
+          label="Score médio"
+          value={avgScore ?? 0}
+          insight={insights.avgScore.message}
+        />
 
         <StatCard
           icon={Calendar}
           label="Idade média"
           value={`${avgAge ?? 0} anos`}
+          insight={insights.avgAge.message}
         />
 
         <Card className="h-full border-border/70 bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg col-span-2 sm:col-span-1">
