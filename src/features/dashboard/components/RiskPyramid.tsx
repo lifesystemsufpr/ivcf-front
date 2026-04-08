@@ -12,7 +12,7 @@ import {
 import { Box } from "@/core/components/ui";
 import { normalizeToPercentage } from "../utils/normalize";
 
-const keys = ["Robusto", "Pré-frágil", "Frágil"] as const;
+const keys = ["Frágil", "Pré-frágil", "Robusto"] as const;
 
 export type RiskPyramidProps = {
   data: {
@@ -27,6 +27,7 @@ export type RiskPyramidProps = {
 export function RiskPyramid({ data, isCompact = false }: RiskPyramidProps) {
   const chartRef = useRef<HTMLDivElement | null>(null);
   const normalizedData = normalizeToPercentage(data);
+
   return (
     <Card className="h-full">
       <CardHeader
@@ -90,7 +91,7 @@ export function RiskPyramid({ data, isCompact = false }: RiskPyramidProps) {
               valueFormat=".1f"
               enableGridX
               axisBottom={{
-                legend: "% na coorte",
+                legend: "% na amostra",
                 legendOffset: isCompact ? 38 : 50,
                 legendPosition: "middle",
               }}
@@ -129,7 +130,7 @@ export function RiskPyramid({ data, isCompact = false }: RiskPyramidProps) {
                     {indexValue}
                   </Typography>
                   <Typography color="secondary" variant="small">
-                    {id}: {value}%
+                    {id}: {value?.toFixed(2)}%
                   </Typography>
                 </Box>
               )}
