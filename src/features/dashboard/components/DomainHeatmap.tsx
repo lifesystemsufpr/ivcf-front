@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import { ResponsiveHeatMap } from "@nivo/heatmap";
 import { Card, CardContent, CardHeader } from "@/core/components/ui/Card";
 import { Button } from "@/core/components/ui/Button";
@@ -30,6 +30,16 @@ export function DomainHeatmap({ data, stratification }: DomainHeatmapProps) {
   const chartRef = useRef<HTMLDivElement | null>(null);
 
   const hasData = data.some((d) => d.data.length > 0);
+  const labelColorThreshold = useMemo(() => {
+    const values = data.flatMap((serie) => serie.data.map((point) => point.y));
+    if (!values.length) return 0;
+
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+
+    // Usa o ponto médio do intervalo atual para manter contraste consistente.
+    return min + (max - min) / 2;
+  }, [data]);
 
   return (
     <Card className="h-full">
@@ -77,9 +87,11 @@ export function DomainHeatmap({ data, stratification }: DomainHeatmapProps) {
               enableLabels={true}
               label={(cell) => cell.value?.toFixed(1) ?? ""}
               labelTextColor={(cell) => {
-                return (cell.value ?? 0) > 2 ? "#ffffff" : "#333333";
+                return (cell.value ?? 0) > labelColorThreshold
+                  ? "#ffffff"
+                  : "#333333";
               }}
-              margin={{ top: 40, right: 80, bottom: 80, left: 120 }}
+              margin={{ top: 40, right: 80, bottom: 100, left: 120 }}
               valueFormat=".2f"
               axisTop={null}
               axisRight={null}
@@ -98,7 +110,7 @@ export function DomainHeatmap({ data, stratification }: DomainHeatmapProps) {
                 {
                   anchor: "bottom",
                   translateX: 0,
-                  translateY: 50,
+                  translateY: 70,
                   length: 240,
                   thickness: 10,
                   direction: "row",

@@ -1,4 +1,4 @@
-import { Box, Button, Typography } from "@/core/components/ui";
+import { Box, Button, Typography, Label } from "@/core/components/ui";
 import { useAssessmentList } from "../contexts/AssessmentListContext";
 import ParticipantAutocomplete from "@/features/participants/components/ParticipantAutocomplete";
 import { ParticipantProvider } from "@/features/participants/context/ParticipantContext";
@@ -16,64 +16,67 @@ export default function ListFilters() {
   } = useAssessmentList();
 
   return (
-    <Box display="flex" direction="column" gap={10}>
-      <Box display="flex" direction="row" gap={20} my={4} align="center">
+    <Box
+      className="rounded-lg border bg-card p-4 shadow-md"
+      display="flex"
+      direction="column"
+      gap={4}
+    >
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="space-y-1">
+          <Typography variant="h4">Filtros de avaliação</Typography>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={clearFilters}>
+            <Typography variant="small" color="accent">
+              Limpar filtros
+            </Typography>
+          </Button>
+
+          <Button onClick={onSubmitFilters} variant="secondary">
+            <Typography variant="small" color="primary">
+              Aplicar filtros
+            </Typography>
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
         <ParticipantProvider>
-          <Box
-            display="flex"
-            direction="row"
-            gap={4}
-            align="center"
-            className="w-full"
-          >
+          <div className="space-y-1 md:col-span-1">
+            <Label>Participante</Label>
             <ParticipantAutocomplete
               className="w-full"
               onChange={(participant) => {
                 setParticipantName(participant?.fullName || "");
               }}
             />
-          </Box>
+          </div>
         </ParticipantProvider>
 
-        <Box
-          display="flex"
-          direction="row"
-          gap={10}
-          align="center"
-          className="flex w-full"
-        >
+        <div className="space-y-1">
+          <Label htmlFor="start-date">Data inicial</Label>
           <DateFilter
+            id="start-date"
             value={startDate}
             onChange={(date) => {
               setStartDate(date);
             }}
           />
+        </div>
+
+        <div className="space-y-1">
+          <Label htmlFor="end-date">Data final</Label>
           <DateFilter
+            id="end-date"
             value={endDate}
             onChange={(date) => {
               setEndDate(date);
             }}
           />
-        </Box>
-      </Box>
-
-      <Box>
-        <Button variant="outline" onClick={clearFilters}>
-          <Typography variant="small" color="accent">
-            Limpar filtros
-          </Typography>
-        </Button>
-
-        <Button
-          onClick={onSubmitFilters}
-          className="ml-2"
-          variant={"secondary"}
-        >
-          <Typography variant="small" color="primary">
-            Aplicar filtros
-          </Typography>
-        </Button>
-      </Box>
+        </div>
+      </div>
     </Box>
   );
 }

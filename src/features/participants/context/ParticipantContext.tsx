@@ -22,8 +22,7 @@ export function ParticipantProvider({ children }: ParticipantProviderProps) {
 
   const participants: Participant[] = useMemo(() => {
     if (!data) return [];
-    const flated = data.pages.flatMap((page) => page.data);
-    return flated.map((item) => parseParticipantResponse(item));
+    return data.data.map((item) => parseParticipantResponse(item));
   }, [data]);
 
   const value: ParticipantContextValue = {

@@ -10,7 +10,7 @@ type TablePaginationProps = {
 
 export function TablePagination({
   colSpan,
-  pageSizeOptions = [5, 10, 20, 50],
+  pageSizeOptions = [1, 5, 10, 20, 50],
   extraColumns = 0,
 }: TablePaginationProps) {
   const { pageState, actions, columns, selection } = useTableContext<any>();

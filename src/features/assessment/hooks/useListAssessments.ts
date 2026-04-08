@@ -1,7 +1,8 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { AssessmentService } from "../services/assessment.service";
 
 interface UseListAssessmentsOptions {
+  page?: number;
   pageSize?: number;
   startDate?: string;
   endDate?: string;
@@ -9,17 +10,20 @@ interface UseListAssessmentsOptions {
 }
 
 export function useListAssessments({
+  page = 1,
   pageSize = 10,
   startDate,
   endDate,
   participantName,
 }: UseListAssessmentsOptions = {}) {
-  return useInfiniteQuery({
-    queryKey: ["assessments", { pageSize, startDate, endDate, participantName }],
-    initialPageParam: 1,
-    queryFn: async ({ pageParam = 1 }) => {
+  return useQuery({
+    queryKey: [
+      "assessments",
+      { page, pageSize, startDate, endDate, participantName },
+    ],
+    queryFn: async () => {
       const data = await AssessmentService.listAllAssessments({
-        page: pageParam,
+        page,
         pageSize,
         startDate,
         endDate,
@@ -31,10 +35,14 @@ export function useListAssessments({
 
       return {
         items: data.data,
-        nextPage: pageParam < totalPages ? pageParam + 1 : undefined,
+        meta: {
+          total: totalItems,
+          totalPages,
+          page,
+          pageSize,
+        },
       };
     },
-    getNextPageParam: (lastPage) => lastPage.nextPage,
     staleTime: 1000 * 60 * 5,
   });
 }

@@ -11,12 +11,15 @@ export interface AssessmentListProviderValue {
   setStartDate: (date: string) => void;
   endDate: string;
   setEndDate: (date: string) => void;
+  page: number;
+  setPage: (page: number) => void;
+  pageSize: number;
+  setPageSize: (size: number) => void;
+  totalPages: number;
+  totalItems: number;
   onSubmitFilters: () => void;
   clearFilters: () => void;
-  hasNextPage: boolean;
-  isFetchingNextPage: boolean;
   isLoading: boolean;
-  loadMoreAssessments: () => void;
 }
 
 export const AssessmentListContext = createContext<
@@ -31,27 +34,32 @@ export function AssessmentListProvider({
   const [participantName, setParticipantName] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
   const [appliedFilters, setAppliedFilters] = useState({
     participantName: "",
     startDate: "",
     endDate: "",
   });
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-    useListAssessments({
-      pageSize: 10,
-      participantName: appliedFilters.participantName || undefined,
-      startDate: appliedFilters.startDate || undefined,
-      endDate: appliedFilters.endDate || undefined,
-    });
+  const { data, isLoading } = useListAssessments({
+    page,
+    pageSize,
+    participantName: appliedFilters.participantName || undefined,
+    startDate: appliedFilters.startDate || undefined,
+    endDate: appliedFilters.endDate || undefined,
+  });
 
   const filteredAssessments = useMemo<Assessment[]>(() => {
     if (!data) return [];
-    const assessments = data.pages.flatMap((page) => page.items);
-    return assessments.map((assessment) => mapperDomainToUI(assessment));
+    return data.items.map((assessment) => mapperDomainToUI(assessment));
   }, [data]);
 
+  const totalPages = data?.meta?.totalPages ?? 0;
+  const totalItems = data?.meta?.total ?? 0;
+
   const onSubmitFilters = () => {
+    setPage(1);
     setAppliedFilters({
       participantName,
       startDate,
@@ -60,6 +68,7 @@ export function AssessmentListProvider({
   };
 
   const clearFilters = () => {
+    setPage(1);
     setParticipantName("");
     setStartDate("");
     setEndDate("");
@@ -68,11 +77,6 @@ export function AssessmentListProvider({
       startDate: "",
       endDate: "",
     });
-  };
-
-  const loadMoreAssessments = () => {
-    if (!hasNextPage || isFetchingNextPage) return;
-    void fetchNextPage();
   };
 
   return (
@@ -85,12 +89,15 @@ export function AssessmentListProvider({
         setStartDate,
         endDate,
         setEndDate,
+        page,
+        setPage,
+        pageSize,
+        setPageSize,
+        totalPages,
+        totalItems,
         onSubmitFilters,
         clearFilters,
-        hasNextPage: !!hasNextPage,
-        isFetchingNextPage,
         isLoading,
-        loadMoreAssessments,
       }}
     >
       {children}

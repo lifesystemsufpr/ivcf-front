@@ -9,10 +9,15 @@ import type {
 } from "../types";
 import type { SuccessResponse } from "@/core/types";
 import type { ParticipantEvolutionData } from "../features/indicators/types";
+import type { FilterState } from "@/core/components/ui";
+import type { SortDirection } from "@/core/components/ui/table/header/TableColumn";
 
 export type PaginationParams = {
   page?: number;
   pageSize?: number;
+  sortField?: string;
+  sortDirection?: SortDirection;
+  filters?: FilterState;
 };
 
 export class ParticipantsService {
@@ -21,12 +26,21 @@ export class ParticipantsService {
   }
 
   static async getParticipants(params?: PaginationParams) {
+    const filtersQuery = Object.fromEntries(
+      Object.entries(params?.filters ?? {}).filter(([, value]) =>
+        Boolean(value?.trim()),
+      ),
+    );
+
     const resp = await http.get<SuccessResponse<ParticipantResponse[]>>(
       apiRoutes.PARTICIPANTS.LIST,
       {
         query: {
           page: params?.page,
           pageSize: params?.pageSize,
+          sortField: params?.sortField,
+          sortDirection: params?.sortDirection,
+          ...filtersQuery,
         },
       },
     );

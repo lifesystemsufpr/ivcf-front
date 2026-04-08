@@ -16,10 +16,12 @@ export function RiskAmountBar({
   total,
   isCompact = false,
 }: RiskAmountBarProps) {
-  const dataWithPercentages = data.map((item) => ({
-    ...item,
-    percentage: calcPercentage(item.count, total),
-  }));
+  const dataWithPercentages = data
+    .map((item) => ({
+      ...item,
+      percentage: calcPercentage(item.count, total ?? 1),
+    }))
+    .reverse();
 
   return (
     <Card className="shadow-sm col-span-1 md:col-span-1 xl:col-span-1 flex flex-col">

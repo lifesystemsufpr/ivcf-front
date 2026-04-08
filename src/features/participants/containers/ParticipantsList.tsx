@@ -2,7 +2,9 @@ import {
   Box,
   Button,
   Dialog,
+  type FilterState,
   Modal,
+  type SortState,
   Table,
   createColumn,
 } from "@/core/components/ui";
@@ -12,22 +14,36 @@ import { useNavigate } from "react-router-dom";
 import { useMemo, useState, type MouseEvent } from "react";
 import { Pencil, PlusCircle, Trash } from "lucide-react";
 import ParticipantForm from "../components/ParticipantForm";
-import { useParticipantContext } from "../context/ParticipantContext";
 import type { Participant, ParticipantRequest } from "../types";
 import { useUpdateParticipant } from "../hooks/useUpdateParticipant";
 import { Bounce, toast } from "react-toastify";
 import { useDeleteParticipant } from "../hooks/useDeleteParticipant";
+import { useListParticipants } from "../hooks/useListParticipants";
+import { parseParticipantResponse } from "../utils";
 
 export default function ParticipantList() {
-  const { participants } = useParticipantContext();
   const navigate = useNavigate();
   const updateParticipantMutation = useUpdateParticipant();
   const deleteParticipantMutation = useDeleteParticipant();
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(8);
+  const [sort, setSort] = useState<SortState>({
+    field: null,
+    direction: "asc",
+  });
+  const [filters, setFilters] = useState<FilterState>({});
+  const { data } = useListParticipants({ page, pageSize, sort, filters });
 
   const [participantToDelete, setParticipantToDelete] =
     useState<Participant | null>(null);
   const [participantToEdit, setParticipantToEdit] =
     useState<Participant | null>(null);
+  const participants = useMemo(
+    () =>
+      data?.data.map((participant) => parseParticipantResponse(participant)) ??
+      [],
+    [data],
+  );
 
   const columns = useMemo(
     () => [
@@ -129,8 +145,6 @@ export default function ParticipantList() {
   const handleUpdateParticipant = async (data: ParticipantRequest) => {
     if (!participantToEdit) return;
 
-    console.log("Atualizando participante com dados:", data);
-
     updateParticipantMutation.mutate(
       {
         id: participantToEdit.id,
@@ -166,7 +180,29 @@ export default function ParticipantList() {
       <Table.Root
         data={participants}
         columns={columns}
-        pageSize={8}
+        serverSide={{
+          total: data?.meta?.total ?? 0,
+          page: data?.meta?.page ?? page,
+          pageSize: data?.meta?.pageSize ?? pageSize,
+          sort,
+          filters,
+          onPageChange: setPage,
+          onPageSizeChange: (nextPageSize) => {
+            setPage(1);
+            setPageSize(nextPageSize);
+          },
+          onSortChange: (nextSort) => {
+            setPage(1);
+            setSort(nextSort);
+          },
+          onFilterChange: (field, value) => {
+            setPage(1);
+            setFilters((current) => ({
+              ...current,
+              [field]: value,
+            }));
+          },
+        }}
         getRowId={(row) => row.id ?? row.email}
       >
         <Table.Header showActionsColumn actionsLabel="Ações" />
@@ -201,7 +237,10 @@ export default function ParticipantList() {
         />
 
         <Table.Footer>
-          <Table.Pagination extraColumns={1} />
+          <Table.Pagination
+            extraColumns={1}
+            pageSizeOptions={[5, 8, 10, 20, 50]}
+          />
         </Table.Footer>
       </Table.Root>
 

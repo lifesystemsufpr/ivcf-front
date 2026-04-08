@@ -1,29 +1,31 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import type { FilterState, SortState } from "@/core/components/ui";
 import { ParticipantsService } from "../services/participants.service";
 
 interface UseListParticipantsOptions {
+  page?: number;
   pageSize?: number;
+  sort?: SortState;
+  filters?: FilterState;
 }
 
 export function useListParticipants({
-  pageSize = 30,
+  page = 1,
+  pageSize = 15,
+  sort,
+  filters,
 }: UseListParticipantsOptions) {
-  return useInfiniteQuery({
-    queryKey: ["participants"],
-    initialPageParam: 1,
-    queryFn: async ({ pageParam = 1 }) => {
-      const resp = await ParticipantsService.getParticipants({
-        page: pageParam,
-        pageSize: pageSize,
-      });
-      return resp;
-    },
-    getNextPageParam: (lastPage, allPages) => {
-      const totalPages =
-        (lastPage.meta?.total || 1) / (lastPage.meta?.pageSize || 1);
-      const nextPage = allPages.length + 1;
-      return nextPage <= totalPages ? nextPage : undefined;
-    },
+  return useQuery({
+    queryKey: ["participants", page, pageSize, sort, filters],
+    queryFn: () =>
+      ParticipantsService.getParticipants({
+        page,
+        pageSize,
+        sortField: sort?.field ?? undefined,
+        sortDirection: sort?.field ? sort.direction : undefined,
+        filters,
+      }),
+    placeholderData: keepPreviousData,
     staleTime: 10 * 60 * 1000,
   });
 }
