@@ -54,7 +54,8 @@ export interface ScatterSerie {
 }
 
 export interface SummaryStats {
-  total: number;
+  totalParticipants: number;
+  totalEvaluated: number;
   avgScore: number;
   avgAge: number;
   topAgeGroups: Array<{ label: string; value: number }>;

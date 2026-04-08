@@ -7,17 +7,17 @@ export function normalizeToPercentage(data: RiskPyramidProps["data"]) {
     if (total === 0) {
       return {
         ...item,
-        Robusto: 0,
-        "Pré-frágil": 0,
         Frágil: 0,
+        "Pré-frágil": 0,
+        Robusto: 0,
       };
     }
 
     return {
       group: item.group,
-      Robusto: (item.Robusto / total) * 100,
-      "Pré-frágil": (item["Pré-frágil"] / total) * 100,
       Frágil: (item.Frágil / total) * 100,
+      "Pré-frágil": (item["Pré-frágil"] / total) * 100,
+      Robusto: (item.Robusto / total) * 100,
     };
   });
 }
