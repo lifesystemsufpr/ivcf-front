@@ -42,10 +42,7 @@ export function ComorbidityScatter({
     [useCanvas],
   );
 
-  const maxAge = Math.max(
-    100,
-    ...data.flatMap((series) => series.data.map((d) => d.x)),
-  );
+  const maxAge = 100;
 
   const maxScore = Math.max(
     40,
@@ -73,32 +70,6 @@ export function ComorbidityScatter({
           >
             Idade × fragilidade
           </Typography>
-          <Typography variant="caption">
-            Cada bolha representa um paciente. <strong>Tamanho proporcional ao volume de dados</strong>{" "}
-            — cor indica sexo, texto no tooltip indica risco clínico.
-          </Typography>
-          {/* Sex + size legend */}
-          {!isCompact && (
-            <div className="flex flex-wrap gap-4 mt-2">
-              {data.map((s) => (
-                <span key={s.id} className="flex items-center gap-1 text-xs">
-                  <span
-                    className="inline-block w-3 h-3 rounded-full"
-                    style={{ backgroundColor: s.id === "Masculino" ? "#38bdf8" : "#a855f7" }}
-                  />
-                  {s.id}
-                </span>
-              ))}
-              <span className="flex items-center gap-3 text-xs text-muted-foreground ml-2">
-                <span className="flex items-center gap-1">
-                  <span className="inline-block w-2 h-2 rounded-full bg-muted-foreground/40" /> menor volume
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="inline-block w-4 h-4 rounded-full bg-muted-foreground/40" /> maior volume
-                </span>
-              </span>
-            </div>
-          )}
         </div>
         <div className="flex gap-2">
           <Button
@@ -160,7 +131,7 @@ export function ComorbidityScatter({
             xScale={{
               type: "linear",
               min: 60,
-              max: maxAge + 2,
+              max: maxAge,
             }}
             yScale={{
               type: "linear",
