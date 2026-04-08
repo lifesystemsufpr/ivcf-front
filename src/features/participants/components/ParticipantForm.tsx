@@ -28,7 +28,6 @@ const defaultValues: ParticipantFormValues = {
   fullName: "",
   birthDate: "",
   email: "",
-  phone: "",
   gender: "MALE",
   height: "",
   weight: "",
@@ -154,7 +153,6 @@ export default function ParticipantForm({
       user: {
         fullName: values.fullName,
         email: values.email,
-        phone: values.phone,
         active: true,
       },
     };
@@ -162,12 +160,12 @@ export default function ParticipantForm({
     onSubmit?.(payload);
   };
 
-  const handleFetchAddress = async () => {
-    if (values.address.zipCode.length < 8) return;
-    console.log("Buscando endereço para CEP:", values.address.zipCode);
+  const handleFetchAddress = async (cep: string) => {
+    if (cep.length < 9) return;
+
     try {
-      const address = await fetchAddressByCep(values.address.zipCode);
-      console.log("Endereço encontrado:", address);
+      const address = await fetchAddressByCep(cep);
+
       if (address) {
         setValues((prev) => ({
           ...prev,
@@ -243,17 +241,6 @@ export default function ParticipantForm({
                 <option value="FEMALE">Feminino</option>
               </Select>
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="phone">Telefone</Label>
-              <Input
-                id="phone"
-                mask="phone"
-                value={values.phone}
-                onChange={(e) => updateField("phone", e.target.value)}
-                placeholder="(00) 00000-0000"
-              />
-            </div>
           </div>
         </Box>
       )}
@@ -269,10 +256,11 @@ export default function ParticipantForm({
                 mask="cep"
                 onChange={(e) => {
                   const cep = e.target.value;
-                  console.log("Atualizando CEP para:", cep);
+
                   updateAddressField("zipCode", cep);
-                  if (cep.length === 8) {
-                    handleFetchAddress();
+
+                  if (cep.length >= 9) {
+                    handleFetchAddress(cep);
                   }
                 }}
                 placeholder="00000-000"

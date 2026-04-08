@@ -42,7 +42,6 @@ export function parseParticipantResponse(
     fullName: data.fullName,
     birthDate: data.birthday,
     email: data.email,
-    phone: data.phone,
     gender: data.gender,
     height: Number(data.height),
     weight: Number(data.weight),

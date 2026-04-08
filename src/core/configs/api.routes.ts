@@ -31,5 +31,6 @@ export const apiRoutes = {
     IVCF_RESPONSE: () => `${API_URL_BASE}/questionnaires/response`,
     IVCF_STRUCTURE: `${API_URL_BASE}/questionnaires/ivcf-20`,
     DASHBOARD: `${API_URL_BASE}/questionnaires/dashboard`,
+    EXPORT: `${API_URL_BASE}/questionnaires/dashboard/export`,
   },
 };
