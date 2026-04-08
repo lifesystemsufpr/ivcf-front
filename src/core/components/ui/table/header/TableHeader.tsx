@@ -2,17 +2,20 @@ import * as React from "react";
 import { cn } from "../../../../utils";
 import { useTableContext } from "../root/TableContext";
 import type { TableColumnDef } from "./TableColumn";
+import { DebouncedFilterInput } from "./Debouncedfilterinput";
 
 type TableHeaderProps = {
   className?: string;
   actionsLabel?: React.ReactNode;
   showActionsColumn?: boolean;
+  filterDebounceMs?: number;
 };
 
 export function TableHeader({
   className,
   actionsLabel = "Ações",
   showActionsColumn,
+  filterDebounceMs = 400,
 }: TableHeaderProps) {
   const {
     columns,
@@ -26,25 +29,25 @@ export function TableHeader({
 
   const allSelected = React.useMemo(() => {
     if (!selection.enabled || visibleData.length === 0) return false;
-    return visibleData.every((row, index) =>
+    return visibleData.every((row: any, index: number) =>
       selection.isRowSelected(getRowId(row, index)),
     );
   }, [selection, visibleData, getRowId]);
 
   const toggleSelectAll = () => {
     if (!selection.enabled) return;
-
     if (allSelected) {
       selection.clearSelection();
       return;
     }
-
-    const ids = visibleData.map((row, index) => getRowId(row, index));
+    const ids = visibleData.map((row: any, index: number) =>
+      getRowId(row, index),
+    );
     selection.selectAll(ids);
   };
 
   return (
-    <thead className={cn("bg-muted/60", className)}>
+    <thead className={cn("bg-muted/90 border-b-1", className)}>
       <tr>
         {selection.enabled && (
           <th className="w-10 px-4 py-3 text-left">
@@ -96,14 +99,10 @@ export function TableHeader({
 
               {column.filterable && (
                 <div className="mt-2">
-                  <input
-                    type="text"
+                  <DebouncedFilterInput
                     value={filterState[columnKey] ?? ""}
-                    onChange={(event) =>
-                      actions.setFilter(columnKey, event.target.value)
-                    }
-                    placeholder="Filtrar"
-                    className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground focus:border-primary focus:outline-none"
+                    onChange={(value) => actions.setFilter(columnKey, value)}
+                    debounceMs={filterDebounceMs}
                   />
                 </div>
               )}
