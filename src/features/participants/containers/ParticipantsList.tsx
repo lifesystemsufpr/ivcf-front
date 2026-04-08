@@ -56,7 +56,6 @@ export default function ParticipantList() {
       createColumn<Participant>({
         field: "email",
         header: "E-mail",
-        sortable: true,
         filterable: true,
       }),
       createColumn<Participant>({
@@ -64,11 +63,6 @@ export default function ParticipantList() {
         header: "Nascimento",
         sortable: true,
         render: (value) => (value ? formatDate(String(value)) : "—"),
-      }),
-      createColumn<Participant>({
-        field: "email",
-        header: "E-mail",
-        filterable: true,
       }),
     ],
     [],
