@@ -7,10 +7,10 @@ import ListFilters from "../containers/ListFilters";
 export function AssessmentPage() {
   return (
     <AssessmentListProvider>
-      <Box type="screen">
+      <Box>
         <ListFilters />
         <AssessmentList />
-        <Box className="self-end radius-full absolute bottom-4 right-4">
+        <Box className="fixed self-end radius-full bottom-4 right-4">
           <NewAssessment />
         </Box>
       </Box>
