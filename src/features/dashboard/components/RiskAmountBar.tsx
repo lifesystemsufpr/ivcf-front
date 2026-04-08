@@ -16,12 +16,59 @@ export function RiskAmountBar({
   total,
   isCompact = false,
 }: RiskAmountBarProps) {
-  const dataWithPercentages = data
-    .map((item) => ({
-      ...item,
-      percentage: calcPercentage(item.count, total ?? 1),
-    }))
-    .reverse();
+  const dataWithPercentages = data.map((item) => ({
+    ...item,
+    percentage: calcPercentage(item.count, total ?? 1),
+  }));
+
+  const fragileSeparatorLayer = ({ bars, innerHeight }: any) => {
+    const fragileBars = bars.filter((bar: any) => {
+      const category = String(bar?.data?.indexValue ?? "").toLowerCase();
+      return category === "fragil" || category === "frágil";
+    });
+
+    if (!fragileBars.length) return null;
+
+    const fragileBar = fragileBars.reduce((acc: any, current: any) =>
+      current.x < acc.x ? current : acc,
+    );
+
+    const barsOnLeft = bars.filter((bar: any) => bar.x < fragileBar.x);
+    const nearestLeftBar = barsOnLeft.reduce(
+      (acc: any, current: any) => (!acc || current.x > acc.x ? current : acc),
+      null,
+    );
+
+    const barsOnRight = bars.filter((bar: any) => bar.x > fragileBar.x);
+    const nearestRightBar = barsOnRight.reduce(
+      (acc: any, current: any) => (!acc || current.x < acc.x ? current : acc),
+      null,
+    );
+
+    let separatorX = fragileBar.x;
+
+    if (nearestLeftBar) {
+      const leftEnd = nearestLeftBar.x + nearestLeftBar.width;
+      const rightStart = fragileBar.x;
+      separatorX = leftEnd + (rightStart - leftEnd) / 2;
+    } else if (nearestRightBar) {
+      const leftEnd = fragileBar.x + fragileBar.width;
+      const rightStart = nearestRightBar.x;
+      separatorX = leftEnd + (rightStart - leftEnd) / 2;
+    }
+
+    return (
+      <line
+        x1={separatorX}
+        x2={separatorX}
+        y1={0}
+        y2={innerHeight}
+        stroke="#dc2626"
+        strokeWidth={1}
+        strokeDasharray="6 6"
+      />
+    );
+  };
 
   return (
     <Card className="shadow-sm col-span-1 md:col-span-1 xl:col-span-1 flex flex-col">
@@ -63,6 +110,15 @@ export function RiskAmountBar({
             label={({ data }) => `${data.percentage}%`}
             labelSkipHeight={12}
             labelTextColor="#ffffff"
+            layers={[
+              "grid",
+              "axes",
+              "bars",
+              "markers",
+              fragileSeparatorLayer,
+              "legends",
+              "annotations",
+            ]}
             tooltip={({ data }) => (
               <Box
                 display="flex"
