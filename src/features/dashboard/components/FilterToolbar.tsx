@@ -115,7 +115,8 @@ export function FilterToolbar({
   };
 
   return (
-    <Box className="rounded-lg border bg-card p-4 shadow-md">
+    <Box className="group relative overflow-hidden rounded-lg border border-border/70 bg-card p-4 shadow-sm transition-all duration-300">
+      <div className="absolute inset-x-0 top-0 h-0.5 bg-muted" />
       <div className="flex flex-wrap items-end gap-4">
         {/* Sexo (Sem debounce, pois é clique único) */}
         <Box className="space-y-1" display="flex" direction="column">

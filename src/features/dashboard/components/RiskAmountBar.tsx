@@ -21,6 +21,69 @@ export function RiskAmountBar({
     percentage: calcPercentage(item.count, total ?? 1),
   }));
 
+  const max = Math.max(...dataWithPercentages.map((d) => d.percentage));
+
+  const riskBackgroundLayer = ({ bars, innerHeight, innerWidth }: any) => {
+    const fragileBars = bars.filter((bar: any) => {
+      const category = String(bar?.data?.indexValue ?? "").toLowerCase();
+      return category === "fragil" || category === "frágil";
+    });
+
+    if (!fragileBars.length) return null;
+
+    const fragileBar = fragileBars.reduce((acc: any, current: any) =>
+      current.x < acc.x ? current : acc,
+    );
+
+    const barsOnLeft = bars.filter((bar: any) => bar.x < fragileBar.x);
+    const nearestLeftBar = barsOnLeft.reduce(
+      (acc: any, current: any) => (!acc || current.x > acc.x ? current : acc),
+      null,
+    );
+
+    const barsOnRight = bars.filter((bar: any) => bar.x > fragileBar.x);
+    const nearestRightBar = barsOnRight.reduce(
+      (acc: any, current: any) => (!acc || current.x < acc.x ? current : acc),
+      null,
+    );
+
+    let separatorX = fragileBar.x;
+
+    if (nearestLeftBar) {
+      const leftEnd = nearestLeftBar.x + nearestLeftBar.width;
+      const rightStart = fragileBar.x;
+      separatorX = leftEnd + (rightStart - leftEnd) / 2;
+    } else if (nearestRightBar) {
+      const leftEnd = fragileBar.x + fragileBar.width;
+      const rightStart = nearestRightBar.x;
+      separatorX = leftEnd + (rightStart - leftEnd) / 2;
+    }
+
+    return (
+      <g>
+        {/* Fundo verde - Baixo risco */}
+        <rect
+          x={0}
+          y={0}
+          width={separatorX}
+          height={innerHeight}
+          fill="#10b981"
+          fillOpacity={0.1}
+        />
+
+        {/* Fundo vermelho - Alto risco */}
+        <rect
+          x={separatorX}
+          y={0}
+          width={innerWidth - separatorX}
+          height={innerHeight}
+          fill="#dc2626"
+          fillOpacity={0.1}
+        />
+      </g>
+    );
+  };
+
   const fragileSeparatorLayer = ({ bars, innerHeight }: any) => {
     const fragileBars = bars.filter((bar: any) => {
       const category = String(bar?.data?.indexValue ?? "").toLowerCase();
@@ -129,6 +192,7 @@ export function RiskAmountBar({
                 ? { top: 28, right: 10, bottom: 30, left: 35 }
                 : { top: 36, right: 20, bottom: 40, left: 50 }
             }
+            valueScale={{ type: "linear", max: max * 1.05 }}
             padding={0.35}
             innerPadding={0}
             borderRadius={5}
@@ -153,6 +217,7 @@ export function RiskAmountBar({
             labelSkipHeight={16}
             labelTextColor="#ffffff"
             layers={[
+              riskBackgroundLayer,
               "grid",
               "axes",
               "bars",
