@@ -21,7 +21,7 @@ export default defineConfig(({ mode }) => {
     server: {
       proxy: {
         "/backend": {
-          target: "http://200.236.3.109",
+          target: "https://lifesystem.ufpr.br/ivcf/backend",
           changeOrigin: true,
           secure: false,
         },
