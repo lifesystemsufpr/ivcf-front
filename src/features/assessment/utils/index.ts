@@ -21,11 +21,16 @@ export const classificationStyles: Record<
   },
 };
 
+type LooseFrailtyClassification = FrailtyClassification | "Pré-Fragil";
+
 export function getStylesByClassification(
-  classification: FrailtyClassification,
+  classification: LooseFrailtyClassification,
 ) {
+  const normalizedClassification: FrailtyClassification =
+    classification === "Pré-Fragil" ? "Pré-frágil" : classification;
+
   return (
-    classificationStyles[classification] ?? {
+    classificationStyles[normalizedClassification] ?? {
       bg: "bg-gray-100",
       border: "border-gray-500",
       text: "text-gray-700",

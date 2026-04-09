@@ -4,6 +4,8 @@ import { Button } from "@/core/components/ui/Button";
 import { Input } from "@/core/components/ui/Input";
 import { Label } from "@/core/components/ui/Label";
 import type { AggregationDimension, FragilityFilters } from "../types";
+import { apiRoutes } from "@/core/configs/api.routes";
+import { client } from "@/core/services/client.service";
 
 type FilterToolbarProps = {
   filters: FragilityFilters;
@@ -80,13 +82,41 @@ export function FilterToolbar({
     setLocalPeriod((prev) => ({ ...prev, [key]: e.target.value }));
   };
 
-  const handleExport = () => {
-    console.log("Solicitando exportação ao BFF com filtros:", filters);
-    alert("O download do CSV será processado pelo servidor.");
+  const handleExport = async () => {
+    try {
+      const endpoint = apiRoutes.ASSESSMENTS.EXPORT;
+
+      const resp = await client(endpoint, {
+        method: "GET",
+        query: {
+          sex: filters.sex,
+          ageMin: filters.ageRange?.[0],
+          ageMax: filters.ageRange?.[1],
+        },
+      });
+
+      console.log("Resposta da exportação:", resp);
+
+      const blob =
+        resp instanceof Blob
+          ? resp
+          : new Blob([resp as unknown as BlobPart], {
+              type: "text/csv;charset=utf-8;",
+            });
+
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "export.csv";
+    } catch (error) {
+      console.error("Erro ao solicitar exportação:", error);
+    }
   };
 
   return (
-    <Box className="rounded-lg border bg-card p-4 shadow-md">
+    <Box className="group relative overflow-hidden rounded-lg border border-border/70 bg-card p-4 shadow-sm transition-all duration-300">
+      <div className="absolute inset-x-0 top-0 h-0.5 bg-muted" />
       <div className="flex flex-wrap items-end gap-4">
         {/* Sexo (Sem debounce, pois é clique único) */}
         <Box className="space-y-1" display="flex" direction="column">

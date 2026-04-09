@@ -12,7 +12,7 @@ import { formatDate } from "@/core/utils";
 import { clientRoutes } from "@/core/configs/client.routes";
 import { useNavigate } from "react-router-dom";
 import { useMemo, useState, type MouseEvent } from "react";
-import { Pencil, PlusCircle, Trash } from "lucide-react";
+import { Pencil, Trash, ClipboardPlus } from "lucide-react";
 import ParticipantForm from "../components/ParticipantForm";
 import type { Participant, ParticipantRequest } from "../types";
 import { useUpdateParticipant } from "../hooks/useUpdateParticipant";
@@ -56,7 +56,6 @@ export default function ParticipantList() {
       createColumn<Participant>({
         field: "email",
         header: "E-mail",
-        sortable: true,
         filterable: true,
       }),
       createColumn<Participant>({
@@ -64,11 +63,6 @@ export default function ParticipantList() {
         header: "Nascimento",
         sortable: true,
         render: (value) => (value ? formatDate(String(value)) : "—"),
-      }),
-      createColumn<Participant>({
-        field: "email",
-        header: "E-mail",
-        filterable: true,
       }),
     ],
     [],
@@ -214,16 +208,16 @@ export default function ParticipantList() {
               <Button
                 variant="secondary"
                 size="sm"
+                onClick={(event) => handleStartAssessment(event, participant)}
+              >
+                <ClipboardPlus size={16} />
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
                 onClick={(event) => handleEdit(event, participant)}
               >
                 <Pencil size={16} />
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={(event) => handleStartAssessment(event, participant)}
-              >
-                <PlusCircle size={16} />
               </Button>
               <Button
                 variant="destructive"

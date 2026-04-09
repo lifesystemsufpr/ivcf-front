@@ -12,7 +12,7 @@ import {
 import { Box } from "@/core/components/ui";
 import { normalizeToPercentage } from "../utils/normalize";
 
-const keys = ["Frágil", "Pré-frágil", "Robusto"] as const;
+const keys = ["Robusto", "Pré-frágil", "Frágil"] as const;
 
 export type RiskPyramidProps = {
   data: {
@@ -29,9 +29,11 @@ export function RiskPyramid({ data, isCompact = false }: RiskPyramidProps) {
   const normalizedData = normalizeToPercentage(data);
 
   return (
-    <Card className="h-full">
+    <Card className="group relative h-full overflow-hidden border border-border/70 bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+      <div className="absolute inset-x-0 top-0 h-1 bg-primary/70" />
+
       <CardHeader
-        className={`flex items-start justify-between gap-4 ${
+        className={`flex items-start justify-between gap-4 pb-3 pt-6 ${
           isCompact ? "flex-col" : "flex-row"
         }`}
       >
@@ -67,8 +69,13 @@ export function RiskPyramid({ data, isCompact = false }: RiskPyramidProps) {
           </Button>
         </div>
       </CardHeader>
-      <CardContent>
-        <div ref={chartRef} className={isCompact ? "h-75" : "h-95"}>
+      <CardContent className="pt-0">
+        <div
+          ref={chartRef}
+          className={`rounded-xl border border-border/60 bg-muted/20 p-2 ${
+            isCompact ? "h-75" : "h-95"
+          }`}
+        >
           {data.length === 0 ? (
             <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
               Sem dados para os filtros atuais.
@@ -124,7 +131,7 @@ export function RiskPyramid({ data, isCompact = false }: RiskPyramidProps) {
                   direction="column"
                   align="center"
                   p={5}
-                  className="bg-background rounded w-30 border"
+                  className="w-30 rounded-lg border border-border/60 bg-background shadow-md"
                 >
                   <Typography color="secondary" variant="body">
                     {indexValue}

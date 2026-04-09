@@ -19,7 +19,6 @@ export interface Participant {
   birthDate: string;
   address: Address;
   email: string;
-  phone: string;
   gender: Gender;
   height: number;
   weight: number;
@@ -46,7 +45,6 @@ export interface ParticipantRequest {
   user: {
     fullName: string;
     email: string;
-    phone: string;
     active: boolean;
   };
 }
@@ -77,8 +75,6 @@ export interface ParticipantResponse {
 
   gender: Gender;
   role: SystemRole;
-
-  phone: string;
 
   hasRelations: boolean;
 }

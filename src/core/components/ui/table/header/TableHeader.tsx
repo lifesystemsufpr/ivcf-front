@@ -47,7 +47,7 @@ export function TableHeader({
   };
 
   return (
-    <thead className={cn("bg-muted/90 border-b-1", className)}>
+    <thead className={cn("bg-muted/90", className)}>
       <tr>
         {selection.enabled && (
           <th className="w-10 px-4 py-3 text-left">

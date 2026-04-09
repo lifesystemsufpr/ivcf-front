@@ -7,11 +7,19 @@ export interface ResponseCounts {
   nao: number;
 }
 
+export interface ResponseOption {
+  label: string;
+  count: number;
+  score: number;
+  indicatesFragility: boolean;
+}
+
 export interface DrilldownNode {
   id: string;
   label: string;
   counts: ResponseCounts;
   children?: DrilldownNode[];
+  responses?: ResponseOption[];
 }
 
 export interface DomainDrilldownData {

@@ -17,7 +17,7 @@ export default function ListFilters() {
 
   return (
     <Box
-      className="rounded-lg border bg-card p-4 shadow-md"
+      className="group relative  rounded-lg border border-border/70 bg-card p-4 shadow-sm transition-all duration-300"
       display="flex"
       direction="column"
       gap={4}

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader } from "@/core/components/ui/Card";
 import { Button } from "@/core/components/ui/Button";
 import type { DrilldownNode } from "../types";
@@ -71,6 +71,20 @@ function overallStats(data: DrilldownNode[]) {
   const total = totSim + totNao;
   const rate = total === 0 ? 0 : totSim / total;
   return { totSim, totNao, total, rate };
+}
+
+function responseTone(indicatesFragility: boolean) {
+  return indicatesFragility
+    ? {
+        container: "border-destructive/20 bg-destructive/5",
+        badge: "bg-destructive/10 text-destructive",
+        bar: "bg-destructive",
+      }
+    : {
+        container: "border-accent/20 bg-accent-soft/40",
+        badge: "bg-accent-soft text-accent-foreground",
+        bar: "bg-accent",
+      };
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -160,7 +174,7 @@ function DomainRow({
             </span>
             <div className="flex items-center gap-2 shrink-0">
               <span className={`text-xs font-semibold ${risk.color}`}>
-                {(rate * 100).toFixed(0)}%
+                {(rate * 100).toFixed(0)}% Indicam Fragilidade
               </span>
               <span className="text-xs text-muted-foreground hidden sm:inline">
                 {node.counts.sim}/{total}
@@ -181,6 +195,116 @@ function DomainRow({
   );
 }
 
+// ─── Helpers for question type detection ──────────────────────────────────────
+
+const SIM_NAO_LABELS = new Set(["sim", "não", "nao"]);
+
+function isBinarySimNao(node: DrilldownNode): boolean {
+  const responses = node.responses ?? [];
+  if (responses.length !== 2) return false;
+  return responses.every((r) => SIM_NAO_LABELS.has(r.label.toLowerCase()));
+}
+
+// ─── Sim / Não stacked bar ───────────────────────────────────────────────────
+
+function SimNaoBar({
+  sim,
+  nao,
+}: {
+  sim: number;
+  nao: number;
+}) {
+  const total = sim + nao;
+  if (total === 0) return null;
+
+  const simPct = (sim / total) * 100;
+  const naoPct = (nao / total) * 100;
+
+  return (
+    <div className="mt-2">
+      {/* Legend */}
+      <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
+        <span className="flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-sm bg-destructive inline-block" />
+          Sim: <b className="text-foreground">{sim}</b>
+          <span className="text-muted-foreground/60">({simPct.toFixed(0)}%)</span>
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-sm bg-accent inline-block" />
+          Não: <b className="text-foreground">{nao}</b>
+          <span className="text-muted-foreground/60">({naoPct.toFixed(0)}%)</span>
+        </span>
+      </div>
+
+      {/* Stacked bar */}
+      <div className="w-full h-3.5 rounded-full bg-muted overflow-hidden flex">
+        {sim > 0 && (
+          <div
+            className="h-full bg-destructive transition-all duration-500 first:rounded-l-full last:rounded-r-full"
+            style={{ width: `${simPct}%` }}
+          />
+        )}
+        {nao > 0 && (
+          <div
+            className="h-full bg-accent transition-all duration-500 first:rounded-l-full last:rounded-r-full"
+            style={{ width: `${naoPct}%` }}
+          />
+        )}
+      </div>
+
+      <p className="text-[11px] text-muted-foreground/70 mt-1 text-right">{total} respostas</p>
+    </div>
+  );
+}
+
+// ─── Multi-choice option list ────────────────────────────────────────────────
+
+function MultiChoiceList({
+  node,
+}: {
+  node: DrilldownNode;
+}) {
+  const responses = node.responses ?? [];
+  const total = responses.reduce((sum, r) => sum + r.count, 0);
+  if (total === 0) return null;
+
+  return (
+    <div className="mt-2 flex flex-col gap-2">
+      {responses.map((response) => {
+        const pct = (response.count / total) * 100;
+        const tone = responseTone(response.indicatesFragility);
+
+        return (
+          <div key={response.label} className="flex flex-col gap-1">
+            {/* Label row */}
+            <div className="flex items-center justify-between gap-2">
+              <span className="min-w-0 flex-1 text-xs text-foreground leading-snug flex items-center gap-1.5">
+                {response.label}
+                {response.indicatesFragility && (
+                  <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-destructive" title="Indica fragilidade" />
+                )}
+              </span>
+              <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+                <b className="text-foreground">{response.count}</b>{" "}
+                <span className="text-muted-foreground/60">({pct.toFixed(0)}%)</span>
+              </span>
+            </div>
+
+            {/* Bar below */}
+            <div className="w-full h-2.5 rounded-full bg-muted overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${tone.bar}`}
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+          </div>
+        );
+      })}
+      <p className="text-[11px] text-muted-foreground/70 mt-0.5 text-right">{total} respostas</p>
+    </div>
+  );
+}
+
 // ─── Question (leaf) row ──────────────────────────────────────────────────────
 
 function QuestionRow({
@@ -194,7 +318,8 @@ function QuestionRow({
 }) {
   const rate = simRate(node);
   const risk = riskLevel(rate);
-  const total = node.counts.sim + node.counts.nao;
+  const responses = node.responses ?? [];
+  const binary = isBinarySimNao(node);
 
   return (
     <div
@@ -209,47 +334,33 @@ function QuestionRow({
         </span>
 
         <div className="flex-1 min-w-0">
-          {/* Question label */}
-          <p
-            className={`text-foreground font-medium leading-snug mb-2 ${isCompact ? "text-xs" : "text-sm"}`}
-          >
-            {node.label}
-          </p>
+          {/* Question header */}
+          <div className="flex items-start justify-between gap-2">
+            <p
+              className={`text-foreground font-medium leading-snug ${isCompact ? "text-xs" : "text-sm"}`}
+            >
+              {node.label}
+            </p>
 
-          {/* Dual progress bar — Sim (bad/destructive) | Não (good/accent) */}
-          <div className="flex h-3 rounded-full overflow-hidden bg-muted gap-px">
-            {total > 0 && (
-              <>
-                <div
-                  className="bg-destructive transition-all duration-500"
-                  style={{ width: `${(node.counts.sim / total) * 100}%` }}
-                  title={`Sim: ${node.counts.sim}`}
-                />
-                <div
-                  className="bg-accent transition-all duration-500"
-                  style={{ width: `${(node.counts.nao / total) * 100}%` }}
-                  title={`Não: ${node.counts.nao}`}
-                />
-              </>
-            )}
+            <span
+              className={`shrink-0 text-xs font-semibold px-2 py-1 rounded-full ${risk.badgeBg} ${risk.badgeText}`}
+            >
+              {(rate * 100).toFixed(0)}% fragilidade
+            </span>
           </div>
 
-          {/* Counts row */}
-          <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1">
-              {/* Sim = bad = destructive */}
-              <span className="w-2 h-2 rounded-full bg-destructive inline-block" />
-              Sim: <b className="text-foreground">{node.counts.sim}</b>
-            </span>
-            <span className="flex items-center gap-1">
-              {/* Não = good = accent */}
-              <span className="w-2 h-2 rounded-full bg-accent inline-block" />
-              Não: <b className="text-foreground">{node.counts.nao}</b>
-            </span>
-            <span className={`ml-auto font-semibold ${risk.color}`}>
-              {(rate * 100).toFixed(0)}% indicam fragilidade
-            </span>
-          </div>
+          {/* Response visualization */}
+          {responses.length > 0 ? (
+            binary ? (
+              <SimNaoBar sim={node.counts.sim} nao={node.counts.nao} />
+            ) : (
+              <MultiChoiceList node={node} />
+            )
+          ) : (
+            <div className="mt-2 rounded-lg border border-dashed border-border/60 bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
+              Nenhuma opção de resposta disponível.
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -269,6 +380,13 @@ export function DomainDrilldownBars({
     { data: fullData, title: "Visão Geral por Domínio", parentId: null },
   ]);
   const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    setHistory([
+      { data: fullData, title: "Visão Geral por Domínio", parentId: null },
+    ]);
+    setSearch("");
+  }, [fullData]);
 
   const currentView = history[history.length - 1];
   const isTopLevel = history.length === 1;
@@ -309,9 +427,15 @@ export function DomainDrilldownBars({
   const overallRisk = riskLevel(stats.rate);
 
   return (
-    <Card className={`flex flex-col ${isCompact ? "h-95" : "h-125"}`}>
+    <Card
+      className={`group relative flex flex-col overflow-hidden border border-border/70 bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg ${
+        isCompact ? "h-95" : "h-125"
+      }`}
+    >
+      <div className="absolute inset-x-0 top-0 h-1 bg-primary/70" />
+
       {/* ── Header ── */}
-      <CardHeader className="shrink-0 pb-2">
+      <CardHeader className="shrink-0 pb-2 pt-6">
         {/* Breadcrumb */}
         <div className="flex items-center gap-1.5 flex-wrap mb-2">
           {history.map((level, i) => (
@@ -356,13 +480,13 @@ export function DomainDrilldownBars({
       </CardHeader>
 
       {/* ── Content ── */}
-      <CardContent className="flex-1 overflow-y-auto px-4 pb-4">
+      <CardContent className="flex-1 overflow-y-auto px-4 pb-4 pt-2">
         {processedData.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
+          <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-border/60 bg-muted/20 text-sm text-muted-foreground">
             Nenhum resultado encontrado.
           </div>
         ) : isQuestionsView ? (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 rounded-xl border border-border/60 bg-muted/20 p-2">
             {processedData.map((node, i) => (
               <QuestionRow
                 key={node.id}
@@ -373,7 +497,7 @@ export function DomainDrilldownBars({
             ))}
           </div>
         ) : (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 rounded-xl border border-border/60 bg-muted/20 p-2">
             {processedData.map((node) => (
               <DomainRow
                 key={node.id}
@@ -388,7 +512,7 @@ export function DomainDrilldownBars({
 
       {/* ── Footer back button ── */}
       {history.length > 1 && (
-        <div className="shrink-0 px-4 pb-4 pt-1 border-t border-border">
+        <div className="shrink-0 border-t border-border/70 px-4 pb-4 pt-2">
           <Button
             variant="outline"
             size="sm"

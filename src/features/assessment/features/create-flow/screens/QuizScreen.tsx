@@ -23,9 +23,11 @@ import {
   findQuestionByOrder,
 } from "../utils/questionnaireHelpers";
 import { useAuthContext } from "@/features/auth/contexts/AuthContext";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function QuizScreen() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { user } = useAuthContext();
   const {
     participantId,
@@ -143,6 +145,7 @@ export default function QuizScreen() {
         answers,
       });
       reset();
+      queryClient.invalidateQueries({ queryKey: ["assessments"] });
       navigate(clientRoutes.IVCF.RESULT({ id: result.id }), { replace: true });
     } catch (error) {
       console.error(error);

@@ -12,7 +12,7 @@ import {
   formatGender,
   getIMCClassification,
 } from "../utils";
-import { formatDate, formatPhone } from "@/core/utils";
+import { formatDate } from "@/core/utils";
 import DataRow from "./DataRow";
 
 interface ParticipantDetailContentProps {
@@ -23,7 +23,9 @@ export default function ParticipantDetailContent({
   participant,
 }: ParticipantDetailContentProps) {
   const age = calculateAge(participant.birthDate);
-  const imc = parseFloat(calculateIMC(participant.weight, participant.height));
+  const imc = parseFloat(
+    calculateIMC(participant.weight, participant.height / 100),
+  );
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -50,7 +52,6 @@ export default function ParticipantDetailContent({
         <Separator />
         <CardContent className="grid grid-cols-1 gap-4 pt-6">
           <DataRow label="E-mail" value={participant.email} />
-          <DataRow label="Telefone" value={formatPhone(participant.phone)} />
         </CardContent>
       </Card>
 
