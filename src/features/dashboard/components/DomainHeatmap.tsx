@@ -108,6 +108,7 @@ export function DomainHeatmap({ data, stratification }: DomainHeatmapProps) {
               }}
               axisLeft={{
                 legend: "Domínios",
+                tickRotation: 35,
                 legendOffset: -90,
                 legendPosition: "middle",
               }}
