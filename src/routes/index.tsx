@@ -23,7 +23,7 @@ export function AppRoutes() {
       <Routes>
         <Route element={<BaseLayout />}>
           <Route
-            path="/"
+            path={basename}
             element={
               <DashboardProvider>
                 <HomePage />
