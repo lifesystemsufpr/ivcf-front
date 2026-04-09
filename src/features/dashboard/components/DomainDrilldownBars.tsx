@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader } from "@/core/components/ui/Card";
 import { Button } from "@/core/components/ui/Button";
 import type { DrilldownNode } from "../types";
@@ -71,6 +71,26 @@ function overallStats(data: DrilldownNode[]) {
   const total = totSim + totNao;
   const rate = total === 0 ? 0 : totSim / total;
   return { totSim, totNao, total, rate };
+}
+
+function responseStats(node: DrilldownNode) {
+  const responses = node.responses ?? [];
+  const total = responses.reduce((sum, response) => sum + response.count, 0);
+  return { responses, total };
+}
+
+function responseTone(indicatesFragility: boolean) {
+  return indicatesFragility
+    ? {
+        container: "border-destructive/20 bg-destructive/5",
+        badge: "bg-destructive/10 text-destructive",
+        bar: "bg-destructive",
+      }
+    : {
+        container: "border-accent/20 bg-accent-soft/40",
+        badge: "bg-accent-soft text-accent-foreground",
+        bar: "bg-accent",
+      };
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -160,7 +180,7 @@ function DomainRow({
             </span>
             <div className="flex items-center gap-2 shrink-0">
               <span className={`text-xs font-semibold ${risk.color}`}>
-                {(rate * 100).toFixed(0)}%
+                {(rate * 100).toFixed(0)}% Indicam Fragilidade
               </span>
               <span className="text-xs text-muted-foreground hidden sm:inline">
                 {node.counts.sim}/{total}
@@ -195,6 +215,7 @@ function QuestionRow({
   const rate = simRate(node);
   const risk = riskLevel(rate);
   const total = node.counts.sim + node.counts.nao;
+  const { responses, total: responseTotal } = responseStats(node);
 
   return (
     <div
@@ -209,46 +230,91 @@ function QuestionRow({
         </span>
 
         <div className="flex-1 min-w-0">
-          {/* Question label */}
-          <p
-            className={`text-foreground font-medium leading-snug mb-2 ${isCompact ? "text-xs" : "text-sm"}`}
-          >
-            {node.label}
-          </p>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-start justify-between gap-2">
+              <p
+                className={`text-foreground font-medium leading-snug ${isCompact ? "text-xs" : "text-sm"}`}
+              >
+                {node.label}
+              </p>
 
-          {/* Dual progress bar — Sim (bad/destructive) | Não (good/accent) */}
-          <div className="flex h-3 rounded-full overflow-hidden bg-muted gap-px">
-            {total > 0 && (
-              <>
-                <div
-                  className="bg-destructive transition-all duration-500"
-                  style={{ width: `${(node.counts.sim / total) * 100}%` }}
-                  title={`Sim: ${node.counts.sim}`}
-                />
-                <div
-                  className="bg-accent transition-all duration-500"
-                  style={{ width: `${(node.counts.nao / total) * 100}%` }}
-                  title={`Não: ${node.counts.nao}`}
-                />
-              </>
+              <span
+                className={`shrink-0 text-xs font-semibold px-2 py-1 rounded-full ${risk.badgeBg} ${risk.badgeText}`}
+              >
+                {(rate * 100).toFixed(0)}% fragilidade
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-destructive inline-block" />
+                Sim: <b className="text-foreground">{node.counts.sim}</b>
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-accent inline-block" />
+                Não: <b className="text-foreground">{node.counts.nao}</b>
+              </span>
+              <span className="ml-auto font-semibold text-foreground/80">
+                {total} respostas no total
+              </span>
+            </div>
+
+            {responses.length > 0 ? (
+              <div className="mt-2 flex flex-col gap-2">
+                {responses.map((response) => {
+                  const percentage =
+                    responseTotal === 0
+                      ? 0
+                      : (response.count / responseTotal) * 100;
+                  const tone = responseTone(response.indicatesFragility);
+
+                  return (
+                    <div
+                      key={response.label}
+                      className={`rounded-lg border px-3 py-2 ${tone.container}`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-foreground leading-snug">
+                            {response.label}
+                          </p>
+                          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                            <span>score {response.score}</span>
+                            <span
+                              className={`rounded-full px-2 py-0.5 font-medium ${tone.badge}`}
+                            >
+                              {response.indicatesFragility
+                                ? "fragilidade"
+                                : "sem fragilidade"}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="shrink-0 text-right">
+                          <p className="text-sm font-semibold text-foreground">
+                            {response.count}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {percentage.toFixed(0)}%
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${tone.bar}`}
+                          style={{ width: `${percentage}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="mt-2 rounded-lg border border-dashed border-border/60 bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
+                Nenhuma opção de resposta disponível.
+              </div>
             )}
-          </div>
-
-          {/* Counts row */}
-          <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1">
-              {/* Sim = bad = destructive */}
-              <span className="w-2 h-2 rounded-full bg-destructive inline-block" />
-              Sim: <b className="text-foreground">{node.counts.sim}</b>
-            </span>
-            <span className="flex items-center gap-1">
-              {/* Não = good = accent */}
-              <span className="w-2 h-2 rounded-full bg-accent inline-block" />
-              Não: <b className="text-foreground">{node.counts.nao}</b>
-            </span>
-            <span className={`ml-auto font-semibold ${risk.color}`}>
-              {(rate * 100).toFixed(0)}% indicam fragilidade
-            </span>
           </div>
         </div>
       </div>
@@ -269,6 +335,13 @@ export function DomainDrilldownBars({
     { data: fullData, title: "Visão Geral por Domínio", parentId: null },
   ]);
   const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    setHistory([
+      { data: fullData, title: "Visão Geral por Domínio", parentId: null },
+    ]);
+    setSearch("");
+  }, [fullData]);
 
   const currentView = history[history.length - 1];
   const isTopLevel = history.length === 1;
