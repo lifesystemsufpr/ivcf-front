@@ -16,6 +16,8 @@ import ForgotPasswordPage from "@/features/auth/pages/ForgotPassword";
 import ResetPasswordPage from "@/features/auth/pages/ResetPassword";
 
 export function AppRoutes() {
+  const basename = import.meta.env.VITE_BASE_PATH || "/ivcf";
+
   return (
     <BrowserRouter>
       <Routes>
