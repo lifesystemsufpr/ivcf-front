@@ -99,6 +99,8 @@ export default function ParticipantForm({
     buildInitialValues(initialValues),
   );
 
+  const isEditMode = Boolean(initialValues?.id);
+
   useEffect(() => {
     setValues(buildInitialValues(initialValues));
     setStep(0);
@@ -354,14 +356,20 @@ export default function ParticipantForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
+              <Label htmlFor="password">
+                {isEditMode ? "Nova senha" : "Senha"}
+              </Label>
               <Input
                 id="password"
                 type="password"
                 value={values.password}
                 onChange={(e) => updateField("password", e.target.value)}
-                placeholder="Defina uma senha"
-                required
+                placeholder={
+                  isEditMode
+                    ? "Deixe em branco para manter a senha atual"
+                    : "Digite uma senha"
+                }
+                required={!isEditMode}
               />
             </div>
           </div>
