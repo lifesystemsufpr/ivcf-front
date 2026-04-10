@@ -16,6 +16,10 @@ type ParticipantFormValues = Omit<Participant, "height" | "weight"> & {
   weight: string;
 };
 
+type AddressFieldKey = keyof ParticipantFormValues["address"];
+type FormErrorKey = keyof ParticipantFormValues | `address.${AddressFieldKey}`;
+type FormErrors = Partial<Record<FormErrorKey, string>>;
+
 type ParticipantFormProps = {
   initialValues?: Partial<Participant>;
   title?: string;
@@ -42,6 +46,11 @@ const defaultValues: ParticipantFormValues = {
     zipCode: "",
   },
 };
+
+const errorState: FormErrors = {};
+
+const MIN_AGE = 60;
+const MAX_AGE = 110;
 
 function normalizeDateForInput(value?: string) {
   if (!value) return "";
@@ -88,6 +97,28 @@ function parseNumber(value: string) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function getAgeFromDate(dateString: string) {
+  const birthDate = new Date(`${dateString}T00:00:00`);
+  if (Number.isNaN(birthDate.getTime())) return null;
+
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+
+  if (
+    monthDiff < 0 ||
+    (monthDiff === 0 && today.getDate() < birthDate.getDate())
+  ) {
+    age -= 1;
+  }
+
+  return age;
+}
+
+function isCompleteDate(value: string) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
 export default function ParticipantForm({
   initialValues,
   title,
@@ -98,9 +129,13 @@ export default function ParticipantForm({
   const [values, setValues] = useState<ParticipantFormValues>(() =>
     buildInitialValues(initialValues),
   );
+  const [errors, setErrors] = useState<FormErrors>(errorState);
+
+  const isEditMode = Boolean(initialValues?.id);
 
   useEffect(() => {
     setValues(buildInitialValues(initialValues));
+    setErrors(errorState);
     setStep(0);
   }, [initialValues]);
 
@@ -115,6 +150,13 @@ export default function ParticipantForm({
     value: ParticipantFormValues[K],
   ) => {
     setValues((prev) => ({ ...prev, [key]: value }));
+    setErrors((prev) => {
+      if (!prev[key]) return prev;
+
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
   };
 
   const updateAddressField = (
@@ -125,13 +167,109 @@ export default function ParticipantForm({
       ...prev,
       address: { ...prev.address, [key]: value },
     }));
+
+    const errorKey = `address.${key}` as FormErrorKey;
+    setErrors((prev) => {
+      if (!prev[errorKey]) return prev;
+
+      const next = { ...prev };
+      delete next[errorKey];
+      return next;
+    });
+  };
+
+  const validateStepOne = () => {
+    const nextErrors: FormErrors = {};
+
+    if (!values.email.trim()) {
+      nextErrors.email = "Informe o email";
+    } else if (!/^\S+@\S+\.\S+$/.test(values.email)) {
+      nextErrors.email = "Informe um email valido";
+    }
+
+    if (!values.fullName.trim()) {
+      nextErrors.fullName = "Informe o nome completo";
+    }
+
+    if (!values.birthDate) {
+      nextErrors.birthDate = "Informe a data de nascimento";
+    } else if (isCompleteDate(values.birthDate)) {
+      const age = getAgeFromDate(values.birthDate);
+
+      if (age === null || age < MIN_AGE || age > MAX_AGE) {
+        nextErrors.birthDate = `A idade deve estar entre ${MIN_AGE} e ${MAX_AGE} anos`;
+      }
+    }
+
+    return nextErrors;
+  };
+
+  const validateStepTwo = () => {
+    const nextErrors: FormErrors = {};
+
+    if (!values.address.zipCode.trim()) {
+      nextErrors["address.zipCode"] = "Informe o CEP";
+    }
+
+    if (!values.address.street.trim()) {
+      nextErrors["address.street"] = "Informe a rua";
+    }
+
+    if (!values.address.number.trim()) {
+      nextErrors["address.number"] = "Informe o numero";
+    }
+
+    if (!values.address.neighborhood.trim()) {
+      nextErrors["address.neighborhood"] = "Informe o bairro";
+    }
+
+    if (!values.address.city.trim()) {
+      nextErrors["address.city"] = "Informe a cidade";
+    }
+
+    if (!values.address.state.trim()) {
+      nextErrors["address.state"] = "Informe o estado";
+    }
+
+    if (!values.height.trim()) {
+      nextErrors.height = "Informe a altura";
+    } else if (parseNumber(values.height) <= 0) {
+      nextErrors.height = "Informe uma altura valida";
+    }
+
+    if (!values.weight.trim()) {
+      nextErrors.weight = "Informe o peso";
+    } else if (parseNumber(values.weight) <= 0) {
+      nextErrors.weight = "Informe um peso valido";
+    }
+
+    if (!isEditMode && !(values.password ?? "").trim()) {
+      nextErrors.password = "Informe a senha";
+    }
+
+    return nextErrors;
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!isLastStep) {
+      const stepOneErrors = validateStepOne();
+      if (Object.keys(stepOneErrors).length > 0) {
+        setErrors(stepOneErrors);
+        return;
+      }
+
       setStep(1);
+      return;
+    }
+
+    const stepTwoErrors = validateStepTwo();
+    const stepOneErrors = validateStepOne();
+    const mergedErrors = { ...stepOneErrors, ...stepTwoErrors };
+
+    if (Object.keys(mergedErrors).length > 0) {
+      setErrors(mergedErrors);
       return;
     }
 
@@ -202,6 +340,7 @@ export default function ParticipantForm({
                 type="email"
                 value={values.email}
                 onChange={(e) => updateField("email", e.target.value)}
+                errorMessage={errors.email}
                 placeholder="email@exemplo.com"
               />
             </div>
@@ -214,6 +353,7 @@ export default function ParticipantForm({
                 onChange={(e) => updateField("fullName", e.target.value)}
                 placeholder="Digite o nome completo"
                 required
+                errorMessage={errors.fullName}
               />
             </div>
 
@@ -223,7 +363,24 @@ export default function ParticipantForm({
                 id="birthDate"
                 type="date"
                 value={values.birthDate}
-                onChange={(e) => updateField("birthDate", e.target.value)}
+                onChange={(e) => {
+                  updateField("birthDate", e.target.value);
+                }}
+                onBlur={(e) => {
+                  const value = e.target.value;
+
+                  if (!value || !isCompleteDate(value)) return;
+
+                  const age = getAgeFromDate(value);
+                  if (age === null || age < MIN_AGE || age > MAX_AGE) {
+                    setErrors((prev) => ({
+                      ...prev,
+                      birthDate: `A idade deve estar entre ${MIN_AGE} e ${MAX_AGE} anos`,
+                    }));
+                  }
+                }}
+                placeholder="dd/mm/aaaa"
+                errorMessage={errors.birthDate}
                 required
               />
             </div>
@@ -264,6 +421,7 @@ export default function ParticipantForm({
                   }
                 }}
                 placeholder="00000-000"
+                errorMessage={errors["address.zipCode"]}
               />
             </div>
 
@@ -274,6 +432,7 @@ export default function ParticipantForm({
                 value={values.address.street}
                 onChange={(e) => updateAddressField("street", e.target.value)}
                 placeholder="Nome da rua"
+                errorMessage={errors["address.street"]}
               />
             </div>
 
@@ -284,6 +443,7 @@ export default function ParticipantForm({
                 value={values.address.number}
                 onChange={(e) => updateAddressField("number", e.target.value)}
                 placeholder="000"
+                errorMessage={errors["address.number"]}
               />
             </div>
 
@@ -308,6 +468,7 @@ export default function ParticipantForm({
                   updateAddressField("neighborhood", e.target.value)
                 }
                 placeholder="Nome do bairro"
+                errorMessage={errors["address.neighborhood"]}
               />
             </div>
 
@@ -318,6 +479,7 @@ export default function ParticipantForm({
                 value={values.address.city}
                 onChange={(e) => updateAddressField("city", e.target.value)}
                 placeholder="Cidade"
+                errorMessage={errors["address.city"]}
               />
             </div>
 
@@ -328,6 +490,7 @@ export default function ParticipantForm({
                 value={values.address.state}
                 onChange={(e) => updateAddressField("state", e.target.value)}
                 placeholder="UF"
+                errorMessage={errors["address.state"]}
               />
             </div>
 
@@ -339,6 +502,7 @@ export default function ParticipantForm({
                 value={values.height}
                 onChange={(e) => updateField("height", e.target.value)}
                 placeholder="170"
+                errorMessage={errors.height}
               />
             </div>
 
@@ -350,18 +514,26 @@ export default function ParticipantForm({
                 value={values.weight}
                 onChange={(e) => updateField("weight", e.target.value)}
                 placeholder="70"
+                errorMessage={errors.weight}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
+              <Label htmlFor="password">
+                {isEditMode ? "Nova senha" : "Senha"}
+              </Label>
               <Input
                 id="password"
                 type="password"
                 value={values.password}
                 onChange={(e) => updateField("password", e.target.value)}
-                placeholder="Defina uma senha"
-                required
+                placeholder={
+                  isEditMode
+                    ? "Deixe em branco para manter a senha atual"
+                    : "Digite uma senha"
+                }
+                required={!isEditMode}
+                errorMessage={errors.password}
               />
             </div>
           </div>
