@@ -16,8 +16,15 @@ export function formatDateTime(dateString: string) {
   return new Date(dateString).toLocaleDateString(undefined, options);
 }
 
-export function formatDate(dateString: string) {
+export function formatDate(dateString: string, useUTC: boolean = false) {
   const date = new Date(dateString);
+
+  if (useUTC) {
+    return new Intl.DateTimeFormat("pt-BR", {
+      timeZone: "UTC",
+    }).format(date);
+  }
+
   return date.toLocaleDateString("pt-BR");
 }
 

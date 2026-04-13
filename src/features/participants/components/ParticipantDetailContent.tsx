@@ -38,7 +38,7 @@ export default function ParticipantDetailContent({
           <DataRow label="Nome Completo" value={participant.fullName} />{" "}
           <DataRow
             label="Data de Nascimento"
-            value={formatDate(participant.birthDate)}
+            value={formatDate(participant.birthDate, true)}
           />
           <DataRow label="Idade" value={`${age} anos`} />
           <DataRow label="Sexo" value={formatGender(participant.gender)} />

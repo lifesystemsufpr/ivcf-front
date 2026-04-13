@@ -62,7 +62,7 @@ export default function ParticipantList() {
         field: "birthDate",
         header: "Nascimento",
         sortable: true,
-        render: (value) => (value ? formatDate(String(value)) : "—"),
+        render: (value) => (value ? formatDate(String(value), true) : "—"),
       }),
     ],
     [],
