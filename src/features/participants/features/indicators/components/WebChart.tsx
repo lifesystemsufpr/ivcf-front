@@ -2,13 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { ResponsiveRadar } from "@nivo/radar";
-import type { IVCF_Assessment } from "../types";
+import type { IVCF_AssessmentWithDate, Daily_Assessment } from "../types";
 import { nivoTheme } from "@/features/dashboard/utils/transforms";
 import { Typography } from "@/core/components/ui/Typography";
 import { DOMAIN_DEFINITIONS, IVCF_DOMAIN_MAX } from "@/core/consts/ivcf.consts";
+import { Box } from "@/core/components/ui";
 
 type WebChartProps = {
-  assessments: IVCF_Assessment[];
+  assessments: IVCF_AssessmentWithDate[] | Daily_Assessment[];
   height?: number;
 };
 
@@ -18,22 +19,93 @@ function formatDateLabel(date: string) {
   });
 }
 
+function isDaily(data: any): data is Daily_Assessment {
+  return Array.isArray(data.assessments);
+}
+
 export function WebChart({ assessments, height = 420 }: WebChartProps) {
-  const sortedAssessments = useMemo(
+  // Transform to structured daily data with all assessments per day
+  const dailyStructure = useMemo(() => {
+    if (Array.isArray(assessments) && assessments.length === 0) {
+      return [];
+    }
+
+    if (
+      Array.isArray(assessments) &&
+      assessments.length > 0 &&
+      isDaily(assessments[0])
+    ) {
+      // Already Daily_Assessment array
+      return (assessments as Daily_Assessment[]).map((daily) => ({
+        date: daily.date,
+        hasMultiple: daily.assessments.length > 1,
+        assessments: daily.assessments.map((a, idx) => ({
+          ...a,
+          date: daily.date,
+          indexInDay: idx,
+        })),
+      }));
+    } else {
+      // IVCF_AssessmentWithDate array - group by date
+      const grouped = new Map<
+        string,
+        (IVCF_AssessmentWithDate & { indexInDay: number })[]
+      >();
+
+      (assessments as IVCF_AssessmentWithDate[]).forEach((a) => {
+        if (!grouped.has(a.date)) {
+          grouped.set(a.date, []);
+        }
+        const arr = grouped.get(a.date)!;
+        arr.push({ ...a, indexInDay: arr.length });
+      });
+
+      return Array.from(grouped.entries())
+        .sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime())
+        .map(([date, assts]) => ({
+          date,
+          hasMultiple: assts.length > 1,
+          assessments: assts,
+        }));
+    }
+  }, [assessments]);
+
+  // Get all assessment IDs in order (for flat iteration)
+  const allAssessmentIds = useMemo(
     () =>
-      [...assessments].sort(
-        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+      dailyStructure.flatMap((day) =>
+        day.assessments.map((a) => ({
+          id: a.id,
+          date: a.date,
+          index: a.indexInDay,
+        })),
       ),
-    [assessments],
+    [dailyStructure],
   );
 
-  const [selectedId, setSelectedId] = useState(
-    sortedAssessments.at(-1)?.id ?? "",
+  // Initialize with the first assessment of the last day
+  const [selectedAssessmentId, setSelectedAssessmentId] = useState(
+    allAssessmentIds.at(-1)?.id ?? "",
   );
 
-  const selectedAssessment =
-    sortedAssessments.find((a) => a.id === selectedId) ??
-    sortedAssessments.at(-1);
+  // Find the selected assessment
+  const selectedAssessment = useMemo(
+    () =>
+      dailyStructure
+        .flatMap((d) => d.assessments)
+        .find((a) => a.id === selectedAssessmentId),
+    [selectedAssessmentId, dailyStructure],
+  );
+
+  // Get assessments in the same day as selected
+  const assessmentsInSelectedDay = useMemo(
+    () =>
+      selectedAssessment
+        ? (dailyStructure.find((d) => d.date === selectedAssessment.date)
+            ?.assessments ?? [])
+        : [],
+    [selectedAssessment, dailyStructure],
+  );
 
   const radarData = useMemo(() => {
     if (!selectedAssessment) return [];
@@ -56,25 +128,64 @@ export function WebChart({ assessments, height = 420 }: WebChartProps) {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2">
-        <Typography variant="small" className="text-muted-foreground">
-          Avaliação
-        </Typography>
+      <Box display="flex" direction="row" align="center" gap={12}>
+        {/* Day selector */}
+        <div className="flex items-center gap-2 ">
+          <Typography variant="small" className="text-muted-foreground">
+            Data
+          </Typography>
 
-        <select
-          value={selectedAssessment?.id ?? ""}
-          onChange={(e) => setSelectedId(e.target.value)}
-          className="h-9 rounded-md border border-border bg-background px-3 text-sm"
-        >
-          {sortedAssessments.map((assessment) => (
-            <option key={assessment.id} value={assessment.id}>
-              {formatDateLabel(assessment.date)} – Score {assessment.totalScore}
-              /40
-            </option>
-          ))}
-        </select>
-      </div>
+          <select
+            value={selectedAssessment?.date ?? ""}
+            onChange={(e) => {
+              const date = e.target.value;
+              const lastAssessmentInDay = dailyStructure
+                .find((d) => d.date === date)
+                ?.assessments?.at(-1);
+              if (lastAssessmentInDay) {
+                setSelectedAssessmentId(lastAssessmentInDay.id);
+              }
+            }}
+            className="h-9 rounded-md border border-border bg-background px-3 text-sm"
+          >
+            {dailyStructure.map((day) => {
+              const dayLabel = formatDateLabel(day.date);
+              const multiple = day.hasMultiple
+                ? ` (${day.assessments.length})`
+                : "";
+              return (
+                <option key={day.date} value={day.date}>
+                  {dayLabel}
+                  {multiple}
+                </option>
+              );
+            })}
+          </select>
+        </div>
 
+        {/* Assessment selector (only show if multiple on this day) */}
+        {assessmentsInSelectedDay.length > 1 && (
+          <div className="flex items-center gap-2">
+            <Typography variant="small" className="text-muted-foreground">
+              Avaliação
+            </Typography>
+
+            <select
+              value={selectedAssessmentId}
+              onChange={(e) => setSelectedAssessmentId(e.target.value)}
+              className="h-9 rounded-md border border-border bg-background px-3 text-sm"
+            >
+              {assessmentsInSelectedDay.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.indexInDay + 1} – Score {a.totalScore}/40
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+      </Box>
+
+      {/* Radar chart */}
       <div style={{ height }}>
         {!hasData ? (
           <div className="flex h-full items-center justify-center text-sm text-muted-foreground">

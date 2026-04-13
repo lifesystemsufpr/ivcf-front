@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { IVCF_Assessment, IVCF_DomainScores } from "../types";
+import type { IVCF_AssessmentWithDate, IVCF_DomainScores } from "../types";
 import type { DomainDefinition } from "./MultipleLineChart";
 import { IVCF_DOMAIN_MAX } from "@/core/consts/ivcf.consts";
 import { cn } from "@/core/utils";
@@ -7,7 +7,7 @@ import { cn } from "@/core/utils";
 type DomainKey = keyof IVCF_DomainScores;
 
 type DomainComparisonTableProps = {
-  assessments: IVCF_Assessment[];
+  assessments: IVCF_AssessmentWithDate[];
   allDomains: DomainDefinition[];
   selectedDomainKeys: DomainKey[];
 };
@@ -98,9 +98,7 @@ export function DomainComparisonTable({
                   <td className="py-4 px-4 font-medium text-gray-900">
                     {domain.label}
                   </td>
-                  <td className="py-4 px-4 text-gray-600">
-                    {basePercent}/100
-                  </td>
+                  <td className="py-4 px-4 text-gray-600">{basePercent}/100</td>
                   <td className="py-4 px-4 text-gray-600">
                     {followPercent}/100
                   </td>

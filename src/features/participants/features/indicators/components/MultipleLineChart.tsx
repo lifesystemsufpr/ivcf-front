@@ -6,7 +6,7 @@ import {
   type SliceTooltipProps,
   type DefaultSeries,
 } from "@nivo/line";
-import type { IVCF_Assessment, IVCF_DomainScores } from "../types";
+import type { IVCF_AssessmentWithDate, IVCF_DomainScores } from "../types";
 import { nivoTheme } from "@/features/dashboard/utils/transforms";
 import { Typography } from "@/core/components/ui/Typography";
 
@@ -19,7 +19,7 @@ export type DomainDefinition = {
 };
 
 type MultipleLineChartProps = {
-  assessments: IVCF_Assessment[];
+  assessments: IVCF_AssessmentWithDate[];
   domains?: DomainDefinition[];
   selectedDomainKeys?: DomainKey[];
   height?: number;
