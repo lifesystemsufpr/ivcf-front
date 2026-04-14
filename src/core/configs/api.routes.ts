@@ -13,7 +13,7 @@ export const apiRoutes = {
   PARTICIPANTS: {
     LIST: `${API_URL_BASE}/participant`,
     INDICATORS: ({ id }: { id: string }) =>
-      `/questionnaires/participant/${id}/evolution`,
+      `/questionnaires/participant/${id}/evolution/daily`,
     CHECK_EMAIL: ({ email }: { email: string }) =>
       `${API_URL_BASE}/participant/check-email/${email}`,
   },
