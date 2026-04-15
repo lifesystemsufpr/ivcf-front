@@ -23,8 +23,8 @@ export const IVCF_SECTIONS = {
     id: "g3",
     label: "Atividades de Vida Diária",
     subgroups: {
-      INSTRUMENTAL: { id: "s1", label: "AVD Instrumental" },
-      BASIC: { id: "s2", label: "AVD Básica" },
+      BASIC: { id: "s1", label: "AVD Básica" },
+      INSTRUMENTAL: { id: "s2", label: "AVD Instrumental" },
     },
   },
   COGNITION: { id: "g4", label: "Cognição" },
