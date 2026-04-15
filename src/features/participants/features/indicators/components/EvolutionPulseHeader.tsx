@@ -67,16 +67,6 @@ export function EvolutionPulseHeader({
             </span>
           </div>
         </div>
-
-        <Button
-          size="md"
-          onClick={() =>
-            exportElementAsPdf(exportRef.current, "resumo-clinico")
-          }
-          leftIcon={<Download className="h-4 w-4" />}
-        >
-          Exportar Resumo
-        </Button>
       </div>
     </div>
   );
