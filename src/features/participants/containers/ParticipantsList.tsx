@@ -206,6 +206,9 @@ export default function ParticipantList() {
           renderActions={(participant) => (
             <Box display="flex" direction="row" gap={8} justify="center">
               <Button
+                tooltip={{
+                  content: "Iniciar nova avaliação",
+                }}
                 variant="secondary"
                 size="sm"
                 onClick={(event) => handleStartAssessment(event, participant)}
@@ -213,6 +216,9 @@ export default function ParticipantList() {
                 <ClipboardPlus size={16} />
               </Button>
               <Button
+                tooltip={{
+                  content: "Editar participante",
+                }}
                 variant="default"
                 size="sm"
                 onClick={(event) => handleEdit(event, participant)}
@@ -220,6 +226,9 @@ export default function ParticipantList() {
                 <Pencil size={16} />
               </Button>
               <Button
+                tooltip={{
+                  content: "Excluir participante",
+                }}
                 variant="destructive"
                 size="sm"
                 onClick={(event) => handleDelete(event, participant)}
