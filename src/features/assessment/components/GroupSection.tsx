@@ -25,7 +25,7 @@ function QuestionRow({ node }: { node: QuestionPresentationNode }) {
             <span>{answer.selectedOption?.label}</span>
             {!hasMultipleAnswers && (
               <span className="font-semibold text-foreground">
-                +{answer.selectedOption?.score ?? 0} pts
+                {answer.selectedOption?.score ?? 0} pts
               </span>
             )}
           </Box>
@@ -43,7 +43,9 @@ function SubgroupSection({ subgroup }: { subgroup: GroupNode }) {
           variant="small"
           className="font-semibold uppercase text-muted-foreground"
         >
-          {subgroup.label}
+          {subgroup.label}{" "}
+          {subgroup.total < subgroup.rawTotal &&
+            "(Max: " + subgroup.total + " pts)"}
         </Typography>
         <Typography variant="small" className="font-semibold">
           {subgroup.total} pts{" "}
