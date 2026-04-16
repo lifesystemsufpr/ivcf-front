@@ -10,7 +10,7 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export function BaseLayout() {
   const router = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [openDropdown, setOpenDropdown] = useState(false);
 
@@ -49,11 +49,9 @@ export function BaseLayout() {
               onOpenChange={setOpenDropdown}
               items={[
                 {
-                  label: "Profile",
-                  Icon: User,
-                  onSelect: () => {
-                    console.log("Go to profile");
-                  },
+                  label: user?.name || "Bem vindo!",
+                  disabled: true,
+                  description: user?.email || "",
                 },
                 {
                   label: theme === "light" ? "Dark Mode" : "Light Mode",
