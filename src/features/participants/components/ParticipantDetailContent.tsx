@@ -6,13 +6,8 @@ import {
   Separator,
 } from "@/core/components/ui";
 import type { Participant } from "../types";
-import {
-  calculateAge,
-  calculateIMC,
-  formatGender,
-  getIMCClassification,
-} from "../utils";
-import { formatDate } from "@/core/utils";
+import { calculateIMC, formatGender, getIMCClassification } from "../utils";
+import { extractAgeFromBirthDate, formatDate } from "@/core/utils";
 import DataRow from "./DataRow";
 
 interface ParticipantDetailContentProps {
@@ -22,7 +17,7 @@ interface ParticipantDetailContentProps {
 export default function ParticipantDetailContent({
   participant,
 }: ParticipantDetailContentProps) {
-  const age = calculateAge(participant.birthDate);
+  const age = extractAgeFromBirthDate(participant.birthDate);
   const imc = parseFloat(
     calculateIMC(participant.weight, participant.height / 100),
   );
