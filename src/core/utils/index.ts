@@ -54,3 +54,21 @@ export async function fetchAddressByCep(cep: string) {
     console.error("Erro ao buscar CEP:", error);
   }
 }
+
+export function extractAgeFromBirthDate(birthDate: string): number | null {
+  if (!birthDate) return null;
+
+  const today = new Date();
+
+  const [year, month, day] = birthDate.split("T")[0].split("-").map(Number);
+  const birth = new Date(year, month - 1, day); // <-- sem UTC
+
+  let age = today.getFullYear() - birth.getFullYear();
+
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+
+  return age;
+}

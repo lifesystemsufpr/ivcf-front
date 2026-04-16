@@ -8,7 +8,7 @@ import {
   Table,
   createColumn,
 } from "@/core/components/ui";
-import { formatDate } from "@/core/utils";
+import { extractAgeFromBirthDate, formatDate } from "@/core/utils";
 import { clientRoutes } from "@/core/configs/client.routes";
 import { useNavigate } from "react-router-dom";
 import { useMemo, useState, type MouseEvent } from "react";
@@ -63,6 +63,13 @@ export default function ParticipantList() {
         header: "Nascimento",
         sortable: true,
         render: (value) => (value ? formatDate(String(value), true) : "—"),
+      }),
+      createColumn<Participant>({
+        field: "birthDate",
+        header: "Idade",
+        sortable: true,
+        render: (value) =>
+          value ? extractAgeFromBirthDate(String(value)) : "—",
       }),
     ],
     [],
