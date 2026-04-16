@@ -1,8 +1,8 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { clientRoutes } from "../configs/client.routes";
-import { Button, Separator, Typography } from "./ui";
+import { Button } from "./ui";
 import { Home, Users2, ClipboardList } from "lucide-react";
-import { useMemo, useState, type ComponentType } from "react";
+import { useMemo, useState, useTransition, type ComponentType } from "react";
 import { cn } from "../utils";
 
 type NavItem = {
@@ -25,6 +25,7 @@ export default function NavBar() {
   const router = useNavigate();
   const location = useLocation();
   const [hovered, setHovered] = useState(false);
+  const [, startTransition] = useTransition();
 
   const activeRoute = location.pathname;
 
@@ -64,7 +65,9 @@ export default function NavBar() {
                   hovered ? "justify-start px-5" : "justify-center px-0",
                 )}
                 onClick={() => {
-                  router(item.path);
+                  startTransition(() => {
+                    router(item.path);
+                  });
                 }}
                 leftIcon={<Icon size={18} />}
               >
