@@ -149,13 +149,13 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {/* Content — hidden visually while loading, kept for layout stability */}
         <span
           className={cn(
-            "inline-flex items-center gap-2",
+            children && "inline-flex items-center gap-2",
             loading && "invisible",
           )}
         >
           {leftIcon && (
             <span
-              className="inline-flex shrink-0 items-center"
+              className={`${children ? "inline-flex shrink-0 items-center" : ""}`}
               aria-hidden="true"
             >
               {leftIcon}

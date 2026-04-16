@@ -2,7 +2,7 @@ import { Box, Dropdown, IconButton } from "../ui";
 import { Outlet, useNavigate } from "react-router-dom";
 import NavBar from "../NavBar";
 import { useState } from "react";
-import { Menu, User, Moon, Sun, LogOut } from "lucide-react";
+import { User, Moon, Sun, LogOut } from "lucide-react";
 import { useTheme } from "@/core/theme/ThemeContext";
 import { clientRoutes } from "@/core/configs/client.routes";
 import { AuthGuard } from "@/core/guards/AuthGuard";
@@ -11,7 +11,6 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 export function BaseLayout() {
   const router = useNavigate();
   const { logout } = useAuth();
-  const [navOpen, setNavOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const [openDropdown, setOpenDropdown] = useState(false);
 
@@ -30,12 +29,6 @@ export function BaseLayout() {
             align="center"
             className="container mx-auto p-4 h-18.75"
           >
-            <IconButton
-              icon={Menu}
-              ariaLabel="Open navigation menu"
-              onClick={() => setNavOpen(true)}
-            />
-
             <img
               src="/logo.png"
               alt="IVCF-20 Logo"
@@ -84,7 +77,7 @@ export function BaseLayout() {
           <Outlet />
         </main>
 
-        <NavBar open={navOpen} onClose={() => setNavOpen(false)} />
+        <NavBar />
       </div>
     </AuthGuard>
   );
