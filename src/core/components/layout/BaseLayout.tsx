@@ -1,18 +1,27 @@
 import { Box, Dropdown, IconButton } from "../ui";
 import { Outlet, useNavigate } from "react-router-dom";
 import NavBar from "../NavBar";
-import { useState } from "react";
-import { User, Moon, Sun, LogOut } from "lucide-react";
+import { useEffect, useState } from "react";
+import { User, Moon, Sun, LogOut, Menu } from "lucide-react";
 import { useTheme } from "@/core/theme/ThemeContext";
 import { clientRoutes } from "@/core/configs/client.routes";
 import { AuthGuard } from "@/core/guards/AuthGuard";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useScreenInfo } from "@/core/hooks/useScreenInfo";
 
 export function BaseLayout() {
   const router = useNavigate();
   const { logout, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { isMobile } = useScreenInfo();
   const [openDropdown, setOpenDropdown] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isMobile) {
+      setMobileNavOpen(false);
+    }
+  }, [isMobile]);
 
   const handleLogout = () => {
     logout();
@@ -29,11 +38,23 @@ export function BaseLayout() {
             align="center"
             className="container mx-auto p-4 h-18.75"
           >
-            <img
-              src="/logo.png"
-              alt="IVCF-20 Logo"
-              className="h-9 object-contain"
-            />
+            <div className="flex items-center gap-2">
+              {isMobile && (
+                <IconButton
+                  icon={Menu}
+                  ariaLabel="Abrir menu de navegacao"
+                  variant="ghost"
+                  color="neutral"
+                  onClick={() => setMobileNavOpen(true)}
+                />
+              )}
+
+              <img
+                src="/logo.png"
+                alt="IVCF-20 Logo"
+                className="h-9 object-contain"
+              />
+            </div>
 
             <Dropdown
               trigger={({ open, toggle }) => (
@@ -75,7 +96,11 @@ export function BaseLayout() {
           <Outlet />
         </main>
 
-        <NavBar />
+        <NavBar
+          isMobile={isMobile}
+          mobileOpen={mobileNavOpen}
+          onMobileClose={() => setMobileNavOpen(false)}
+        />
       </div>
     </AuthGuard>
   );
