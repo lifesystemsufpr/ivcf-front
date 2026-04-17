@@ -6,6 +6,7 @@ import {
 import { Card, CardContent, CardHeader } from "@/core/components/ui/Card";
 import { Button } from "@/core/components/ui/Button";
 import { Typography } from "@/core/components/ui/Typography";
+import { useTheme } from "@/core/theme/ThemeContext";
 import {
   exportElementAsPdf,
   exportElementAsPng,
@@ -35,6 +36,7 @@ export function ComorbidityScatter({
   isCompact = false,
 }: ComorbidityScatterProps) {
   const chartRef = useRef<HTMLDivElement | null>(null);
+  const { theme } = useTheme();
   const useCanvas =
     data.reduce((acc, series) => acc + series.data.length, 0) > 5000;
 
@@ -53,6 +55,17 @@ export function ComorbidityScatter({
     ...data.flatMap((series) => series.data.map((d) => d.y)),
   );
 
+  const sexPalette =
+    theme === "dark"
+      ? {
+          male: "#60a5fa",
+          female: "#f59e0b",
+        }
+      : {
+          male: "#2563eb",
+          female: "#ea580c",
+        };
+
   return (
     <Card className="group relative h-full overflow-hidden border border-border/70 bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
       <div className="absolute inset-x-0 top-0 h-1 bg-primary/70" />
@@ -70,7 +83,7 @@ export function ComorbidityScatter({
             Idade × fragilidade
           </Typography>
           <Typography variant="caption">
-            Relação entre idade e score total IVCF-20 (tamanho reflete risco).
+            Relação entre idade e score total IVCF-20.
           </Typography>
         </div>
         <div className="flex gap-2">
@@ -104,24 +117,18 @@ export function ComorbidityScatter({
           <ChartComponent
             data={data}
             theme={nivoTheme}
-            colors={(series) =>
-              series.serieId === "Masculino" ? "#38bdf8" : "#a855f7"
-            }
+            colors={(series) => {
+              const sexLabel = String(series.serieId).toLowerCase();
+              const isMale = sexLabel.startsWith("m");
+              return isMale ? sexPalette.male : sexPalette.female;
+            }}
             margin={
               isCompact
                 ? { top: 20, right: 20, bottom: 45, left: 50 }
                 : { top: 30, right: 40, bottom: 60, left: 70 }
             }
             blendMode="multiply"
-            nodeSize={({ data }) => {
-              if (data.size) return data.size;
-              const sizeMap: Record<string, number> = {
-                Frágil: 16,
-                "Pré-frágil": 10,
-                Robusto: 6,
-              };
-              return sizeMap[data.riskLevel] ?? 10;
-            }}
+            nodeSize={isCompact ? 8 : 10}
             axisBottom={{
               legend: "Idade (anos)",
               legendOffset: isCompact ? 32 : 42,
