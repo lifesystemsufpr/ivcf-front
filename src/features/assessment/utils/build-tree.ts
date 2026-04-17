@@ -15,7 +15,7 @@ export interface GroupNode {
   subgroups: GroupNode[];
 }
 
-// Statically structure domains specifically for presentation, 
+// Statically structure domains specifically for presentation,
 // decoupled from form creation components to minimize frontend dependency when plotting responses
 const SECTIONS = {
   IDADE: { id: "sec_idade", label: "Idade" },
@@ -33,13 +33,23 @@ const SUBSECTIONS = {
   AVD_INST: { id: "sub_avd_inst", label: "AVD Instrumental" },
   AVD_BASICA: { id: "sub_avd_basica", label: "AVD Básica" },
   MOB_ALCANCE: { id: "sub_mob_alcance", label: "Alcance, preensão e pinça" },
-  MOB_AEROBICA: { id: "sub_mob_aerobica", label: "Capacidade aeróbica e/ou muscular" },
+  MOB_AEROBICA: {
+    id: "sub_mob_aerobica",
+    label: "Capacidade aeróbica e/ou muscular",
+  },
   MOB_MARCHA: { id: "sub_mob_marcha", label: "Marcha" },
+  MOB_ESFINCT: { id: "sub_mob_esfinct", label: "Continência Esfincteriana" },
   COMUN_VISAO: { id: "sub_comun_visao", label: "Visão" },
   COMUN_AUD: { id: "sub_comun_aud", label: "Audição" },
 };
 
-const ORDER_MAP: Record<number, { section: { id: string; label: string }; subSection?: { id: string; label: string } }> = {
+const ORDER_MAP: Record<
+  number,
+  {
+    section: { id: string; label: string };
+    subSection?: { id: string; label: string };
+  }
+> = {
   1: { section: SECTIONS.IDADE },
   2: { section: SECTIONS.PERCEPCAO },
   3: { section: SECTIONS.AVD, subSection: SUBSECTIONS.AVD_INST },
@@ -56,13 +66,13 @@ const ORDER_MAP: Record<number, { section: { id: string; label: string }; subSec
   14: { section: SECTIONS.MOBILIDADE, subSection: SUBSECTIONS.MOB_AEROBICA },
   15: { section: SECTIONS.MOBILIDADE, subSection: SUBSECTIONS.MOB_MARCHA },
   16: { section: SECTIONS.MOBILIDADE, subSection: SUBSECTIONS.MOB_MARCHA },
-  17: { section: SECTIONS.ESFINCT },
+  17: { section: SECTIONS.MOBILIDADE, subSection: SUBSECTIONS.MOB_ESFINCT },
   18: { section: SECTIONS.COMUNICACAO, subSection: SUBSECTIONS.COMUN_VISAO },
   19: { section: SECTIONS.COMUNICACAO, subSection: SUBSECTIONS.COMUN_AUD },
   20: { section: SECTIONS.COMORB },
 };
 
-const SECTION_ORDER = Object.values(SECTIONS).map(s => s.id);
+const SECTION_ORDER = Object.values(SECTIONS).map((s) => s.id);
 
 const subgroupCaps: Record<string, number> = {
   [SUBSECTIONS.AVD_INST.id]: 4,
@@ -79,14 +89,24 @@ export function buildGroupedTree(assessment: AssessmentResponse): GroupNode[] {
   const ensureGroup = (id: string, label: string): GroupNode => {
     let existing = groups.get(id);
     if (!existing) {
-      existing = { id, label, total: 0, rawTotal: 0, questions: [], subgroups: [] };
+      existing = {
+        id,
+        label,
+        total: 0,
+        rawTotal: 0,
+        questions: [],
+        subgroups: [],
+      };
       groups.set(id, existing);
     }
     return existing;
   };
 
-  const getQuestionNode = (container: GroupNode, question: Question): QuestionPresentationNode => {
-    let qNode = container.questions.find(q => q.question.id === question.id);
+  const getQuestionNode = (
+    container: GroupNode,
+    question: Question,
+  ): QuestionPresentationNode => {
+    let qNode = container.questions.find((q) => q.question.id === question.id);
     if (!qNode) {
       qNode = { question, answers: [], totalScore: 0 };
       container.questions.push(qNode);
@@ -96,23 +116,34 @@ export function buildGroupedTree(assessment: AssessmentResponse): GroupNode[] {
 
   assessment.answers.forEach((answer) => {
     const order = answer.question.order;
-    const mapping = ORDER_MAP[order] || { section: { id: "outros", label: "Outros" } };
+    const mapping = ORDER_MAP[order] || {
+      section: { id: "outros", label: "Outros" },
+    };
 
     const group = ensureGroup(mapping.section.id, mapping.section.label);
 
     if (mapping.subSection) {
-      let subgroup = group.subgroups.find(sg => sg.id === mapping.subSection!.id);
+      let subgroup = group.subgroups.find(
+        (sg) => sg.id === mapping.subSection!.id,
+      );
       if (!subgroup) {
-        subgroup = { id: mapping.subSection!.id, label: mapping.subSection!.label, total: 0, rawTotal: 0, questions: [], subgroups: [] };
+        subgroup = {
+          id: mapping.subSection!.id,
+          label: mapping.subSection!.label,
+          total: 0,
+          rawTotal: 0,
+          questions: [],
+          subgroups: [],
+        };
         group.subgroups.push(subgroup);
       }
       const qNode = getQuestionNode(subgroup, answer.question);
       qNode.answers.push(answer);
-      qNode.totalScore += (answer.selectedOption?.score ?? 0);
+      qNode.totalScore += answer.selectedOption?.score ?? 0;
     } else {
       const qNode = getQuestionNode(group, answer.question);
       qNode.answers.push(answer);
-      qNode.totalScore += (answer.selectedOption?.score ?? 0);
+      qNode.totalScore += answer.selectedOption?.score ?? 0;
     }
   });
 
@@ -123,8 +154,8 @@ export function buildGroupedTree(assessment: AssessmentResponse): GroupNode[] {
 
     group.subgroups.forEach((sub) => {
       let subRaw = 0;
-      sub.questions.forEach(q => {
-          subRaw += q.totalScore;
+      sub.questions.forEach((q) => {
+        subRaw += q.totalScore;
       });
       sub.rawTotal = subRaw;
       sub.total = Math.min(subRaw, subgroupCaps[sub.id] ?? subRaw);
@@ -133,18 +164,18 @@ export function buildGroupedTree(assessment: AssessmentResponse): GroupNode[] {
     });
 
     let directRaw = 0;
-    group.questions.forEach(q => {
-        directRaw += q.totalScore;
+    group.questions.forEach((q) => {
+      directRaw += q.totalScore;
     });
 
     group.rawTotal = directRaw + rawSubgroupsTotal;
     const uncappedTotal = directRaw + subgroupsTotal;
     group.total = Math.min(uncappedTotal, groupCaps[group.id] ?? uncappedTotal);
-    
+
     // Sort questions inside groups/subgroups by order
     group.questions.sort((a, b) => a.question.order - b.question.order);
-    group.subgroups.forEach(sg => {
-        sg.questions.sort((a, b) => a.question.order - b.question.order);
+    group.subgroups.forEach((sg) => {
+      sg.questions.sort((a, b) => a.question.order - b.question.order);
     });
   });
 
@@ -160,4 +191,3 @@ export function buildGroupedTree(assessment: AssessmentResponse): GroupNode[] {
 
   return ordered;
 }
-
