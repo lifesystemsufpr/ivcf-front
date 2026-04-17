@@ -1,8 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { clientRoutes } from "../configs/client.routes";
-import { Button } from "./ui";
 import { Home, Users2, ClipboardList } from "lucide-react";
-import { useMemo, useState, useTransition, type ComponentType } from "react";
+import { useMemo, type ComponentType } from "react";
 import { cn } from "../utils";
 
 type NavItem = {
@@ -24,64 +23,62 @@ const NAV_ITEMS: NavItem[] = [
 export default function NavBar() {
   const router = useNavigate();
   const location = useLocation();
-  const [hovered, setHovered] = useState(false);
-  const [, startTransition] = useTransition();
-
   const activeRoute = location.pathname;
 
   const items = useMemo(
     () =>
-      NAV_ITEMS.map((item) => ({
-        ...item,
-        active: activeRoute === item.path,
-      })),
+      NAV_ITEMS.map((item) => ({ ...item, active: activeRoute === item.path })),
     [activeRoute],
   );
 
   return (
-    <aside
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className={cn(
-        "fixed left-0 top-19 z-30 h-[calc(100vh-4.75rem)] border-r border-border bg-card/95 shadow-lg backdrop-blur-md transition-[width] duration-300 ease-out",
-        hovered ? "w-64" : "w-16",
-      )}
-    >
+    <aside className="group/nav fixed left-0 top-19 z-30 h-[calc(100vh-4.75rem)] w-16 hover:w-64 border-r border-border bg-card/95 shadow-lg backdrop-blur-md transition-[width] duration-300 ease-out">
       <div className="flex h-full flex-col px-2 py-4">
         <nav className="mt-4 flex flex-1 flex-col gap-2">
           {items.map((item) => {
             const Icon = item.icon;
 
             return (
-              <Button
+              <button
                 key={item.path}
-                variant={item.active ? "secondary" : "ghost"}
-                size="icon"
-                fullWidth={hovered}
-                tooltip={!hovered ? item.label : undefined}
+                onClick={() => router(item.path)}
                 aria-label={item.label}
+                title={item.label} // tooltip nativo quando colapsado
                 className={cn(
-                  "transition-all duration-400",
-                  hovered ? "justify-start px-5" : "justify-center px-0",
+                  // base
+                  "inline-flex w-full items-center rounded-lg text-sm font-medium tracking-tight",
+                  "h-10 select-none cursor-pointer",
+                  "transition-all duration-150 ease-out active:scale-[0.97]",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                  // layout: colapsado → expandido via group-hover
+                  "justify-center px-0",
+                  "group-hover/nav:justify-start group-hover/nav:px-5",
+                  // variante ativa vs ghost
+                  item.active
+                    ? "bg-accent text-accent-foreground shadow-sm hover:bg-accent-hover hover:shadow-md"
+                    : "hover:bg-muted text-foreground",
                 )}
-                onClick={() => {
-                  startTransition(() => {
-                    router(item.path);
-                  });
-                }}
-                leftIcon={<Icon size={18} />}
               >
-                {hovered && (
-                  <span
-                    className={cn(
-                      "overflow-hidden text-left transition-all duration-300",
-                      hovered ? "max-w-40 opacity-100" : "max-w-0 opacity-0",
-                    )}
-                  >
-                    {item.label}
-                  </span>
-                )}
-              </Button>
+                {/* Ícone — sempre visível */}
+                <span
+                  className="shrink-0 inline-flex items-center"
+                  aria-hidden="true"
+                >
+                  <Icon size={18} />
+                </span>
+
+                {/* Label — animada via CSS, sem state */}
+                <span
+                  className={cn(
+                    "overflow-hidden whitespace-nowrap text-left",
+                    "max-w-0 opacity-0 ml-0",
+                    "group-hover/nav:max-w-40 group-hover/nav:opacity-100 group-hover/nav:ml-2",
+                    "transition-all duration-300 ease-out",
+                  )}
+                >
+                  {item.label}
+                </span>
+              </button>
             );
           })}
         </nav>

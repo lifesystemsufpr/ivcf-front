@@ -11,6 +11,7 @@ import {
 import { buildGroupedTree } from "../utils/build-tree";
 import GroupSection from "../components/GroupSection";
 import { useAssessmentResponse } from "../hooks/useAssessmentResponse";
+import { formatDate } from "@/core/utils";
 
 interface AssessmentDetailModalProps {
   assessmentId: string;
@@ -81,7 +82,7 @@ export function AssessmentDetailModal({
                   {participantName}
                 </Typography>
                 <Typography variant="small" className="text-muted-foreground">
-                  {new Date(assessment.date).toLocaleDateString("pt-BR")} Total:{" "}
+                  {formatDate(assessment.date, true)} Total:{" "}
                   {assessment.totalScore} pontos
                 </Typography>
               </Box>
