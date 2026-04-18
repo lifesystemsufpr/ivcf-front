@@ -81,7 +81,7 @@ export default function ParticipantDetailContent({
         </CardHeader>
         <Separator />
         <CardContent className="grid grid-cols-2 gap-4 pt-6">
-          <DataRow label="Altura" value={`${participant.height} m`} />
+          <DataRow label="Altura" value={`${participant.height} cm`} />
           <DataRow label="Peso" value={`${participant.weight} kg`} />
           <DataRow label="IMC" value={imc} />
           <DataRow label="Classificação" value={getIMCClassification(imc)} />
