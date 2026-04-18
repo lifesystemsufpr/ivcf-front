@@ -130,8 +130,6 @@ export default function ParticipantForm({
   );
   const [errors, setErrors] = useState<FormErrors>(errorState);
 
-  const isEditMode = Boolean(initialValues?.id);
-
   useEffect(() => {
     setValues(buildInitialValues(initialValues));
     setErrors(errorState);
