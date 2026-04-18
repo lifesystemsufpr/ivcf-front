@@ -29,6 +29,7 @@ export default function RegisterPage() {
   const { isMobile, isShortHeight } = useScreenInfo();
   const [openTerms, setOpenTerms] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [emailError, setEmailError] = useState("");
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
@@ -48,6 +49,7 @@ export default function RegisterPage() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    setEmailError("");
     e.preventDefault();
 
     // Validação de senha
@@ -95,6 +97,10 @@ export default function RegisterPage() {
       }, 1000);
     } catch (err: unknown) {
       const errorMessage = getErrorMessage(err);
+
+      if (errorMessage === "O e-mail já está em uso.") {
+        setEmailError(errorMessage);
+      }
 
       toast.error(`Erro ao realizar cadastro. ${errorMessage}`, {
         toastId: "register-error",
@@ -167,6 +173,7 @@ export default function RegisterPage() {
                   id="email"
                   name="email"
                   type="email"
+                  errorMessage={emailError}
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="seu@email.com"
