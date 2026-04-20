@@ -6,6 +6,7 @@ import type { IVCF_AssessmentWithDate, Daily_Assessment } from "../types";
 import { prepareLinearScoreChartData } from "../utils/data-adapter";
 import { nivoTheme } from "@/features/dashboard/utils/transforms";
 import { Typography } from "@/core/components/ui/Typography";
+import { ResponsiveBar } from "@nivo/bar";
 
 type LinearScoreChartProps = {
   assessments: IVCF_AssessmentWithDate[] | Daily_Assessment[];
@@ -101,6 +102,7 @@ export function LinearScoreChart({
   }, [primaryData, secondaryData]);
 
   const hasData = sorted.length > 0;
+  const hasOne = sorted.length === 1;
 
   return (
     <div className="space-y-3">
@@ -117,6 +119,57 @@ export function LinearScoreChart({
           <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
             Sem dados para exibir.
           </div>
+        ) : hasOne ? (
+          <>
+            {console.log(
+              "Exibindo gráfico de barras para avaliação única:",
+              lineData[0].data[0],
+            )}
+            <ResponsiveBar
+              data={lineData[0].data}
+              indexBy="x"
+              keys={["y"]}
+              theme={nivoTheme}
+              margin={{ top: 50, right: 40, bottom: 60, left: 60 }}
+              padding={0.8}
+              valueScale={{
+                type: "linear",
+                min: 0,
+                max: 40,
+              }}
+              axisBottom={{
+                tickRotation: 0,
+                legend: "Data da Avaliação",
+                legendOffset: 50,
+                legendPosition: "middle",
+              }}
+              axisLeft={{
+                legend: "Score IVCF (0–40)",
+                legendOffset: -50,
+                legendPosition: "middle",
+              }}
+              colors={["#3B82F6"]}
+              onClick={(node) => {
+                const assessmentId = node.data.assessmentId;
+                if (assessmentId) {
+                  onSelectAssessment?.(String(assessmentId));
+                }
+              }}
+              tooltip={({ data }) => (
+                <div className="rounded-md border bg-background p-2 text-xs shadow-md">
+                  <div className="font-medium">
+                    {formatDateLabel(data.rawDate as string)}
+                  </div>
+                  <div>
+                    Score: <strong>{data.y}</strong> / 40
+                  </div>
+                  <div className="text-muted-foreground">
+                    Classificação: {data.riskLevel}
+                  </div>
+                </div>
+              )}
+            />
+          </>
         ) : (
           <ResponsiveLine
             data={lineData}

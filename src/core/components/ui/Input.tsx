@@ -105,6 +105,34 @@ function toYMD(date: Date): string {
   return `${y}-${m}-${d}`;
 }
 
+function sanitizeNumberText(value: string): string {
+  if (!value) return "";
+
+  // Keep only digits, sign and decimal separators.
+  const normalized = value.replace(/,/g, ".").replace(/[^0-9.-]/g, "");
+
+  const isNegative = normalized.startsWith("-");
+  const unsigned = normalized.replace(/-/g, "");
+
+  const [integerPart = "", ...fractionParts] = unsigned.split(".");
+  const fractionPart = fractionParts.join("");
+  const hasDecimal = normalized.includes(".");
+
+  const trimmedInteger = integerPart.replace(/^0+(?=\d)/, "");
+
+  const signedInteger = isNegative ? `-${trimmedInteger}` : trimmedInteger;
+
+  if (hasDecimal) {
+    const integerForDecimal =
+      signedInteger === "" || signedInteger === "-"
+        ? `${isNegative ? "-" : ""}0`
+        : signedInteger;
+    return `${integerForDecimal}.${fractionPart}`;
+  }
+
+  return signedInteger;
+}
+
 export interface InputProps
   extends
     Omit<React.InputHTMLAttributes<HTMLInputElement>, "size">,
@@ -127,6 +155,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       className,
       wrapperClassName,
       type = "text",
+      inputMode,
+      pattern,
       size,
       status: statusProp,
       leftElement,
@@ -147,6 +177,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ) => {
     const status = errorMessage ? "error" : statusProp;
     const helperId = id ? `${id}-helper` : undefined;
+    const isNumberInput = type === "number";
+    const inputType = isNumberInput ? "text" : type;
 
     // Normalize date values to avoid "does not conform to format yyyy-MM-dd" warnings.
     const normalizedValue =
@@ -174,6 +206,22 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (isNumberInput) {
+        const numericValue = sanitizeNumberText(e.target.value);
+        e.target.value = numericValue;
+
+        const syntheticEvent = {
+          ...e,
+          target: {
+            ...e.target,
+            value: numericValue,
+          },
+        } as React.ChangeEvent<HTMLInputElement>;
+
+        onChange?.(syntheticEvent);
+        return;
+      }
+
       if (!mask) {
         onChange?.(e);
         return;
@@ -221,7 +269,11 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <input
             ref={ref}
             id={id}
-            type={type}
+            type={inputType}
+            inputMode={isNumberInput ? (inputMode ?? "decimal") : inputMode}
+            pattern={
+              isNumberInput ? (pattern ?? "-?[0-9]*[.,]?[0-9]*") : pattern
+            }
             aria-describedby={helperId}
             aria-invalid={status === "error" || undefined}
             className={cn(

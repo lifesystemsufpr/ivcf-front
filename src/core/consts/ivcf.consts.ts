@@ -28,7 +28,7 @@ export const DOMAIN_DEFINITIONS: {
 }[] = [
   { key: "age", label: "Idade", max: 3 },
   { key: "selfPerception", label: "Autopercepção", max: 1 },
-  { key: "functionalCapacity", label: "Capacidade Funcional", max: 10 },
+  { key: "functionalCapacity", label: "Atv. de Vida Diária", max: 10 },
   { key: "cognition", label: "Cognição", max: 4 },
   { key: "mood", label: "Humor", max: 4 },
   { key: "mobility", label: "Mobilidade", max: 10 },

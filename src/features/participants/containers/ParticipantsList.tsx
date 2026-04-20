@@ -8,7 +8,7 @@ import {
   Table,
   createColumn,
 } from "@/core/components/ui";
-import { formatDate } from "@/core/utils";
+import { extractAgeFromBirthDate, formatDate } from "@/core/utils";
 import { clientRoutes } from "@/core/configs/client.routes";
 import { useNavigate } from "react-router-dom";
 import { useMemo, useState, type MouseEvent } from "react";
@@ -63,6 +63,13 @@ export default function ParticipantList() {
         header: "Nascimento",
         sortable: true,
         render: (value) => (value ? formatDate(String(value), true) : "—"),
+      }),
+      createColumn<Participant>({
+        field: "birthDate",
+        header: "Idade",
+        sortable: true,
+        render: (value) =>
+          value ? extractAgeFromBirthDate(String(value)) : "—",
       }),
     ],
     [],
@@ -206,6 +213,9 @@ export default function ParticipantList() {
           renderActions={(participant) => (
             <Box display="flex" direction="row" gap={8} justify="center">
               <Button
+                tooltip={{
+                  content: "Iniciar nova avaliação",
+                }}
                 variant="secondary"
                 size="sm"
                 onClick={(event) => handleStartAssessment(event, participant)}
@@ -213,6 +223,9 @@ export default function ParticipantList() {
                 <ClipboardPlus size={16} />
               </Button>
               <Button
+                tooltip={{
+                  content: "Editar participante",
+                }}
                 variant="default"
                 size="sm"
                 onClick={(event) => handleEdit(event, participant)}
@@ -220,6 +233,9 @@ export default function ParticipantList() {
                 <Pencil size={16} />
               </Button>
               <Button
+                tooltip={{
+                  content: "Excluir participante",
+                }}
                 variant="destructive"
                 size="sm"
                 onClick={(event) => handleDelete(event, participant)}

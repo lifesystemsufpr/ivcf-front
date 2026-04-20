@@ -32,13 +32,16 @@ export class ParticipantsService {
       ),
     );
 
+    const shortField =
+      params?.sortField === "birthDate" ? "birthday" : params?.sortField;
+
     const resp = await http.get<SuccessResponse<ParticipantResponse[]>>(
       apiRoutes.PARTICIPANTS.LIST,
       {
         query: {
           page: params?.page,
           pageSize: params?.pageSize,
-          sortField: params?.sortField,
+          sortField: shortField,
           sortDirection: params?.sortDirection,
           ...filtersQuery,
         },

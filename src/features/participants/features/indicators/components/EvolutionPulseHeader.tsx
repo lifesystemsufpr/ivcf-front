@@ -1,9 +1,6 @@
-import { Download } from "lucide-react";
 import { Badge } from "@/core/components/ui/Badge";
-import { Button } from "@/core/components/ui/Button";
 import { cn } from "@/core/utils";
 import { classificationStyles } from "@/core/consts/ivcf.consts";
-import { exportElementAsPdf } from "@/features/dashboard/utils/transforms";
 import type { FrailtyClassification } from "@/core/types";
 
 type EvolutionPulseHeaderProps = {
@@ -21,7 +18,6 @@ export function EvolutionPulseHeader({
   totalScore,
   deltaAbsolute,
   deltaPercent,
-  exportRef,
 }: EvolutionPulseHeaderProps) {
   const riskStyle = classificationStyles[riskLevel];
 
@@ -67,16 +63,6 @@ export function EvolutionPulseHeader({
             </span>
           </div>
         </div>
-
-        <Button
-          size="md"
-          onClick={() =>
-            exportElementAsPdf(exportRef.current, "resumo-clinico")
-          }
-          leftIcon={<Download className="h-4 w-4" />}
-        >
-          Exportar Resumo
-        </Button>
       </div>
     </div>
   );

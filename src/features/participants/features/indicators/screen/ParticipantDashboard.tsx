@@ -1,9 +1,8 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
-  MultipleLineChart,
-  type DomainDefinition,
-} from "../components/MultipleLineChart";
-import { DomainComparisonTable } from "../components/DomainComparisonTable";
+  DomainTable,
+  type DomainTableDomainDefinition,
+} from "../components/DomainTable";
 import { EvolutionPulseHeader } from "../components/EvolutionPulseHeader";
 import { LinearScoreChart } from "../components/LinearScoreChart";
 import { WebChart } from "../components/WebChart";
@@ -18,15 +17,15 @@ import {
 
 type DomainKey = keyof IVCF_DomainScores;
 
-const ALL_DOMAINS: DomainDefinition[] = [
-  { key: "age", label: "Idade", color: "#3B82F6" },
-  { key: "selfPerception", label: "Autopercepção", color: "#8B5CF6" },
-  { key: "functionalCapacity", label: "Cap. Funcional", color: "#F97316" },
-  { key: "cognition", label: "Cognição", color: "#10B981" },
-  { key: "mood", label: "Humor", color: "#EF4444" },
-  { key: "mobility", label: "Mobilidade", color: "#14B8A6" },
-  { key: "communication", label: "Comunicação", color: "#6366F1" },
-  { key: "comorbidities", label: "Comorbidades", color: "#EAB308" },
+const ALL_DOMAINS: DomainTableDomainDefinition[] = [
+  { key: "age", label: "Idade" },
+  { key: "selfPerception", label: "Autopercepção" },
+  { key: "functionalCapacity", label: "Atv. de Vida Diária" },
+  { key: "cognition", label: "Cognição" },
+  { key: "mood", label: "Humor" },
+  { key: "mobility", label: "Mobilidade" },
+  { key: "communication", label: "Comunicação" },
+  { key: "comorbidities", label: "Comorbidades" },
 ];
 
 const ALL_DOMAIN_KEYS: DomainKey[] = ALL_DOMAINS.map((d) => d.key);
@@ -122,17 +121,9 @@ export function ParticipantDashboard({
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div ref={contentRef} className="flex-1 min-w-0 space-y-6">
-          <MultipleLineChart
+          <DomainTable
             assessments={flatAssessments}
             domains={ALL_DOMAINS}
-            selectedDomainKeys={ALL_DOMAIN_KEYS}
-            height={380}
-            onSelectAssessment={handleSelectAssessment}
-          />
-
-          <DomainComparisonTable
-            assessments={flatAssessments}
-            allDomains={ALL_DOMAINS}
             selectedDomainKeys={ALL_DOMAIN_KEYS}
           />
         </div>

@@ -5,6 +5,8 @@ import {
   Separator,
   Input,
   Typography,
+  Checkbox,
+  Modal,
 } from "@/core/components/ui";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -13,6 +15,7 @@ import { useRegisterAndLogin } from "../hooks/useRegisterAndLogin";
 import { Bounce, toast } from "react-toastify";
 import { getErrorMessage } from "../utils/error";
 import { useScreenInfo } from "@/core/hooks/useScreenInfo";
+import Term from "../components/Term";
 
 interface FormData {
   name: string;
@@ -24,6 +27,9 @@ interface FormData {
 export default function RegisterPage() {
   const router = useNavigate();
   const { isMobile, isShortHeight } = useScreenInfo();
+  const [openTerms, setOpenTerms] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [emailError, setEmailError] = useState("");
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
@@ -43,6 +49,7 @@ export default function RegisterPage() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    setEmailError("");
     e.preventDefault();
 
     // Validação de senha
@@ -91,6 +98,10 @@ export default function RegisterPage() {
     } catch (err: unknown) {
       const errorMessage = getErrorMessage(err);
 
+      if (errorMessage === "O e-mail já está em uso.") {
+        setEmailError(errorMessage);
+      }
+
       toast.error(`Erro ao realizar cadastro. ${errorMessage}`, {
         toastId: "register-error",
         position: "top-center",
@@ -110,7 +121,7 @@ export default function RegisterPage() {
       display="flex"
       justify="center"
       align={useCompactLayout ? "flex-start" : "center"}
-      className="min-h-[100dvh] w-full p-3 sm:p-4"
+      className="min-h-dvh w-full p-3 sm:p-4"
     >
       <Box
         className={`w-full max-w-2xl overflow-hidden border bg-background/80 backdrop-blur ${
@@ -162,6 +173,7 @@ export default function RegisterPage() {
                   id="email"
                   name="email"
                   type="email"
+                  errorMessage={emailError}
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="seu@email.com"
@@ -209,26 +221,44 @@ export default function RegisterPage() {
               />
             </Box>
 
+            <Box display="flex" align="center" gap={8} direction="row">
+              <Checkbox
+                id="terms"
+                checked={termsAccepted}
+                onChange={(e) => setTermsAccepted(e.target.checked)}
+              />
+              <Typography
+                variant="small"
+                className="text-muted-foreground cursor-pointer"
+                onClick={() => setOpenTerms(true)}
+              >
+                Li e concordo com os Termos de Uso e a Política de Privacidade.
+              </Typography>
+            </Box>
+
             <Box className="pt-2">
               <Button
                 type="submit"
                 variant="default"
                 size="lg"
                 className="w-full"
-                disabled={isPending}
+                disabled={isPending || !termsAccepted}
               >
                 {isPending ? "Cadastrando..." : "Finalizar Cadastro"}
               </Button>
             </Box>
-
-            <Typography
-              variant="small"
-              className="text-center text-muted-foreground"
-            >
-              Ao se cadastrar, você concorda com nossos Termos de Uso e Política
-              de Privacidade.
-            </Typography>
           </form>
+
+          {openTerms && (
+            <Modal
+              open={openTerms}
+              onClose={() => setOpenTerms(false)}
+              hideCloseButton
+              size="xl"
+            >
+              <Term />
+            </Modal>
+          )}
         </Box>
       </Box>
     </Box>
