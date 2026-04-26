@@ -108,8 +108,9 @@ function toYMD(date: Date): string {
 function sanitizeNumberText(value: string): string {
   if (!value) return "";
 
-  // Keep only digits, sign and decimal separators.
   const normalized = value.replace(/,/g, ".").replace(/[^0-9.-]/g, "");
+
+  if (!/[0-9]/.test(normalized)) return "";
 
   const isNegative = normalized.startsWith("-");
   const unsigned = normalized.replace(/-/g, "");
@@ -123,11 +124,8 @@ function sanitizeNumberText(value: string): string {
   const signedInteger = isNegative ? `-${trimmedInteger}` : trimmedInteger;
 
   if (hasDecimal) {
-    const integerForDecimal =
-      signedInteger === "" || signedInteger === "-"
-        ? `${isNegative ? "-" : ""}0`
-        : signedInteger;
-    return `${integerForDecimal}.${fractionPart}`;
+    if (!trimmedInteger && !fractionPart) return "";
+    return `${signedInteger || (isNegative ? "-" : "")}.${fractionPart}`;
   }
 
   return signedInteger;
@@ -180,6 +178,12 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const isNumberInput = type === "number";
     const inputType = isNumberInput ? "text" : type;
 
+    const [numberDisplay, setNumberDisplay] = React.useState<string>(() =>
+      isNumberInput && value !== undefined && value !== ""
+        ? sanitizeNumberText(String(value))
+        : "",
+    );
+
     // Normalize date values to avoid "does not conform to format yyyy-MM-dd" warnings.
     const normalizedValue =
       type === "date" && value !== undefined ? normalizeDate(value) : value;
@@ -208,7 +212,9 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       if (isNumberInput) {
         const numericValue = sanitizeNumberText(e.target.value);
-        e.target.value = numericValue;
+
+        // Update display — empty string is intentional (user is clearing)
+        setNumberDisplay(numericValue);
 
         const syntheticEvent = {
           ...e,
@@ -256,6 +262,21 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       onChange?.(syntheticEvent);
     };
 
+    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+      if (isNumberInput && numberDisplay === "") {
+        setNumberDisplay("0");
+
+        const syntheticEvent = {
+          ...e,
+          target: { ...e.target, value: "0" },
+        } as unknown as React.ChangeEvent<HTMLInputElement>;
+
+        onChange?.(syntheticEvent);
+      }
+
+      props.onBlur?.(e);
+    };
+
     return (
       <div className={cn("flex flex-col gap-1.5 w-full", wrapperClassName)}>
         <div className={cn(inputWrapperVariants({ size, status }))}>
@@ -282,9 +303,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               "disabled:cursor-not-allowed",
               className,
             )}
-            value={normalizedValue}
-            defaultValue={normalizedDefaultValue}
+            value={isNumberInput ? numberDisplay : normalizedValue}
+            defaultValue={isNumberInput ? undefined : normalizedDefaultValue}
             onChange={handleChange}
+            onBlur={handleBlur}
             {...props}
           />
 
