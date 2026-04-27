@@ -6,7 +6,6 @@ import {
 import { Card, CardContent, CardHeader } from "@/core/components/ui/Card";
 import { Button } from "@/core/components/ui/Button";
 import { Typography } from "@/core/components/ui/Typography";
-import { useTheme } from "@/core/theme/ThemeContext";
 import {
   exportElementAsPdf,
   exportElementAsPng,
@@ -36,7 +35,6 @@ export function ComorbidityScatter({
   isCompact = false,
 }: ComorbidityScatterProps) {
   const chartRef = useRef<HTMLDivElement | null>(null);
-  const { theme } = useTheme();
   const useCanvas =
     data.reduce((acc, series) => acc + series.data.length, 0) > 5000;
 
@@ -45,33 +43,17 @@ export function ComorbidityScatter({
     [useCanvas],
   );
 
-  const maxAge = Math.max(
-    100,
-    ...data.flatMap((series) => series.data.map((d) => d.x)),
-  );
+  const maxAge = 100;
 
   const maxScore = Math.max(
     40,
     ...data.flatMap((series) => series.data.map((d) => d.y)),
   );
 
-  const sexPalette =
-    theme === "dark"
-      ? {
-          male: "#60a5fa",
-          female: "#f59e0b",
-        }
-      : {
-          male: "#2563eb",
-          female: "#ea580c",
-        };
-
   return (
-    <Card className="group relative h-full overflow-hidden border border-border/70 bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
-      <div className="absolute inset-x-0 top-0 h-1 bg-primary/70" />
-
+    <Card className="h-full">
       <CardHeader
-        className={`flex items-start justify-between gap-4 pb-3 pt-6 ${
+        className={`flex items-start justify-between gap-4 ${
           isCompact ? "flex-col" : "flex-row"
         }`}
       >
@@ -81,9 +63,6 @@ export function ComorbidityScatter({
             className="text-primary font-medium uppercase mb-2"
           >
             Idade × fragilidade
-          </Typography>
-          <Typography variant="caption">
-            Relação entre idade e score total IVCF-20.
           </Typography>
         </div>
         <div className="flex gap-2">
@@ -107,28 +86,29 @@ export function ComorbidityScatter({
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="pt-0">
-        <div
-          ref={chartRef}
-          className={`rounded-xl border border-border/60 bg-muted/20 p-2 ${
-            isCompact ? "h-80" : "h-105"
-          }`}
-        >
+      <CardContent>
+        <div ref={chartRef} className={isCompact ? "h-80" : "h-105"}>
           <ChartComponent
             data={data}
             theme={nivoTheme}
-            colors={(series) => {
-              const sexLabel = String(series.serieId).toLowerCase();
-              const isMale = sexLabel.startsWith("m");
-              return isMale ? sexPalette.male : sexPalette.female;
-            }}
+            colors={(series) =>
+              series.serieId === "Masculino" ? "#38bdf8" : "#a855f7"
+            }
             margin={
               isCompact
                 ? { top: 20, right: 20, bottom: 45, left: 50 }
                 : { top: 30, right: 40, bottom: 60, left: 70 }
             }
             blendMode="multiply"
-            nodeSize={isCompact ? 8 : 10}
+            nodeSize={({ data }) => {
+              if (data.size) return data.size;
+              const sizeMap: Record<string, number> = {
+                Frágil: 16,
+                "Pré-frágil": 10,
+                Robusto: 6,
+              };
+              return sizeMap[data.riskLevel] ?? 10;
+            }}
             axisBottom={{
               legend: "Idade (anos)",
               legendOffset: isCompact ? 32 : 42,
@@ -144,7 +124,7 @@ export function ComorbidityScatter({
             xScale={{
               type: "linear",
               min: 60,
-              max: maxAge + 2,
+              max: maxAge,
             }}
             yScale={{
               type: "linear",
@@ -171,7 +151,7 @@ export function ComorbidityScatter({
                 direction="column"
                 align="center"
                 p={5}
-                className="w-35 rounded-lg border border-border/60 bg-background shadow-md"
+                className="bg-background rounded w-35 border"
               >
                 <div className="font-semibold">Sexo: {node.data.sex}</div>
                 <div>Idade: {node.data.x} anos</div>
