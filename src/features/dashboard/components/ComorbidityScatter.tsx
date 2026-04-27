@@ -45,11 +45,7 @@ export function ComorbidityScatter({
     [useCanvas],
   );
 
-  const maxAge = Math.max(
-    100,
-    ...data.flatMap((series) => series.data.map((d) => d.x)),
-  );
-
+  const maxAge = 100;
   const maxScore = Math.max(
     40,
     ...data.flatMap((series) => series.data.map((d) => d.y)),
@@ -81,9 +77,6 @@ export function ComorbidityScatter({
             className="text-primary font-medium uppercase mb-2"
           >
             Idade × fragilidade
-          </Typography>
-          <Typography variant="caption">
-            Relação entre idade e score total IVCF-20.
           </Typography>
         </div>
         <div className="flex gap-2">
@@ -144,7 +137,7 @@ export function ComorbidityScatter({
             xScale={{
               type: "linear",
               min: 60,
-              max: maxAge + 2,
+              max: maxAge,
             }}
             yScale={{
               type: "linear",
