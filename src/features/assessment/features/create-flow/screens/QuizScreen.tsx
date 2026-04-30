@@ -18,10 +18,7 @@ import { ProgressBar } from "../components/ProgressBar";
 import { QuestionCard } from "../components/QuestionCard";
 import { saveAssessment } from "../services/saveAssessment";
 import { useQuestionnaireStructure } from "../hooks/useQuestionnaireStructure";
-import {
-  flattenQuestions,
-  findQuestionByOrder,
-} from "../utils/questionnaireHelpers";
+import { flattenQuestions } from "../utils/questionnaireHelpers";
 import { useAuthContext } from "@/features/auth/contexts/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -41,6 +38,7 @@ export default function QuizScreen() {
     selectParticipant,
     setQuestionnaireId,
     setTotalQuestions,
+    setCurrentQuestion,
     reset,
   } = useAssessmentContext();
 
@@ -60,17 +58,64 @@ export default function QuizScreen() {
     return flattenQuestions(questionnaireStructure);
   }, [questionnaireStructure]);
 
+  const question7 = useMemo(
+    () => questions.find((item) => item.order === 7),
+    [questions],
+  );
+  const question8 = useMemo(
+    () => questions.find((item) => item.order === 8),
+    [questions],
+  );
+  const question9 = useMemo(
+    () => questions.find((item) => item.order === 9),
+    [questions],
+  );
+
+  const isQuestion7Yes = useMemo(() => {
+    if (!question7) return false;
+
+    const question7OptionId = answers[question7.id]?.optionId;
+    if (!question7OptionId) return false;
+
+    const question7Option = question7.options.find(
+      (option) => option.id === question7OptionId,
+    );
+    if (!question7Option) return false;
+
+    return question7Option.label.trim().toLowerCase() === "sim";
+  }, [answers, question7]);
+
+  const visibleQuestions = useMemo(
+    () =>
+      questions.filter((item) => {
+        if (item.order === 8 || item.order === 9) {
+          return isQuestion7Yes;
+        }
+        return true;
+      }),
+    [isQuestion7Yes, questions],
+  );
+
   useEffect(() => {
     if (questionnaireStructure?.id) {
       setQuestionnaireId(questionnaireStructure.id);
-      setTotalQuestions(questions.length);
+      setTotalQuestions(visibleQuestions.length);
     }
   }, [
     questionnaireStructure,
-    questions.length,
+    visibleQuestions.length,
     setQuestionnaireId,
     setTotalQuestions,
   ]);
+
+  useEffect(() => {
+    if (
+      currentQuestion > visibleQuestions.length &&
+      visibleQuestions.length > 0
+    ) {
+      setCurrentQuestion(visibleQuestions.length);
+    }
+  }, [currentQuestion, setCurrentQuestion, visibleQuestions.length]);
 
   useEffect(() => {
     if (selectedParticipant?.id) {
@@ -78,15 +123,70 @@ export default function QuizScreen() {
     }
   }, [selectedParticipant, selectParticipant]);
 
+  useEffect(() => {
+    if (isQuestion7Yes) {
+      return;
+    }
+
+    const normalize = (value: string) =>
+      value
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .toLowerCase();
+
+    const applyNoAnswer = (targetQuestion?: (typeof questions)[number]) => {
+      if (!targetQuestion) {
+        return;
+      }
+
+      const noOption = targetQuestion.options.find(
+        (option) => normalize(option.label) === "nao",
+      );
+
+      if (!noOption) {
+        return;
+      }
+
+      const currentOptionId = answers[targetQuestion.id]?.optionId;
+      if (currentOptionId === noOption.id) {
+        return;
+      }
+
+      updateAnswer({
+        questionId: targetQuestion.id,
+        optionId: noOption.id,
+        score: noOption.score,
+      });
+    };
+
+    applyNoAnswer(question8);
+    applyNoAnswer(question9);
+  }, [answers, isQuestion7Yes, question8, question9, updateAnswer]);
+
   const question = useMemo(() => {
-    return findQuestionByOrder(questions, currentQuestion) ?? questions[0];
-  }, [questions, currentQuestion]);
+    return visibleQuestions[currentQuestion - 1] ?? visibleQuestions[0];
+  }, [visibleQuestions, currentQuestion]);
 
   const selectedOptionId = question
     ? answers[question.id]?.optionId
     : undefined;
-  const answeredCount = Object.keys(answers).length;
-  const hasAllAnswers = answeredCount === totalQuestions;
+  const visibleQuestionIds = useMemo(
+    () => new Set(visibleQuestions.map((item) => item.id)),
+    [visibleQuestions],
+  );
+  const visibleAnswers = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(answers).filter(([questionId]) =>
+          visibleQuestionIds.has(questionId),
+        ),
+      ),
+    [answers, visibleQuestionIds],
+  );
+  const answeredCount = Object.keys(visibleAnswers).length;
+  const hasAllAnswers =
+    visibleQuestions.length > 0 && answeredCount === visibleQuestions.length;
   const isLastQuestion = currentQuestion === totalQuestions;
 
   const handleSelectOption = (optionId: string, score: number) => {
