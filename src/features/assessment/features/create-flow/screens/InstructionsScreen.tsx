@@ -1,10 +1,11 @@
 import { useState, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { MessageCircle, Ear, Hand, Clock } from "lucide-react"; // Ícones para a lista
+import { MessageCircle, Ear, Hand, Clock } from "lucide-react";
 import { Box, Button, Typography } from "@/core/components/ui";
 import { clientRoutes } from "@/core/configs/client.routes";
 import ParticipantAutocomplete from "@/features/participants/components/ParticipantAutocomplete";
 import { useAssessmentContext } from "../context/CreateAssessmentContext";
+import { extractAgeFromBirthDate } from "@/core/utils";
 
 interface InstructionsScreenProps {
   participantId?: string;
@@ -15,6 +16,7 @@ export default function InstructionsScreen({
 }: InstructionsScreenProps) {
   const navigate = useNavigate();
   const location = useLocation();
+
   const { selectParticipant, reset } = useAssessmentContext();
 
   const initialId = useMemo(() => {
@@ -26,11 +28,12 @@ export default function InstructionsScreen({
   const [selectedLocalId, setSelectedLocalId] = useState<string | null>(
     initialId,
   );
+  const [participantAge, setParticipantAge] = useState<number | null>(null);
 
   const handleStart = () => {
-    if (!selectedLocalId) return;
+    if (!selectedLocalId || participantAge === null) return;
     reset();
-    selectParticipant(selectedLocalId);
+    selectParticipant(selectedLocalId, participantAge);
     navigate(clientRoutes.IVCF.TEST);
   };
 
@@ -93,30 +96,25 @@ export default function InstructionsScreen({
           gap={12}
           className="border-t border-slate-100 pt-6"
         >
-          {!initialId ? (
-            <>
-              <Typography
-                variant="small"
-                className="font-semibold text-primary"
-              >
-                Escolha o participante para continuar:
-              </Typography>
-              <ParticipantAutocomplete
-                onChange={(value) => setSelectedLocalId(value?.id ?? null)}
-                initialId={selectedLocalId}
-                className="w-full"
-              />
-            </>
-          ) : (
-            <Box className="p-4 bg-primary-soft rounded-2xl border border-primary/10">
-              <Typography
-                variant="small"
-                className="text-primary font-bold text-center"
-              >
-                ✓ Participante selecionado e pronto para avaliação.
-              </Typography>
-            </Box>
-          )}
+          <Typography variant="small" className="font-semibold text-primary">
+            Escolha o participante para continuar:
+          </Typography>
+          <ParticipantAutocomplete
+            onChange={(value) => {
+              setSelectedLocalId(value?.id ?? null);
+              setParticipantAge(
+                extractAgeFromBirthDate(value?.birthDate) ?? null,
+              );
+            }}
+            onInitialResolve={(value) => {
+              setSelectedLocalId(value?.id ?? null);
+              setParticipantAge(
+                extractAgeFromBirthDate(value?.birthDate) ?? null,
+              );
+            }}
+            initialId={initialId}
+            className="w-full"
+          />
         </Box>
 
         {/* Botão de Ação (Verde Accent) */}

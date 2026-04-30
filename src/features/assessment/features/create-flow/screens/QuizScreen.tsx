@@ -74,7 +74,7 @@ export default function QuizScreen() {
 
   useEffect(() => {
     if (selectedParticipant?.id) {
-      selectParticipant(selectedParticipant.id);
+      selectParticipant(selectedParticipant.id, null);
     }
   }, [selectedParticipant, selectParticipant]);
 
