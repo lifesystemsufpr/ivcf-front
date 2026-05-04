@@ -83,7 +83,7 @@ export function getSummaryInsights(summary: SummaryStats) {
       min: 6,
       max: 15,
       message:
-        "Fragilidade média intermediária. Mantenha monitoramento continuo.",
+        "Fragilidade média intermediária. Mantenha monitoramento contínuo.",
       level: "medium",
     },
     {
