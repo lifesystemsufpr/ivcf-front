@@ -35,6 +35,7 @@ export function useQuizFlow({
     if (!user?.id) return setErrorMessage("Usuário não autenticado.");
     if (!hasAllAnswers) return setErrorMessage("Responda tudo.");
 
+    setErrorMessage(null);
     setIsSubmitting(true);
 
     try {
