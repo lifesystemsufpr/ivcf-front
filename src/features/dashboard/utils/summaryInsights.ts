@@ -76,7 +76,7 @@ export function getSummaryInsights(summary: SummaryStats) {
   const avgScoreInsights = pickInsight(summary.avgScore ?? 0, [
     {
       max: 6,
-      message: "Frágilidade média baixa no grupo avaliado.",
+      message: "Fragilidade média baixa no grupo avaliado.",
       level: "low",
     },
     {
