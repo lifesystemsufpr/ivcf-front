@@ -23,7 +23,7 @@ const pickInsight = (value: number, rules: InsightRule[]): InsightResult => {
 
   return (
     matched ?? {
-      message: "Sem observacao para o valor atual.",
+      message: "Sem observação para o valor atual.",
       level: "low",
     }
   );
@@ -34,20 +34,20 @@ export function getSummaryInsights(summary: SummaryStats) {
     {
       max: 15,
       message:
-        "Poucos participantes. Amplie a captacao para fortalecer a analise.",
+        "Poucos participantes. Amplie a captação para fortalecer a análise.",
       level: "low",
     },
     {
       min: 15,
       max: 30,
       message:
-        "Base em formacao. Acompanhe crescimento para ganhar estabilidade.",
+        "Base em formação. Acompanhe crescimento para ganhar estabilidade.",
       level: "medium",
     },
     {
       min: 30,
       message:
-        "Base consolidada para leitura de tendencia com maior confianca.",
+        "Base consolidada para leitura de tendência com maior confiança.",
       level: "high",
     },
   ]);
@@ -56,19 +56,19 @@ export function getSummaryInsights(summary: SummaryStats) {
     {
       max: 10,
       message:
-        "Cobertura de avaliacao baixa. Priorize mais aplicacoes do protocolo.",
+        "Cobertura de avaliação baixa. Priorize mais aplicações do protocolo.",
       level: "low",
     },
     {
       min: 10,
       max: 25,
       message:
-        "Cobertura moderada. Ha sinal, mas ainda com espaco para ampliar.",
+        "Cobertura moderada. Há sinal, mas ainda com espaço para ampliar.",
       level: "medium",
     },
     {
       min: 25,
-      message: "Cobertura robusta de avaliacao no periodo selecionado.",
+      message: "Cobertura robusta de avaliação no período selecionado.",
       level: "high",
     },
   ]);
@@ -76,20 +76,20 @@ export function getSummaryInsights(summary: SummaryStats) {
   const avgScoreInsights = pickInsight(summary.avgScore ?? 0, [
     {
       max: 6,
-      message: "Fragilidade media baixa no grupo avaliado.",
+      message: "Fragilidade média baixa no grupo avaliado.",
       level: "low",
     },
     {
       min: 6,
       max: 15,
       message:
-        "Fragilidade media intermediaria. Mantenha monitoramento continuo.",
+        "Fragilidade média intermediária. Mantenha monitoramento contínuo.",
       level: "medium",
     },
     {
       min: 15,
       message:
-        "Fragilidade media elevada. Priorize planos de cuidado intensivo.",
+        "Fragilidade média elevada. Priorize planos de cuidado intensivo.",
       level: "high",
     },
   ]);
@@ -97,7 +97,7 @@ export function getSummaryInsights(summary: SummaryStats) {
   const avgAgeInsights = pickInsight(summary.avgAge ?? 0, [
     {
       max: 70,
-      message: "Perfil etario mais jovem dentro da populacao idosa.",
+      message: "Perfil etário mais jovem dentro da população idosa.",
       level: "low",
     },
     {
@@ -118,18 +118,18 @@ export function getSummaryInsights(summary: SummaryStats) {
   const ageGroupsInsights = pickInsight(topAgeGroupVolume, [
     {
       max: 10,
-      message: "Distribuicao etaria pulverizada entre os grupos.",
+      message: "Distribuição etária pulverizada entre os grupos.",
       level: "low",
     },
     {
       min: 10,
       max: 25,
-      message: "Concentracao etaria moderada no grupo predominante.",
+      message: "Concentração etária moderada no grupo predominante.",
       level: "medium",
     },
     {
       min: 25,
-      message: "Alta concentracao etaria em poucos grupos prioritarios.",
+      message: "Alta concentração etária em poucos grupos prioritários.",
       level: "high",
     },
   ]);

@@ -17,6 +17,7 @@ export type AnswerMap = Record<string, AssessmentAnswer>;
 
 interface AssessmentState {
   participantId: string | null;
+  participantAge: number | null;
   questionnaireId: string | null;
   answers: AnswerMap;
   currentQuestion: number;
@@ -25,7 +26,10 @@ interface AssessmentState {
 
 interface AssessmentContextValue extends AssessmentState {
   totalScore: number;
-  selectParticipant: (participantId: string) => void;
+  selectParticipant: (
+    participantId: string,
+    participantAge: number | null,
+  ) => void;
   setQuestionnaireId: (questionnaireId: string) => void;
   setTotalQuestions: (total: number) => void;
   updateAnswer: (answer: AssessmentAnswer) => void;
@@ -43,6 +47,7 @@ const defaultState: AssessmentState = {
   answers: {},
   currentQuestion: 1,
   totalQuestions: 20,
+  participantAge: null,
 };
 
 const calculateIvcfScore = (answers: AnswerMap): number => {
@@ -98,6 +103,7 @@ function loadInitialState(): AssessmentState {
     const parsed = JSON.parse(stored) as AssessmentState;
     return {
       participantId: parsed.participantId ?? null,
+      participantAge: parsed.participantAge ?? null,
       questionnaireId: parsed.questionnaireId ?? null,
       answers: parsed.answers ?? {},
       currentQuestion: parsed.currentQuestion ?? 1,
@@ -129,9 +135,16 @@ export function AssessmentProvider({
     [state.answers],
   );
 
-  const selectParticipant = useCallback((participantId: string) => {
-    setState((prev) => ({ ...prev, participantId }));
-  }, []);
+  const selectParticipant = useCallback(
+    (participantId: string, participantAge: number | null) => {
+      if (participantAge === null) {
+        setState((prev) => ({ ...prev, participantId }));
+        return;
+      }
+      setState((prev) => ({ ...prev, participantId, participantAge }));
+    },
+    [],
+  );
 
   const setQuestionnaireId = useCallback((questionnaireId: string) => {
     setState((prev) => ({ ...prev, questionnaireId }));

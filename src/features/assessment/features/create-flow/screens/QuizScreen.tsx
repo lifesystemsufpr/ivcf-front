@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   Alert,
   Box,
@@ -10,24 +9,17 @@ import {
   CardTitle,
   Typography,
 } from "@/core/components/ui";
-import { clientRoutes } from "@/core/configs/client.routes";
 import ParticipantAutocomplete from "@/features/participants/components/ParticipantAutocomplete";
 import type { Participant } from "@/features/participants/types";
 import { useAssessmentContext } from "../context/CreateAssessmentContext";
 import { ProgressBar } from "../components/ProgressBar";
 import { QuestionCard } from "../components/QuestionCard";
-import { saveAssessment } from "../services/saveAssessment";
 import { useQuestionnaireStructure } from "../hooks/useQuestionnaireStructure";
-import {
-  flattenQuestions,
-  findQuestionByOrder,
-} from "../utils/questionnaireHelpers";
 import { useAuthContext } from "@/features/auth/contexts/AuthContext";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuizLogic } from "../hooks/useQuizLogic";
+import { useQuizFlow } from "../hooks/useQuizFlow";
 
 export default function QuizScreen() {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const { user } = useAuthContext();
   const {
     participantId,
@@ -41,6 +33,7 @@ export default function QuizScreen() {
     selectParticipant,
     setQuestionnaireId,
     setTotalQuestions,
+    setCurrentQuestion,
     reset,
   } = useAssessmentContext();
 
@@ -50,44 +43,62 @@ export default function QuizScreen() {
     error: structureError,
   } = useQuestionnaireStructure();
 
+  const { answeredCount, hasAllAnswers, questions, visibleQuestions } =
+    useQuizLogic({
+      answers,
+      questionnaireStructure,
+      updateAnswer,
+    });
+
   const [selectedParticipant, setSelectedParticipant] =
     useState<Participant | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const questions = useMemo(() => {
-    if (!questionnaireStructure) return [];
-    return flattenQuestions(questionnaireStructure);
-  }, [questionnaireStructure]);
+  const { errorMessage, handleFinish, isSubmitting, setErrorMessage } =
+    useQuizFlow({
+      answers,
+      hasAllAnswers,
+      participantId,
+      questionnaireId,
+      reset,
+      user,
+    });
+
+  const question = useMemo(() => {
+    return visibleQuestions[currentQuestion - 1] ?? visibleQuestions[0];
+  }, [visibleQuestions, currentQuestion]);
 
   useEffect(() => {
     if (questionnaireStructure?.id) {
       setQuestionnaireId(questionnaireStructure.id);
-      setTotalQuestions(questions.length);
+      setTotalQuestions(visibleQuestions.length);
     }
   }, [
     questionnaireStructure,
-    questions.length,
+    visibleQuestions.length,
     setQuestionnaireId,
     setTotalQuestions,
   ]);
 
   useEffect(() => {
+    if (
+      currentQuestion > visibleQuestions.length &&
+      visibleQuestions.length > 0
+    ) {
+      setCurrentQuestion(visibleQuestions.length);
+    }
+  }, [currentQuestion, setCurrentQuestion, visibleQuestions.length]);
+
+  useEffect(() => {
     if (selectedParticipant?.id) {
-      selectParticipant(selectedParticipant.id);
+      selectParticipant(selectedParticipant.id, null);
     }
   }, [selectedParticipant, selectParticipant]);
 
-  const question = useMemo(() => {
-    return findQuestionByOrder(questions, currentQuestion) ?? questions[0];
-  }, [questions, currentQuestion]);
+  const isLastQuestion = currentQuestion === totalQuestions;
 
   const selectedOptionId = question
     ? answers[question.id]?.optionId
     : undefined;
-  const answeredCount = Object.keys(answers).length;
-  const hasAllAnswers = answeredCount === totalQuestions;
-  const isLastQuestion = currentQuestion === totalQuestions;
 
   const handleSelectOption = (optionId: string, score: number) => {
     if (!question) return;
@@ -110,49 +121,6 @@ export default function QuizScreen() {
     }
 
     nextQuestion();
-  };
-
-  const handleFinish = async () => {
-    if (!participantId) {
-      setErrorMessage("Selecione um participante para finalizar.");
-      return;
-    }
-
-    if (!questionnaireId) {
-      setErrorMessage(
-        "Erro ao identificar o questionário. Recarregue a página.",
-      );
-      return;
-    }
-
-    if (!user?.id) {
-      setErrorMessage("Usuário não autenticado. Faça login novamente.");
-      return;
-    }
-
-    if (!hasAllAnswers) {
-      setErrorMessage("Responda todas as perguntas antes de finalizar.");
-      return;
-    }
-
-    setErrorMessage(null);
-    setIsSubmitting(true);
-    try {
-      const result = await saveAssessment({
-        participantId,
-        healthProfessionalId: user.id,
-        questionnaireId,
-        answers,
-      });
-      reset();
-      queryClient.invalidateQueries({ queryKey: ["assessments"] });
-      navigate(clientRoutes.IVCF.RESULT({ id: result.id }), { replace: true });
-    } catch (error) {
-      console.error(error);
-      setErrorMessage("Não foi possível salvar a avaliação. Tente novamente.");
-    } finally {
-      setIsSubmitting(false);
-    }
   };
 
   const primaryButtonDisabled =

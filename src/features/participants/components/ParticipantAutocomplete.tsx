@@ -1,10 +1,11 @@
 import { Autocomplete, Input } from "@/core/components/ui";
 import { useSearchParticipants } from "../hooks/useSearchParticipants";
 import type { Participant } from "../types";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface ParticipantAutocompleteProps {
   onChange?: (value: Participant | null) => void;
+  onInitialResolve?: (value: Participant | null) => void;
   initialId?: string | null;
   initialValue?: Participant | null;
   className?: string;
@@ -12,6 +13,7 @@ interface ParticipantAutocompleteProps {
 
 export default function ParticipantAutocomplete({
   onChange,
+  onInitialResolve,
   initialId,
   initialValue,
   className,
@@ -24,19 +26,30 @@ export default function ParticipantAutocomplete({
     searchTerm,
   });
 
+  const hasInitializedRef = useRef(false);
+
   // Sincronizar com initialId/initialValue
   useEffect(() => {
+    if (hasInitializedRef.current) return;
+
     if (initialValue) {
       setValue(initialValue);
       setInputValue(initialValue.fullName);
-    } else if (initialId) {
+
+      onInitialResolve?.(initialValue);
+      hasInitializedRef.current = true;
+    } else if (initialId && participants.length > 0) {
       const found = participants.find((p) => p.id === initialId);
+
       if (found) {
         setValue(found);
         setInputValue(found.fullName);
+
+        onInitialResolve?.(found);
+        hasInitializedRef.current = true;
       }
     }
-  }, [initialId, initialValue, participants]);
+  }, [initialId, initialValue, participants, onInitialResolve]);
 
   const handleInputChange = useCallback((newInputValue: string) => {
     setInputValue(newInputValue);

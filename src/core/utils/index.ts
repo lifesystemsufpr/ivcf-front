@@ -55,7 +55,9 @@ export async function fetchAddressByCep(cep: string) {
   }
 }
 
-export function extractAgeFromBirthDate(birthDate: string): number | null {
+export function extractAgeFromBirthDate(
+  birthDate: string | undefined | null,
+): number | null {
   if (!birthDate) return null;
 
   const today = new Date();
