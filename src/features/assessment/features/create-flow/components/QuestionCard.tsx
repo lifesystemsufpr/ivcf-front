@@ -28,6 +28,12 @@ export function QuestionCard({
   const { participantAge } = useAssessmentContext();
   const isAgeQuestion =
     question.statement.trim().toLowerCase() === "qual é a sua idade?";
+  const NoOrYesQuestion = question.options.some((option) =>
+    ["sim", "não"].includes(option.label.trim().toLowerCase()),
+  );
+  const displayOptions = NoOrYesQuestion
+    ? [...question.options].reverse()
+    : question.options;
 
   const getAgeOptionId = () => {
     const age = Number(participantAge);
@@ -88,7 +94,7 @@ export function QuestionCard({
         <CardTitle>{question.statement}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
-        {question.options.map((option) => {
+        {displayOptions.map((option) => {
           const isActive = selectedOptionId === option.id;
           return (
             <Button
