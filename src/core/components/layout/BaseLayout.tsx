@@ -8,6 +8,7 @@ import { clientRoutes } from "@/core/configs/client.routes";
 import { AuthGuard } from "@/core/guards/AuthGuard";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useScreenInfo } from "@/core/hooks/useScreenInfo";
+import logo from "@/assets/logo.png";
 
 export function BaseLayout() {
   const router = useNavigate();
@@ -50,7 +51,7 @@ export function BaseLayout() {
               )}
 
               <img
-                src="/logo.png"
+                src={logo}
                 alt="IVCF-20 Logo"
                 className="h-9 object-contain"
               />

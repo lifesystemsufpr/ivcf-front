@@ -1,5 +1,6 @@
 // core/components/layout/AuthLayout.tsx
 import { Outlet } from "react-router-dom";
+import logo from "@/assets/logo.png";
 
 export default function AuthLayout() {
   return (
@@ -11,7 +12,7 @@ export default function AuthLayout() {
         <div className="relative items-center justify-center  flex z-1">
           {/* <!-- ===== Common Grid Shape Start ===== --> */}
           <div className="flex flex-col items-center max-w-xs">
-            <img width={331} height={48} src="/logo.png" alt="Logo" />
+            <img width={331} height={48} src={logo} alt="Logo" />
             <p className="text-center text-gray-400 dark:text-white/60">
               IVCF-20 Digital: Inteligência para o cuidado da fragilidade.
             </p>

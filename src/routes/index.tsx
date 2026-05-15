@@ -52,8 +52,10 @@ const PageLoader = () => (
 );
 
 export function AppRoutes() {
+  const basePath = import.meta.env.VITE_BASE_PATH;
+
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={basePath}>
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route element={<BaseLayout />}>
