@@ -57,7 +57,7 @@ export default function LoginPage() {
           <Box display="flex" justify="space-between" align="center">
             <Typography variant="h1">Login</Typography>
             <a
-              href="/register"
+              href="register"
               className="text-sm text-primary hover:underline"
             >
               Não tem uma conta?
