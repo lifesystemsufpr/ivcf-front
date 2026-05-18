@@ -58,9 +58,9 @@ export function AppRoutes() {
     <BrowserRouter basename={basePath}>
       <Suspense fallback={<PageLoader />}>
         <Routes>
-          <Route element={<BaseLayout />}>
+          <Route path="/" element={<BaseLayout />}>
             <Route
-              path="/"
+              index
               element={
                 <DashboardProvider>
                   <HomePage />
@@ -88,7 +88,7 @@ export function AppRoutes() {
               />
             </Route>
           </Route>
-          <Route element={<AuthLayout />}>
+          <Route path="/" element={<AuthLayout />}>
             <Route path={clientRoutes.AUTH.LOGIN} element={<LoginPage />} />
             <Route
               path={clientRoutes.AUTH.REGISTER}
