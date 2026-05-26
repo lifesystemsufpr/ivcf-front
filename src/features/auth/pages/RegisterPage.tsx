@@ -12,59 +12,32 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import type { RegisterPayload } from "../types";
 import { useRegisterAndLogin } from "../hooks/useRegisterAndLogin";
-import { Bounce, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import { getErrorMessage } from "../utils/error";
 import { useScreenInfo } from "@/core/hooks/useScreenInfo";
 import Term from "../components/Term";
-
-interface FormData {
-  name: string;
-  email: string;
-  ocupacao: string;
-  password: string;
-}
+import { useRegisterForm } from "../hooks/useRegisterForm";
 
 export default function RegisterPage() {
   const router = useNavigate();
   const { isMobile, isShortHeight } = useScreenInfo();
   const [openTerms, setOpenTerms] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
-  const [emailError, setEmailError] = useState("");
-  const [formData, setFormData] = useState<FormData>({
-    name: "",
-    email: "",
-    ocupacao: "",
-    password: "",
-  });
 
   const useCompactLayout = isMobile || isShortHeight;
 
   const { mutateAsync: registerAndLogin, isPending } = useRegisterAndLogin();
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  const { formData, errors, handleChange, validate, setErrors } =
+    useRegisterForm();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    setEmailError("");
     e.preventDefault();
 
-    // Validação de senha
-    if (formData.password.length < 6) {
-      toast.error("A senha deve conter no mínimo 6 caracteres.", {
-        position: "top-center",
-        autoClose: 2500,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-        transition: Bounce,
-      });
+    const isValid = validate();
+
+    if (!isValid) {
+      toast.error("Verifique os campos do formulário.");
       return;
     }
 
@@ -80,39 +53,23 @@ export default function RegisterPage() {
 
       await registerAndLogin(payload);
 
-      toast.success("Registro realizado com sucesso!", {
-        position: "top-center",
-        autoClose: 800,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: 1,
-        theme: "colored",
-        transition: Bounce,
-      });
+      toast.success("Registro realizado com sucesso!");
 
-      setTimeout(() => {
-        router("/");
-      }, 1000);
-    } catch (err: unknown) {
+      router("/");
+    } catch (err) {
       const errorMessage = getErrorMessage(err);
 
-      if (errorMessage === "O e-mail já está em uso.") {
-        setEmailError(errorMessage);
+      if (
+        errorMessage === "O e-mail já está em uso." ||
+        errorMessage === "O e-mail deve ser válido"
+      ) {
+        setErrors((prev) => ({
+          ...prev,
+          email: errorMessage,
+        }));
       }
 
-      toast.error(`Erro ao realizar cadastro. ${errorMessage}`, {
-        toastId: "register-error",
-        position: "top-center",
-        autoClose: 1500,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        theme: "light",
-        transition: Bounce,
-      });
+      toast.error(errorMessage);
     }
   };
 
@@ -173,7 +130,7 @@ export default function RegisterPage() {
                   id="email"
                   name="email"
                   type="email"
-                  errorMessage={emailError}
+                  errorMessage={errors.email}
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="seu@email.com"
@@ -189,6 +146,7 @@ export default function RegisterPage() {
                   id="name"
                   name="name"
                   value={formData.name}
+                  errorMessage={errors.name}
                   onChange={handleChange}
                   placeholder="Seu nome completo"
                   required
@@ -200,6 +158,7 @@ export default function RegisterPage() {
                   id="ocupacao"
                   name="ocupacao"
                   value={formData.ocupacao}
+                  errorMessage={errors.ocupacao}
                   onChange={handleChange}
                   placeholder="Ex: Médico, Filho(a), Cuidador"
                   required
@@ -213,6 +172,7 @@ export default function RegisterPage() {
                 id="password"
                 name="password"
                 type="password"
+                errorMessage={errors.password}
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="Mínimo 6 caracteres"
