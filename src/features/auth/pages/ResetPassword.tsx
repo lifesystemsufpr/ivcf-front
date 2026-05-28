@@ -57,7 +57,7 @@ export default function ResetPasswordPage() {
       display="flex"
       justify="center"
       align="center"
-      className="min-h-screen min-w-[85%]"
+      className="h-full min-w-[85%]"
     >
       {!success ? (
         <Box
