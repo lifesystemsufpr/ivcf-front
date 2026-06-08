@@ -120,13 +120,13 @@ export default function RegisterPage() {
     <Box
       display="flex"
       justify="center"
-      align={useCompactLayout ? "flex-start" : "center"}
-      className="min-h-dvh w-full p-3 sm:p-4"
+      align="center"
+      className="h-full w-full"
     >
       <Box
         className={`w-full max-w-2xl overflow-hidden border bg-background/80 backdrop-blur ${
           useCompactLayout
-            ? "max-h-[calc(100dvh-1.5rem)] rounded-xl shadow-xl"
+            ? "max-h-[calc(100dvh-1.5rem)] rounded-xl shadow-lg"
             : "rounded-2xl shadow-2xl"
         }`}
         display="flex"
@@ -153,10 +153,12 @@ export default function RegisterPage() {
                 Já tem uma conta?
               </a>
             </Box>
-            <Typography variant="body" className="text-muted-foreground">
-              Preencha os dados abaixo para criar sua conta de responsável e
-              gerenciar seus acompanhados.
-            </Typography>
+            {!useCompactLayout && (
+              <Typography variant="body" className="text-muted-foreground">
+                Preencha os dados abaixo para criar sua conta de responsável e
+                gerenciar seus acompanhados.
+              </Typography>
+            )}
           </Box>
 
           <Separator className={useCompactLayout ? "my-4" : "my-6"} />

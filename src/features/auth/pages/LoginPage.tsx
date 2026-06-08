@@ -44,7 +44,7 @@ export default function LoginPage() {
       display="flex"
       justify="center"
       align="center"
-      className="min-h-screen min-w-[85%]"
+      className="h-full min-w-[85%]"
     >
       <Box
         className="w-full max-w-2xl rounded-xl shadow-2xl p-6 border"
