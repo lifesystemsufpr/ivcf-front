@@ -58,26 +58,6 @@ export function DomainHeatmap({ data, stratification }: DomainHeatmapProps) {
             {dimensionLabel[stratification]}.
           </Typography>
         </div>
-        <div className="flex gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() =>
-              exportElementAsPng(chartRef.current, "heatmap-dominios")
-            }
-          >
-            PNG
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() =>
-              exportElementAsPdf(chartRef.current, "heatmap-dominios")
-            }
-          >
-            PDF
-          </Button>
-        </div>
       </CardHeader>
       <CardContent className="pt-0">
         <div

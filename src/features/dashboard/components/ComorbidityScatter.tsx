@@ -79,26 +79,6 @@ export function ComorbidityScatter({
             Idade × fragilidade
           </Typography>
         </div>
-        <div className="flex gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() =>
-              exportElementAsPng(chartRef.current, "comorbidades-scatter")
-            }
-          >
-            PNG
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() =>
-              exportElementAsPdf(chartRef.current, "comorbidades-scatter")
-            }
-          >
-            PDF
-          </Button>
-        </div>
       </CardHeader>
       <CardContent className="pt-0">
         <div

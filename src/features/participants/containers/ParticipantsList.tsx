@@ -13,9 +13,8 @@ import { clientRoutes } from "@/core/configs/client.routes";
 import { useNavigate } from "react-router-dom";
 import { useMemo, useState, type MouseEvent } from "react";
 import { Pencil, Trash, ClipboardPlus } from "lucide-react";
-import ParticipantForm from "../components/ParticipantForm";
-import type { Participant, ParticipantRequest } from "../types";
-import { useUpdateParticipant } from "../hooks/useUpdateParticipant";
+import ParticipantForm from "./ParticipantForm";
+import type { Participant } from "../types";
 import { Bounce, toast } from "react-toastify";
 import { useDeleteParticipant } from "../hooks/useDeleteParticipant";
 import { useListParticipants } from "../hooks/useListParticipants";
@@ -23,7 +22,6 @@ import { parseParticipantResponse } from "../utils";
 
 export default function ParticipantList() {
   const navigate = useNavigate();
-  const updateParticipantMutation = useUpdateParticipant();
   const deleteParticipantMutation = useDeleteParticipant();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(8);
@@ -143,39 +141,6 @@ export default function ParticipantList() {
     });
   };
 
-  const handleUpdateParticipant = async (data: ParticipantRequest) => {
-    if (!participantToEdit) return;
-
-    updateParticipantMutation.mutate(
-      {
-        id: participantToEdit.id,
-        data,
-      },
-      {
-        onSuccess: () => {
-          setParticipantToEdit(null);
-        },
-        onError: (error) => {
-          console.error("Erro ao atualizar participante:", error);
-          const msg =
-            error.message ||
-            "Erro ao atualizar participante. Por favor, tente novamente.";
-          toast.error(msg, {
-            position: "top-center",
-            autoClose: 2500,
-            hideProgressBar: false,
-            closeOnClick: false,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "colored",
-            transition: Bounce,
-          });
-        },
-      },
-    );
-  };
-
   return (
     <Box display="flex" direction="column" gap={4} className="mt-1">
       <Table.Root
@@ -293,7 +258,6 @@ export default function ParticipantList() {
           <ParticipantForm
             initialValues={participantToEdit}
             title="Editar participante"
-            onSubmit={handleUpdateParticipant}
             onCancel={() => setParticipantToEdit(null)}
           />
         )}
