@@ -11,6 +11,7 @@ import {
 } from "@/core/components/ui";
 import ParticipantAutocomplete from "@/features/participants/components/ParticipantAutocomplete";
 import type { Participant } from "@/features/participants/types";
+import { extractAgeFromBirthDate } from "@/core/utils";
 import { useAssessmentContext } from "../context/CreateAssessmentContext";
 import { ProgressBar } from "../components/ProgressBar";
 import { QuestionCard } from "../components/QuestionCard";
@@ -90,7 +91,10 @@ export default function QuizScreen() {
 
   useEffect(() => {
     if (selectedParticipant?.id) {
-      selectParticipant(selectedParticipant.id, null);
+      selectParticipant(
+        selectedParticipant.id,
+        extractAgeFromBirthDate(selectedParticipant.birthDate),
+      );
     }
   }, [selectedParticipant, selectParticipant]);
 
