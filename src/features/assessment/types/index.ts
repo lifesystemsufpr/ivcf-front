@@ -1,4 +1,8 @@
-export type FrailtyClassification = "Robusto" | "Pré-frágil" | "Frágil";
+export type FrailtyClassification =
+  | "Robusto"
+  | "Pré-frágil"
+  | "Em Risco de Fragilização"
+  | "Frágil";
 
 export type QuestionType = "MULTIPLE_CHOICE" | "TEXT" | "NUMBER";
 

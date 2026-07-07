@@ -22,12 +22,6 @@ export interface SavedAssessment {
 
 const RESULTS_KEY = "ivcf:results";
 
-function computeClassification(score: number): FrailtyClassification {
-  if (score >= 15) return "Frágil";
-  if (score >= 7) return "Pré-frágil";
-  return "Robusto";
-}
-
 function persistResult(result: SavedAssessment) {
   try {
     const stored = sessionStorage.getItem(RESULTS_KEY);
@@ -67,19 +61,12 @@ export async function saveAssessment({
   const response =
     await QuestionnaireService.submitQuestionnaireResponse(requestPayload);
 
-  // Cria versão local para cache
-  const totalScore = Object.values(answers).reduce(
-    (sum, answer) => sum + answer.score,
-    0,
-  );
-
-  const classification = computeClassification(totalScore);
-
+  // Pontuação e classificação vêm da API, não devem ser recalculadas no frontend
   const payload: SavedAssessment = {
     id: response.id,
     participantId: response.participantId,
     totalScore: response.totalScore,
-    classification: classification,
+    classification: response.classification,
     createdAt: response.createdAt,
     answers,
   };

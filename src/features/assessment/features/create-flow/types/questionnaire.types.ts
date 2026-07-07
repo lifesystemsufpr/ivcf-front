@@ -1,4 +1,4 @@
-import type { FrailtyClassification } from "@/core/types";
+import type { FrailtyClassification } from "@/features/assessment/types";
 
 export interface QuestionnaireOption {
   id: string;

@@ -8,16 +8,15 @@ import {
   Separator,
   Typography,
 } from "@/core/components/ui";
-import ParticipantForm from "../components/ParticipantForm";
 import { ParticipantProvider } from "../context/ParticipantContext";
 import ParticipantList from "../containers/ParticipantsList";
-import type { Participant, ParticipantRequest } from "../types";
+import type { Participant } from "../types";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { useCreateParticipant } from "../hooks/useCreateParticipant";
 import { useCheckParticipantEmail } from "../hooks/useCheckParticipantEmail";
 import { useLinkParticipantToProfessional } from "../hooks/useLinkParticipantToProfessional";
 import { Bounce, toast } from "react-toastify";
+import ParticipantForm from "../containers/ParticipantForm";
 
 export function PatientListPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -30,7 +29,6 @@ export function PatientListPage() {
     Partial<Participant> | undefined
   >(undefined);
 
-  const createParticipant = useCreateParticipant();
   const checkParticipantEmail = useCheckParticipantEmail();
   const linkParticipantToProfessional = useLinkParticipantToProfessional();
 
@@ -155,14 +153,6 @@ export function PatientListPage() {
     );
   };
 
-  const handleCreateParticipant = (data: ParticipantRequest) => {
-    createParticipant.mutate(data, {
-      onSuccess: () => {
-        handleCloseCreateModal();
-      },
-    });
-  };
-
   return (
     <ParticipantProvider>
       <Box type="screen" className="flex flex-col">
@@ -274,7 +264,6 @@ export function PatientListPage() {
           {shouldShowForm && (
             <ParticipantForm
               initialValues={createInitialValues}
-              onSubmit={handleCreateParticipant}
               onCancel={handleCloseCreateModal}
             />
           )}

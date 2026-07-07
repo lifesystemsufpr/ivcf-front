@@ -48,26 +48,6 @@ export function RiskPyramid({ data, isCompact = false }: RiskPyramidProps) {
             Percentual de Robusto → Pré-Frágil → Frágil em cada estrato.
           </Typography>
         </div>
-        <div className="flex gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() =>
-              exportElementAsPng(chartRef.current, "piramide-risco")
-            }
-          >
-            PNG
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() =>
-              exportElementAsPdf(chartRef.current, "piramide-risco")
-            }
-          >
-            PDF
-          </Button>
-        </div>
       </CardHeader>
       <CardContent className="pt-0">
         <div

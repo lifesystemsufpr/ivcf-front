@@ -25,7 +25,6 @@ interface AssessmentState {
 }
 
 interface AssessmentContextValue extends AssessmentState {
-  totalScore: number;
   selectParticipant: (
     participantId: string,
     participantAge: number | null,
@@ -48,51 +47,6 @@ const defaultState: AssessmentState = {
   currentQuestion: 1,
   totalQuestions: 20,
   participantAge: null,
-};
-
-const calculateIvcfScore = (answers: AnswerMap): number => {
-  const values = Object.values(answers);
-
-  const avdInstrumentalScore = Math.min(
-    values
-      .filter((a) => ["q3", "q4", "q5"].includes(a.questionId))
-      .reduce((sum, a) => sum + a.score, 0),
-    4,
-  );
-
-  const mobilityScore = Math.min(
-    values
-      .filter((a) =>
-        ["q12", "q13", "q14", "q15", "q16", "q17"].includes(a.questionId),
-      )
-      .reduce((sum, a) => sum + a.score, 0),
-    2,
-  );
-
-  const comorbidityScore = Math.min(
-    values
-      .filter((a) => a.questionId === "q20")
-      .reduce((sum, a) => sum + a.score, 0),
-    4,
-  );
-
-  const otherIds = [
-    "q1",
-    "q2",
-    "q6",
-    "q7",
-    "q8",
-    "q9",
-    "q10",
-    "q11",
-    "q18",
-    "q19",
-  ];
-  const othersScore = values
-    .filter((a) => otherIds.includes(a.questionId))
-    .reduce((sum, a) => sum + a.score, 0);
-
-  return avdInstrumentalScore + mobilityScore + comorbidityScore + othersScore;
 };
 
 function loadInitialState(): AssessmentState {
@@ -130,17 +84,8 @@ export function AssessmentProvider({
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state]);
 
-  const totalScore = useMemo(
-    () => calculateIvcfScore(state.answers),
-    [state.answers],
-  );
-
   const selectParticipant = useCallback(
     (participantId: string, participantAge: number | null) => {
-      if (participantAge === null) {
-        setState((prev) => ({ ...prev, participantId }));
-        return;
-      }
       setState((prev) => ({ ...prev, participantId, participantAge }));
     },
     [],
@@ -193,7 +138,6 @@ export function AssessmentProvider({
   const value = useMemo(
     () => ({
       ...state,
-      totalScore,
       selectParticipant,
       setQuestionnaireId,
       setTotalQuestions,
@@ -205,7 +149,6 @@ export function AssessmentProvider({
     }),
     [
       state,
-      totalScore,
       selectParticipant,
       setQuestionnaireId,
       setTotalQuestions,

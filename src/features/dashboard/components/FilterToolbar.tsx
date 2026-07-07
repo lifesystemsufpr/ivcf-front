@@ -1,11 +1,9 @@
-import { type ChangeEvent, useState, useEffect } from "react";
+import { type ChangeEvent, useEffect, useRef, useState } from "react";
 import { Box } from "@/core/components/ui/Box";
 import { Button } from "@/core/components/ui/Button";
 import { Input } from "@/core/components/ui/Input";
 import { Label } from "@/core/components/ui/Label";
 import type { AggregationDimension, FragilityFilters } from "../types";
-import { apiRoutes } from "@/core/configs/api.routes";
-import { client } from "@/core/services/client.service";
 
 type FilterToolbarProps = {
   filters: FragilityFilters;
@@ -28,6 +26,7 @@ export function FilterToolbar({
   ageBounds,
 }: FilterToolbarProps) {
   // 1. Estados Locais para inputs de texto/data (Buffer)
+  const skipAgeSyncRef = useRef(false);
   const [localAge, setLocalAge] = useState<[number, number]>(
     filters.ageRange ?? [ageBounds.min, ageBounds.max],
   );
@@ -45,6 +44,11 @@ export function FilterToolbar({
   }, [filters.ageRange, filters.period, ageBounds]);
 
   useEffect(() => {
+    if (skipAgeSyncRef.current) {
+      skipAgeSyncRef.current = false;
+      return;
+    }
+
     const handler = setTimeout(() => {
       if (JSON.stringify(localAge) !== JSON.stringify(filters.ageRange)) {
         setFilter("ageRange", localAge);
@@ -75,43 +79,20 @@ export function FilterToolbar({
     });
   };
 
+  const handleClearFilters = () => {
+    skipAgeSyncRef.current = true;
+    setFilter("ageRange", undefined);
+    setFilter("period", undefined);
+    setFilter("sex", "all");
+    setLocalAge([ageBounds.min, ageBounds.max]);
+    setLocalPeriod({ start: "", end: "" });
+  };
+
   const handlePeriodInputChange = (
     e: ChangeEvent<HTMLInputElement>,
     key: "start" | "end",
   ) => {
     setLocalPeriod((prev) => ({ ...prev, [key]: e.target.value }));
-  };
-
-  const handleExport = async () => {
-    try {
-      const endpoint = apiRoutes.ASSESSMENTS.EXPORT;
-
-      const resp = await client(endpoint, {
-        method: "GET",
-        query: {
-          sex: filters.sex,
-          ageMin: filters.ageRange?.[0],
-          ageMax: filters.ageRange?.[1],
-        },
-      });
-
-      console.log("Resposta da exportação:", resp);
-
-      const blob =
-        resp instanceof Blob
-          ? resp
-          : new Blob([resp as unknown as BlobPart], {
-              type: "text/csv;charset=utf-8;",
-            });
-
-      const url = window.URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "export.csv";
-    } catch (error) {
-      console.error("Erro ao solicitar exportação:", error);
-    }
   };
 
   return (
@@ -196,19 +177,8 @@ export function FilterToolbar({
 
         {/* Ações */}
         <div className="flex flex-1 justify-end gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              setFilter("ageRange", undefined);
-              setFilter("period", undefined);
-              setFilter("sex", "all");
-            }}
-          >
+          <Button variant="default" size="sm" onClick={handleClearFilters}>
             Limpar
-          </Button>
-          <Button variant="secondary" size="sm" onClick={handleExport}>
-            Exportar CSV
           </Button>
         </div>
       </div>

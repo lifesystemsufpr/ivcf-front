@@ -193,6 +193,17 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         ? normalizeDate(defaultValue)
         : defaultValue;
 
+    React.useEffect(() => {
+      if (!isNumberInput) return;
+
+      if (value === undefined || value === null || value === "") {
+        setNumberDisplay("");
+        return;
+      }
+
+      setNumberDisplay(sanitizeNumberText(String(value)));
+    }, [isNumberInput, value]);
+
     const renderAddon = (el: React.ReactNode | LucideIcon) => {
       if (!el) return null;
       if (React.isValidElement(el)) return el;
