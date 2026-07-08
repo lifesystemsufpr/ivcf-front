@@ -4,14 +4,9 @@ import {
   ResponsiveScatterPlotCanvas,
 } from "@nivo/scatterplot";
 import { Card, CardContent, CardHeader } from "@/core/components/ui/Card";
-import { Button } from "@/core/components/ui/Button";
 import { Typography } from "@/core/components/ui/Typography";
 import { useTheme } from "@/core/theme/ThemeContext";
-import {
-  exportElementAsPdf,
-  exportElementAsPng,
-  nivoTheme,
-} from "../utils/transforms";
+import { nivoTheme } from "../utils/transforms";
 import { Box } from "@/core/components/ui";
 
 type ComorbidityScatterProps = {

@@ -1,13 +1,8 @@
 import { useMemo, useRef } from "react";
 import { ResponsiveHeatMap } from "@nivo/heatmap";
 import { Card, CardContent, CardHeader } from "@/core/components/ui/Card";
-import { Button } from "@/core/components/ui/Button";
 import { Typography } from "@/core/components/ui/Typography";
-import {
-  exportElementAsPdf,
-  exportElementAsPng,
-  nivoTheme,
-} from "../utils/transforms";
+import { nivoTheme } from "../utils/transforms";
 import type { AggregationDimension } from "../types";
 import { Box } from "@/core/components/ui";
 

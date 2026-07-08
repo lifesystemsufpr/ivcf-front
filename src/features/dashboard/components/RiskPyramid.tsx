@@ -1,14 +1,8 @@
 import { useRef } from "react";
 import { ResponsiveBar } from "@nivo/bar";
 import { Card, CardContent, CardHeader } from "@/core/components/ui/Card";
-import { Button } from "@/core/components/ui/Button";
 import { Typography } from "@/core/components/ui/Typography";
-import {
-  riskColorMap,
-  nivoTheme,
-  exportElementAsPdf,
-  exportElementAsPng,
-} from "../utils/transforms";
+import { riskColorMap, nivoTheme } from "../utils/transforms";
 import { Box } from "@/core/components/ui";
 import { normalizeToPercentage } from "../utils/normalize";
 
