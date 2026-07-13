@@ -4,8 +4,13 @@ import {
   type FrailtyClassification,
 } from "@/core/types";
 import { useState } from "react";
+import type { AssessmentFilters } from "../hooks/useFetchAssessments";
 
-export default function Filter() {
+interface FilterProps {
+  onApply: (filters: AssessmentFilters) => void;
+}
+
+export default function Filter({ onApply }: FilterProps) {
   const [selectedClassification, setSelectedClassification] =
     useState<FrailtyClassification | null>("Todos");
   const [startDate, setStartDate] = useState<string>("");
@@ -15,6 +20,18 @@ export default function Filter() {
     setSelectedClassification("Todos");
     setStartDate("");
     setEndDate("");
+    onApply({});
+  };
+
+  const handleApplyFilters = () => {
+    onApply({
+      classification:
+        selectedClassification && selectedClassification !== "Todos"
+          ? selectedClassification
+          : undefined,
+      startDate: startDate || undefined,
+      endDate: endDate || undefined,
+    });
   };
 
   return (
@@ -55,7 +72,9 @@ export default function Filter() {
         <Button variant="outline" className="mr-2" onClick={handleClearFilters}>
           Limpar Filtros
         </Button>
-        <Button variant="secondary">Aplicar Filtros</Button>
+        <Button variant="secondary" onClick={handleApplyFilters}>
+          Aplicar Filtros
+        </Button>
       </Box>
     </Box>
   );

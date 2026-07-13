@@ -1,7 +1,10 @@
 import Filter from "../components/Filter";
 import AssesmentCard from "@/features/assessment/components/AssesmentCard";
-import useFetchAssessments from "../hooks/useFetchAssessments";
+import useFetchAssessments, {
+  type AssessmentFilters,
+} from "../hooks/useFetchAssessments";
 import { Box, Separator, Typography } from "@/core/components/ui";
+import { useState } from "react";
 
 interface ParticipantAssessmentsScreenProps {
   id: string;
@@ -11,15 +14,17 @@ export default function ParticipantAssessmentsScreen({
   id,
 }: ParticipantAssessmentsScreenProps) {
   const participantId = id;
+  const [filters, setFilters] = useState<AssessmentFilters>({});
+
   const {
     data: assessments,
     error: errors,
     isLoading,
-  } = useFetchAssessments(participantId);
+  } = useFetchAssessments(participantId, filters);
 
   return (
     <Box display="flex" direction="column" gap={6}>
-      <Filter />
+      <Filter onApply={setFilters} />
 
       <Separator />
       {isLoading && <Typography>Carregando avaliações...</Typography>}
