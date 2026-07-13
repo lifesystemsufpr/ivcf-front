@@ -133,10 +133,7 @@ export function PatientListPage() {
           handleCloseCreateModal();
         },
         onError: (error) => {
-          const message =
-            error instanceof Error
-              ? error.message
-              : "Erro ao vincular participante. Tente novamente.";
+          const message = error.message || "Erro ao vincular participante. Tente novamente.";
           toast.error(message, {
             position: "top-center",
             autoClose: 2500,
