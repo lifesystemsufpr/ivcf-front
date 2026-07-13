@@ -2,6 +2,7 @@ import { Box, Input, Label } from "@/core/components/ui";
 import { fetchAddressByCep } from "@/core/utils";
 import { mapStateToUF } from "../../utils";
 import type { AddressFieldKey, FormErrors, ParticipantFormValues } from "./types";
+import { useState } from "react";
 
 type ParticipantFormStepTwoProps = {
   values: ParticipantFormValues;
@@ -16,6 +17,17 @@ export default function ParticipantFormStepTwo({
   onAddressFieldChange,
   onAddressResolved,
 }: ParticipantFormStepTwoProps) {
+  const [cepError, setCepError] = useState<string | undefined>();
+
+  const validateCep = (cep: string) => {
+    const digits = cep.replace(/\D/g, "");
+    if (digits.length > 0 && digits.length < 8) {
+      setCepError("CEP incompleto. Digite 8 números.");
+    } else {
+      setCepError(undefined);
+    }
+  };
+
   const handleFetchAddress = async (cep: string) => {
     if (cep.length < 9) return;
 
@@ -49,13 +61,14 @@ export default function ParticipantFormStepTwo({
               const cep = e.target.value;
 
               onAddressFieldChange("zipCode", cep);
+              validateCep(cep);
 
               if (cep.length >= 9) {
                 handleFetchAddress(cep);
               }
             }}
             placeholder="00000-000"
-            errorMessage={errors["address.zipCode"]}
+            errorMessage={cepError || errors["address.zipCode"]}
           />
         </div>
 
