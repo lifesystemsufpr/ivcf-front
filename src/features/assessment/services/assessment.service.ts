@@ -46,9 +46,26 @@ export class AssessmentService {
 
   static async getParticipantResponses(
     participanteId: string,
+    filters?: {
+      classification?: string;
+      startDate?: string;
+      endDate?: string;
+    },
   ): Promise<AssessmentResponse[]> {
+    const query: Record<string, string> = {};
+    if (filters?.classification && filters.classification !== "Todos") {
+      query.classification = filters.classification;
+    }
+    if (filters?.startDate) {
+      query.startDate = filters.startDate;
+    }
+    if (filters?.endDate) {
+      query.endDate = filters.endDate;
+    }
+
     return http.get<AssessmentResponse[]>(
       apiRoutes.ASSESSMENTS.BY_PARTICIPANT(participanteId),
+      { query },
     );
   }
 }
