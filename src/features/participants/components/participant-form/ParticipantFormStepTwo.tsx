@@ -37,6 +37,7 @@ export default function ParticipantFormStepTwo({
       if (address) {
         onAddressResolved({
           ...values.address,
+          zipCode: cep,
           street: address.logradouro,
           neighborhood: address.bairro,
           city: address.localidade,
