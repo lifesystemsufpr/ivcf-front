@@ -7,12 +7,16 @@ import {
   CardTitle,
   Typography,
 } from "@/core/components/ui";
-import type { IvcfOption, IvcfQuestion } from "../questions";
+import type {
+  QuestionnaireQuestion,
+  QuestionnaireOption,
+} from "../types/questionnaire.types";
+import { useAssessmentContext } from "../context/CreateAssessmentContext";
 
 interface QuestionCardProps {
-  question: IvcfQuestion;
+  question: QuestionnaireQuestion;
   selectedOptionId?: string;
-  onSelect: (option: IvcfOption) => void;
+  onSelect: (option: QuestionnaireOption) => void;
 }
 
 export function QuestionCard({
@@ -21,12 +25,62 @@ export function QuestionCard({
   onSelect,
 }: QuestionCardProps) {
   const [visible, setVisible] = useState(false);
+  const { participantAge } = useAssessmentContext();
+  const isAgeQuestion =
+    question.statement.trim().toLowerCase() === "qual é a sua idade?";
+  const NoOrYesQuestion = question.options.some((option) =>
+    ["sim", "não"].includes(option.label.trim().toLowerCase()),
+  );
+  const displayOptions = NoOrYesQuestion
+    ? [...question.options].reverse()
+    : question.options;
+
+  const getAgeOptionId = () => {
+    const age = Number(participantAge);
+
+    if (!Number.isFinite(age)) {
+      return undefined;
+    }
+
+    if (age >= 85) {
+      return question.options.find((option) => option.label.includes("85"))?.id;
+    }
+
+    if (age >= 75) {
+      return question.options.find((option) => option.label.includes("75 a 84"))
+        ?.id;
+    }
+
+    return question.options.find((option) => option.label.includes("60 a 74"))
+      ?.id;
+  };
+
+  const ageOptionId = isAgeQuestion ? getAgeOptionId() : undefined;
+  const isAgeQuestionLocked = isAgeQuestion && Boolean(ageOptionId);
 
   useEffect(() => {
     setVisible(false);
     const id = requestAnimationFrame(() => setVisible(true));
     return () => cancelAnimationFrame(id);
   }, [question.id]);
+
+  useEffect(() => {
+    if (!isAgeQuestion || !ageOptionId || selectedOptionId === ageOptionId) {
+      return;
+    }
+
+    const option = question.options.find((item) => item.id === ageOptionId);
+
+    if (option) {
+      onSelect(option);
+    }
+  }, [
+    ageOptionId,
+    isAgeQuestion,
+    onSelect,
+    question.options,
+    selectedOptionId,
+  ]);
 
   return (
     <Card
@@ -40,7 +94,7 @@ export function QuestionCard({
         <CardTitle>{question.statement}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
-        {question.options.map((option) => {
+        {displayOptions.map((option) => {
           const isActive = selectedOptionId === option.id;
           return (
             <Button
@@ -48,7 +102,14 @@ export function QuestionCard({
               variant={isActive ? "secondary" : "outline"}
               className="justify-start text-left"
               fullWidth
-              onClick={() => onSelect(option)}
+              disabled={isAgeQuestionLocked}
+              onClick={() => {
+                if (isAgeQuestionLocked) {
+                  return;
+                }
+
+                onSelect(option);
+              }}
             >
               <span className="font-medium">{option.label}</span>
               <Typography

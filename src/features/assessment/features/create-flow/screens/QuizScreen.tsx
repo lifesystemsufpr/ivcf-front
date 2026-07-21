@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   Alert,
   Box,
@@ -10,52 +9,100 @@ import {
   CardTitle,
   Typography,
 } from "@/core/components/ui";
-import { clientRoutes } from "@/core/configs/client.routes";
 import ParticipantAutocomplete from "@/features/participants/components/ParticipantAutocomplete";
 import type { Participant } from "@/features/participants/types";
+import { extractAgeFromBirthDate } from "@/core/utils";
 import { useAssessmentContext } from "../context/CreateAssessmentContext";
 import { ProgressBar } from "../components/ProgressBar";
 import { QuestionCard } from "../components/QuestionCard";
-import { IVCF_TOTAL_QUESTIONS, ivcfQuestions } from "../questions";
-import { saveAssessment } from "../services/saveAssessment";
+import { useQuestionnaireStructure } from "../hooks/useQuestionnaireStructure";
+import { useAuthContext } from "@/features/auth/contexts/AuthContext";
+import { useQuizLogic } from "../hooks/useQuizLogic";
+import { useQuizFlow } from "../hooks/useQuizFlow";
 
 export default function QuizScreen() {
-  const navigate = useNavigate();
+  const { user } = useAuthContext();
   const {
     participantId,
+    questionnaireId,
     answers,
     currentQuestion,
+    totalQuestions,
     updateAnswer,
     nextQuestion,
     previousQuestion,
     selectParticipant,
+    setQuestionnaireId,
+    setTotalQuestions,
+    setCurrentQuestion,
     reset,
   } = useAssessmentContext();
 
+  const {
+    data: questionnaireStructure,
+    isLoading: isLoadingStructure,
+    error: structureError,
+  } = useQuestionnaireStructure();
+
+  const { answeredCount, hasAllAnswers, questions, visibleQuestions } =
+    useQuizLogic({
+      answers,
+      questionnaireStructure,
+      updateAnswer,
+    });
+
   const [selectedParticipant, setSelectedParticipant] =
     useState<Participant | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const { errorMessage, handleFinish, isSubmitting, setErrorMessage } =
+    useQuizFlow({
+      answers,
+      hasAllAnswers,
+      participantId,
+      questionnaireId,
+      reset,
+      user,
+    });
+
+  const question = useMemo(() => {
+    return visibleQuestions[currentQuestion - 1] ?? visibleQuestions[0];
+  }, [visibleQuestions, currentQuestion]);
+
+  useEffect(() => {
+    if (questionnaireStructure?.id) {
+      setQuestionnaireId(questionnaireStructure.id);
+      setTotalQuestions(visibleQuestions.length);
+    }
+  }, [
+    questionnaireStructure,
+    visibleQuestions.length,
+    setQuestionnaireId,
+    setTotalQuestions,
+  ]);
+
+  useEffect(() => {
+    if (
+      currentQuestion > visibleQuestions.length &&
+      visibleQuestions.length > 0
+    ) {
+      setCurrentQuestion(visibleQuestions.length);
+    }
+  }, [currentQuestion, setCurrentQuestion, visibleQuestions.length]);
 
   useEffect(() => {
     if (selectedParticipant?.id) {
-      selectParticipant(selectedParticipant.id);
+      selectParticipant(
+        selectedParticipant.id,
+        extractAgeFromBirthDate(selectedParticipant.birthDate),
+      );
     }
   }, [selectedParticipant, selectParticipant]);
 
-  const question = useMemo(() => {
-    return (
-      ivcfQuestions.find((item) => item.order === currentQuestion) ??
-      ivcfQuestions[0]
-    );
-  }, [currentQuestion]);
+  const isLastQuestion = currentQuestion === totalQuestions;
 
   const selectedOptionId = question
     ? answers[question.id]?.optionId
     : undefined;
-  const answeredCount = Object.keys(answers).length;
-  const hasAllAnswers = answeredCount === IVCF_TOTAL_QUESTIONS;
-  const isLastQuestion = currentQuestion === IVCF_TOTAL_QUESTIONS;
 
   const handleSelectOption = (optionId: string, score: number) => {
     if (!question) return;
@@ -80,31 +127,6 @@ export default function QuizScreen() {
     nextQuestion();
   };
 
-  const handleFinish = async () => {
-    if (!participantId) {
-      setErrorMessage("Selecione um participante para finalizar.");
-      return;
-    }
-
-    if (!hasAllAnswers) {
-      setErrorMessage("Responda todas as perguntas antes de finalizar.");
-      return;
-    }
-
-    setErrorMessage(null);
-    setIsSubmitting(true);
-    try {
-      const result = await saveAssessment({ participantId, answers });
-      reset();
-      navigate(clientRoutes.IVCF.RESULT({ id: result.id }), { replace: true });
-    } catch (error) {
-      console.error(error);
-      setErrorMessage("Não foi possível salvar a avaliação. Tente novamente.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   const primaryButtonDisabled =
     !selectedOptionId ||
     isSubmitting ||
@@ -112,8 +134,40 @@ export default function QuizScreen() {
     (isLastQuestion && !hasAllAnswers);
   const previousDisabled = currentQuestion === 1 || isSubmitting;
 
+  if (isLoadingStructure) {
+    return (
+      <Box className="h-[90vh] p-6 flex items-center justify-center">
+        <Card className="w-full max-w-5xl" padding="lg">
+          <CardContent className="p-6">
+            <Typography variant="h3">Carregando questionário...</Typography>
+          </CardContent>
+        </Card>
+      </Box>
+    );
+  }
+
+  if (structureError || !questionnaireStructure || questions.length === 0) {
+    return (
+      <Box className="h-[90vh] p-6 flex items-center justify-center">
+        <Card className="w-full max-w-5xl" padding="lg">
+          <CardContent className="p-6">
+            <Alert className="border-destructive bg-destructive/10 text-destructive">
+              <Typography variant="h3">
+                Erro ao carregar questionário
+              </Typography>
+              <Typography variant="small">
+                Não foi possível carregar a estrutura do questionário. Tente
+                recarregar a página.
+              </Typography>
+            </Alert>
+          </CardContent>
+        </Card>
+      </Box>
+    );
+  }
+
   return (
-    <Box className="min-h-screen p-6 flex items-center justify-center">
+    <Box className="h-[90vh] p-6 flex items-center justify-center">
       <Card className="w-full max-w-5xl" padding="lg">
         <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between p-2">
           <div>
@@ -122,7 +176,7 @@ export default function QuizScreen() {
               Responda cada questão. Suas respostas são salvas automaticamente.
             </Typography>
           </div>
-          <ProgressBar current={currentQuestion} total={IVCF_TOTAL_QUESTIONS} />
+          <ProgressBar current={currentQuestion} total={totalQuestions} />
         </CardHeader>
 
         <CardContent className="space-y-6 p-2">
@@ -159,7 +213,7 @@ export default function QuizScreen() {
 
           <Box className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <Typography variant="small" className="text-muted-foreground">
-              {answeredCount}/{IVCF_TOTAL_QUESTIONS} respondidas
+              {answeredCount}/{totalQuestions} respondidas
             </Typography>
             <Box className="flex gap-3">
               <Button

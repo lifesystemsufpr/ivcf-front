@@ -41,7 +41,10 @@ export default function AssesmentCard({ assessment }: AssesmentCardProps) {
               <Typography variant="h4" className="font-bold">
                 {assessment.participantName}
               </Typography>
-              <Typography variant="caption" className="text-gray-500">
+              <Typography
+                variant={`${assessment.participantName ? "caption" : "body"}`}
+                className={`${assessment.participantName ? "text-gray-500" : "font-bold"}`}
+              >
                 Pontuação total: {assessment.totalScore}
               </Typography>
             </Box>

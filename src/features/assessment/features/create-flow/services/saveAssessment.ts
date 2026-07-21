@@ -1,9 +1,14 @@
 import type { AnswerMap } from "../context/CreateAssessmentContext";
 import type { FrailtyClassification } from "@/features/assessment/types";
+import { QuestionnaireService } from "./questionnaire.service";
+import type { SubmitQuestionnaireRequest } from "../types/questionnaire.types";
 
 export interface SaveAssessmentInput {
   participantId: string;
+  healthProfessionalId: string;
+  questionnaireId: string;
   answers: AnswerMap;
+  healthcareUnitId?: string;
 }
 
 export interface SavedAssessment {
@@ -16,12 +21,6 @@ export interface SavedAssessment {
 }
 
 const RESULTS_KEY = "ivcf:results";
-
-function computeClassification(score: number): FrailtyClassification {
-  if (score >= 15) return "Frágil";
-  if (score >= 7) return "Pré-frágil";
-  return "Robusto";
-}
 
 function persistResult(result: SavedAssessment) {
   try {
@@ -38,29 +37,40 @@ function persistResult(result: SavedAssessment) {
 
 export async function saveAssessment({
   participantId,
+  healthProfessionalId,
+  questionnaireId,
   answers,
+  healthcareUnitId,
 }: SaveAssessmentInput) {
-  const totalScore = Object.values(answers).reduce(
-    (sum, answer) => sum + answer.score,
-    0,
-  );
-  const id = crypto.randomUUID
-    ? crypto.randomUUID()
-    : `assessment-${Date.now()}`;
-  const createdAt = new Date().toISOString();
-  const classification = computeClassification(totalScore);
+  // Converte answers para o formato esperado pela API
+  const apiAnswers = Object.values(answers).map((answer) => ({
+    questionId: answer.questionId,
+    selectedOptionId: answer.optionId,
+    valueText: null,
+  }));
 
-  const payload: SavedAssessment = {
-    id,
+  const requestPayload: SubmitQuestionnaireRequest = {
     participantId,
-    totalScore,
-    classification,
-    createdAt,
+    healthProfessionalId,
+    questionnaireId,
+    healthcareUnitId,
+    answers: apiAnswers,
+  };
+
+  // Envia para a API
+  const response =
+    await QuestionnaireService.submitQuestionnaireResponse(requestPayload);
+
+  // Pontuação e classificação vêm da API, não devem ser recalculadas no frontend
+  const payload: SavedAssessment = {
+    id: response.id,
+    participantId: response.participantId,
+    totalScore: response.totalScore,
+    classification: response.classification,
+    createdAt: response.createdAt,
     answers,
   };
 
-  // Simula latência de rede mínima para manter a experiência realista.
-  await new Promise((resolve) => setTimeout(resolve, 400));
   persistResult(payload);
 
   return payload;

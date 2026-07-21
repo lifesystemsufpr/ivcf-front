@@ -53,7 +53,7 @@ export default function ResultScreen() {
   const styles = getStylesByClassification(assessment.classification);
 
   return (
-    <Box className="min-h-screen bg-muted/30 p-6 flex items-center justify-center">
+    <Box className="h-[80vh] p-6 flex items-center align-middle justify-center">
       <Card padding="lg" className="w-full max-w-4xl">
         <CardHeader className="space-y-1">
           <CardTitle>Resultado do IVCF-20</CardTitle>
@@ -63,7 +63,7 @@ export default function ResultScreen() {
           </Typography>
         </CardHeader>
         <CardContent className="space-y-6">
-          <Box className="grid gap-4 sm:grid-cols-3">
+          <Box className="grid gap-4 sm:grid-cols-2">
             <Card className="border" padding="md">
               <Typography variant="small" className="text-muted-foreground">
                 Pontuação total
@@ -85,17 +85,6 @@ export default function ResultScreen() {
               </Typography>
               <Typography variant="caption" className="text-muted-foreground">
                 Calculada a partir da soma dos escores.
-              </Typography>
-            </Card>
-            <Card className="border" padding="md">
-              <Typography variant="small" className="text-muted-foreground">
-                Protocolo
-              </Typography>
-              <Typography variant="h3" className="font-semibold">
-                {assessment.id}
-              </Typography>
-              <Typography variant="caption" className="text-muted-foreground">
-                Guarde este número para futuras consultas.
               </Typography>
             </Card>
           </Box>

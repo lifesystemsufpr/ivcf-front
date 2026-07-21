@@ -6,13 +6,8 @@ import {
   Separator,
 } from "@/core/components/ui";
 import type { Participant } from "../types";
-import {
-  calculateAge,
-  calculateIMC,
-  formatGender,
-  getIMCClassification,
-} from "../utils";
-import { formatDate } from "@/core/utils";
+import { calculateIMC, formatGender, getIMCClassification } from "../utils";
+import { extractAgeFromBirthDate, formatDate } from "@/core/utils";
 import DataRow from "./DataRow";
 
 interface ParticipantDetailContentProps {
@@ -22,8 +17,10 @@ interface ParticipantDetailContentProps {
 export default function ParticipantDetailContent({
   participant,
 }: ParticipantDetailContentProps) {
-  const age = calculateAge(participant.birthDate);
-  const imc = parseFloat(calculateIMC(participant.weight, participant.height));
+  const age = extractAgeFromBirthDate(participant.birthDate);
+  const imc = parseFloat(
+    calculateIMC(participant.weight, participant.height / 100),
+  );
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -33,11 +30,10 @@ export default function ParticipantDetailContent({
         </CardHeader>
         <Separator />
         <CardContent className="grid grid-cols-2 gap-4 pt-6">
-          <DataRow label="Nome Completo" value={participant.fullName} />
-          <DataRow label="CPF" value={participant.cpf} />
+          <DataRow label="Nome Completo" value={participant.fullName} />{" "}
           <DataRow
             label="Data de Nascimento"
-            value={formatDate(participant.birthDate)}
+            value={formatDate(participant.birthDate, true)}
           />
           <DataRow label="Idade" value={`${age} anos`} />
           <DataRow label="Sexo" value={formatGender(participant.gender)} />
@@ -51,7 +47,6 @@ export default function ParticipantDetailContent({
         <Separator />
         <CardContent className="grid grid-cols-1 gap-4 pt-6">
           <DataRow label="E-mail" value={participant.email} />
-          <DataRow label="Telefone" value={participant.phone} />
         </CardContent>
       </Card>
 
@@ -86,7 +81,7 @@ export default function ParticipantDetailContent({
         </CardHeader>
         <Separator />
         <CardContent className="grid grid-cols-2 gap-4 pt-6">
-          <DataRow label="Altura" value={`${participant.height} m`} />
+          <DataRow label="Altura" value={`${participant.height} cm`} />
           <DataRow label="Peso" value={`${participant.weight} kg`} />
           <DataRow label="IMC" value={imc} />
           <DataRow label="Classificação" value={getIMCClassification(imc)} />

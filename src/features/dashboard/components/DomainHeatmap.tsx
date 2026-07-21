@@ -1,19 +1,10 @@
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import { ResponsiveHeatMap } from "@nivo/heatmap";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/core/components/ui/Card";
-import { Button } from "@/core/components/ui/Button";
+import { Card, CardContent, CardHeader } from "@/core/components/ui/Card";
 import { Typography } from "@/core/components/ui/Typography";
-import {
-  exportElementAsPdf,
-  exportElementAsPng,
-  nivoTheme,
-} from "../utils/transforms";
+import { nivoTheme } from "../utils/transforms";
 import type { AggregationDimension } from "../types";
+import { Box } from "@/core/components/ui";
 
 const heatmapColors = {
   type: "sequential" as const,
@@ -34,57 +25,65 @@ export function DomainHeatmap({ data, stratification }: DomainHeatmapProps) {
   const chartRef = useRef<HTMLDivElement | null>(null);
 
   const hasData = data.some((d) => d.data.length > 0);
+  const labelColorThreshold = useMemo(() => {
+    const values = data.flatMap((serie) => serie.data.map((point) => point.y));
+    if (!values.length) return 0;
+
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+
+    // Usa o ponto médio do intervalo atual para manter contraste consistente.
+    return min + (max - min) / 2;
+  }, [data]);
 
   return (
-    <Card className="h-full">
-      <CardHeader className="flex flex-row items-start justify-between gap-4">
+    <Card className="group relative h-full overflow-hidden border border-border/70 bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+      <div className="absolute inset-x-0 top-0 h-1 bg-primary/70" />
+
+      <CardHeader className="flex flex-row items-start justify-between gap-4 pb-3 pt-6">
         <div>
-          <CardTitle>Heatmap por domínio</CardTitle>
-          <Typography variant="small">
+          <Typography
+            variant="caption"
+            className="text-primary font-medium uppercase mb-2"
+          >
+            Heatmap por domínio
+          </Typography>
+          <Typography variant="caption">
             Médias de score por domínio estratificadas por{" "}
             {dimensionLabel[stratification]}.
           </Typography>
         </div>
-        <div className="flex gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() =>
-              exportElementAsPng(chartRef.current, "heatmap-dominios")
-            }
-          >
-            PNG
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() =>
-              exportElementAsPdf(chartRef.current, "heatmap-dominios")
-            }
-          >
-            PDF
-          </Button>
-        </div>
       </CardHeader>
-      <CardContent>
-        <div ref={chartRef} className="h-105">
+      <CardContent className="pt-0">
+        <div
+          ref={chartRef}
+          className="h-105 rounded-xl border border-border/60 bg-muted/20 p-2"
+        >
           {hasData ? (
             <ResponsiveHeatMap
               data={data}
               colors={heatmapColors}
               theme={nivoTheme}
-              margin={{ top: 40, right: 80, bottom: 80, left: 120 }}
+              enableLabels={true}
+              label={(cell) => cell.value?.toFixed(1) ?? ""}
+              labelTextColor={(cell) => {
+                return (cell.value ?? 0) > labelColorThreshold
+                  ? "#ffffff"
+                  : "#333333";
+              }}
+              margin={{ top: 40, right: 80, bottom: 100, left: 120 }}
               valueFormat=".2f"
               axisTop={null}
               axisRight={null}
               axisBottom={{
                 tickRotation: -20,
                 legend: dimensionLabel[stratification],
-                legendOffset: 46,
+                legendOffset: 30,
                 legendPosition: "middle",
               }}
               axisLeft={{
                 legend: "Domínios",
+                tickRotation: 35,
                 legendOffset: -90,
                 legendPosition: "middle",
               }}
@@ -92,7 +91,7 @@ export function DomainHeatmap({ data, stratification }: DomainHeatmapProps) {
                 {
                   anchor: "bottom",
                   translateX: 0,
-                  translateY: 50,
+                  translateY: 70,
                   length: 240,
                   thickness: 10,
                   direction: "row",
@@ -109,13 +108,19 @@ export function DomainHeatmap({ data, stratification }: DomainHeatmapProps) {
               inactiveOpacity={0.25}
               hoverTarget="cell"
               tooltip={({ cell }) => (
-                <div className="text-sm">
-                  <strong>{cell.x}</strong>
+                <Box className="w-40 rounded-lg border border-border/60 bg-background p-3 text-sm shadow-md">
                   <div>
-                    {dimensionLabel[stratification]}: {cell.y.toFixed(0)}
+                    {/* Acessamos cell.data.x para pegar o valor real da string do eixo X */}
+                    <strong>{dimensionLabel[stratification]}:</strong>{" "}
+                    {cell.data.x}
                   </div>
-                  <div>Score médio: {cell.value?.toFixed(2)}</div>
-                </div>
+                  <div>
+                    <strong>Domínio:</strong> {cell.serieId}
+                  </div>
+                  <div>
+                    <strong>Score médio:</strong> {cell.value?.toFixed(1)}
+                  </div>
+                </Box>
               )}
             />
           ) : (

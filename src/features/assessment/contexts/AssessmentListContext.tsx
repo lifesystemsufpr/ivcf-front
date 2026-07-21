@@ -1,6 +1,7 @@
-import { useContext, createContext, useState } from "react";
-import { assessmentsListMock } from "../mocks";
+import { useContext, createContext, useMemo, useState } from "react";
 import type { Assessment } from "../types";
+import { useListAssessments } from "../hooks/useListAssessments";
+import { mapperDomainToUI } from "../utils/mapper";
 
 export interface AssessmentListProviderValue {
   filteredAssessments: Assessment[];
@@ -10,7 +11,15 @@ export interface AssessmentListProviderValue {
   setStartDate: (date: string) => void;
   endDate: string;
   setEndDate: (date: string) => void;
+  page: number;
+  setPage: (page: number) => void;
+  pageSize: number;
+  setPageSize: (size: number) => void;
+  totalPages: number;
+  totalItems: number;
   onSubmitFilters: () => void;
+  clearFilters: () => void;
+  isLoading: boolean;
 }
 
 export const AssessmentListContext = createContext<
@@ -22,30 +31,52 @@ export function AssessmentListProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const assessmentsList = assessmentsListMock;
-
   const [participantName, setParticipantName] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [filteredAssessments, setFilteredAssessments] =
-    useState(assessmentsList);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(15);
+  const [appliedFilters, setAppliedFilters] = useState({
+    participantName: "",
+    startDate: "",
+    endDate: "",
+  });
+
+  const { data, isLoading } = useListAssessments({
+    page,
+    pageSize,
+    participantName: appliedFilters.participantName || undefined,
+    startDate: appliedFilters.startDate || undefined,
+    endDate: appliedFilters.endDate || undefined,
+  });
+
+  const filteredAssessments = useMemo<Assessment[]>(() => {
+    if (!data) return [];
+    return data.items.map((assessment) => mapperDomainToUI(assessment));
+  }, [data]);
+
+  const totalPages = data?.meta?.totalPages ?? 0;
+  const totalItems = data?.meta?.total ?? 0;
 
   const onSubmitFilters = () => {
-    const filtered = assessmentsList.filter((assessment) => {
-      const matchesName = assessment.participantName
-        .toLowerCase()
-        .includes(participantName.toLowerCase());
-      const matchesStartDate = startDate
-        ? new Date(assessment.date) >= new Date(startDate)
-        : true;
-      const matchesEndDate = endDate
-        ? new Date(assessment.date) <= new Date(endDate)
-        : true;
-
-      return matchesName && matchesStartDate && matchesEndDate;
+    setPage(1);
+    setAppliedFilters({
+      participantName,
+      startDate,
+      endDate,
     });
+  };
 
-    setFilteredAssessments(filtered);
+  const clearFilters = () => {
+    setPage(1);
+    setParticipantName("");
+    setStartDate("");
+    setEndDate("");
+    setAppliedFilters({
+      participantName: "",
+      startDate: "",
+      endDate: "",
+    });
   };
 
   return (
@@ -58,7 +89,15 @@ export function AssessmentListProvider({
         setStartDate,
         endDate,
         setEndDate,
+        page,
+        setPage,
+        pageSize,
+        setPageSize,
+        totalPages,
+        totalItems,
         onSubmitFilters,
+        clearFilters,
+        isLoading,
       }}
     >
       {children}

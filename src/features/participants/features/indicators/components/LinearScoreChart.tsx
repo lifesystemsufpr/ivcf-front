@@ -2,13 +2,16 @@
 
 import { useMemo } from "react";
 import { ResponsiveLine } from "@nivo/line";
-import type { IVCF_Assessment } from "../types";
+import type { IVCF_AssessmentWithDate, Daily_Assessment } from "../types";
+import { prepareLinearScoreChartData } from "../utils/data-adapter";
 import { nivoTheme } from "@/features/dashboard/utils/transforms";
 import { Typography } from "@/core/components/ui/Typography";
+import { ResponsiveBar } from "@nivo/bar";
 
 type LinearScoreChartProps = {
-  assessments: IVCF_Assessment[];
+  assessments: IVCF_AssessmentWithDate[] | Daily_Assessment[];
   height?: number;
+  onSelectAssessment?: (id: string) => void;
 };
 
 function formatDateLabel(date: string) {
@@ -17,50 +20,161 @@ function formatDateLabel(date: string) {
   });
 }
 
+function isDaily(data: any): data is Daily_Assessment {
+  return Array.isArray(data.assessments);
+}
+
 export function LinearScoreChart({
   assessments,
   height = 420,
+  onSelectAssessment,
 }: LinearScoreChartProps) {
+  // Prepare enhanced data with metadata about multiple assessments
+  const enhancedData = useMemo(() => {
+    if (
+      Array.isArray(assessments) &&
+      assessments.length > 0 &&
+      isDaily(assessments[0])
+    ) {
+      // Input is Daily_Assessment array
+      return prepareLinearScoreChartData(assessments as Daily_Assessment[]);
+    } else {
+      // Input is IVCF_AssessmentWithDate array - add default metadata
+      return (assessments as IVCF_AssessmentWithDate[]).map((a) => ({
+        ...a,
+        isPrimaryAssessment: true,
+        hasMultipleAssessmentsOnDay: false,
+        assessmentIndexOnDay: 0,
+      }));
+    }
+  }, [assessments]);
+
   const sorted = useMemo(
     () =>
-      [...assessments].sort(
+      [...enhancedData].sort(
         (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
       ),
-    [assessments],
+    [enhancedData],
   );
 
-  const lineData = useMemo(() => {
-    return [
-      {
-        id: "IVCF Score",
-        data: sorted.map((a) => ({
-          x: formatDateLabel(a.date),
-          y: a.totalScore,
-          riskLevel: a.riskLevel,
-          rawDate: a.date,
-        })),
-      },
-    ];
+  // Split into primary (main line) and secondary (additional assessments) series
+  const { primaryData, secondaryData } = useMemo(() => {
+    const primary = sorted.filter((a) => a.isPrimaryAssessment);
+    const secondary = sorted.filter((a) => !a.isPrimaryAssessment);
+
+    return {
+      primaryData: primary.map((a) => ({
+        x: formatDateLabel(a.date),
+        y: a.totalScore,
+        riskLevel: a.riskLevel,
+        rawDate: a.date,
+        assessmentId: a.id,
+        assessmentIndex: a.assessmentIndexOnDay,
+      })),
+      secondaryData: secondary.map((a) => ({
+        x: formatDateLabel(a.date),
+        y: a.totalScore,
+        riskLevel: a.riskLevel,
+        rawDate: a.date,
+        assessmentId: a.id,
+        assessmentIndex: a.assessmentIndexOnDay,
+      })),
+    };
   }, [sorted]);
 
+  const lineData = useMemo(() => {
+    const series: any[] = [
+      {
+        id: "IVCF Score Primário",
+        data: primaryData,
+      },
+    ];
+
+    // Only add secondary series if there are additional assessments
+    if (secondaryData.length > 0) {
+      series.push({
+        id: "Avaliações Adicionais",
+        data: secondaryData,
+      });
+    }
+
+    return series;
+  }, [primaryData, secondaryData]);
+
   const hasData = sorted.length > 0;
+  const hasOne = sorted.length === 1;
 
   return (
     <div className="space-y-3">
-      <Typography variant="small" className="text-muted-foreground">
-        Evolução do Score Total IVCF
-      </Typography>
+      <div className="flex items-start justify-between">
+        <div>
+          <Typography variant="small" className="text-muted-foreground">
+            Evolução do Score Total IVCF
+          </Typography>
+        </div>
+      </div>
 
       <div style={{ height }}>
         {!hasData ? (
           <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
             Sem dados para exibir.
           </div>
+        ) : hasOne ? (
+          <>
+            {console.log(
+              "Exibindo gráfico de barras para avaliação única:",
+              lineData[0].data[0],
+            )}
+            <ResponsiveBar
+              data={lineData[0].data}
+              indexBy="x"
+              keys={["y"]}
+              theme={nivoTheme}
+              margin={{ top: 50, right: 40, bottom: 60, left: 60 }}
+              padding={0.8}
+              valueScale={{
+                type: "linear",
+                min: 0,
+                max: 40,
+              }}
+              axisBottom={{
+                tickRotation: 0,
+                legend: "Data da Avaliação",
+                legendOffset: 50,
+                legendPosition: "middle",
+              }}
+              axisLeft={{
+                legend: "Score IVCF (0–40)",
+                legendOffset: -50,
+                legendPosition: "middle",
+              }}
+              colors={["#3B82F6"]}
+              onClick={(node) => {
+                const assessmentId = node.data.assessmentId;
+                if (assessmentId) {
+                  onSelectAssessment?.(String(assessmentId));
+                }
+              }}
+              tooltip={({ data }) => (
+                <div className="rounded-md border bg-background p-2 text-xs shadow-md">
+                  <div className="font-medium">
+                    {formatDateLabel(data.rawDate as string)}
+                  </div>
+                  <div>
+                    Score: <strong>{data.y}</strong> / 40
+                  </div>
+                  <div className="text-muted-foreground">
+                    Classificação: {data.riskLevel}
+                  </div>
+                </div>
+              )}
+            />
+          </>
         ) : (
           <ResponsiveLine
             data={lineData}
             theme={nivoTheme}
-            margin={{ top: 40, right: 40, bottom: 60, left: 60 }}
+            margin={{ top: 50, right: 40, bottom: 60, left: 60 }}
             xScale={{ type: "point" }}
             yScale={{
               type: "linear",
@@ -80,13 +194,27 @@ export function LinearScoreChart({
               legendOffset: -50,
               legendPosition: "middle",
             }}
-            colors={{ scheme: "category10" }}
+            colors={(series) => {
+              if (series.id === "IVCF Score Primário") return "#3B82F6";
+              return "#93C5FD";
+            }}
+            lineWidth={secondaryData.length > 0 ? 2.5 : 3}
+            enablePoints
             pointSize={8}
             pointBorderWidth={2}
             pointBorderColor={{ from: "serieColor" }}
-            enableArea={true}
+            enableArea={secondaryData.length === 0}
             areaOpacity={0.08}
             useMesh={true}
+            onClick={(item) => {
+              if ("points" in item) return;
+
+              const assessmentId = item.data.assessmentId;
+
+              if (assessmentId) {
+                onSelectAssessment?.(assessmentId);
+              }
+            }}
             tooltip={({ point }) => (
               <div className="rounded-md border bg-background p-2 text-xs shadow-md">
                 <div className="font-medium">
@@ -98,8 +226,25 @@ export function LinearScoreChart({
                 <div className="text-muted-foreground">
                   Classificação: {point.data.riskLevel}
                 </div>
+                {point.seriesId === "Avaliações Adicionais" && (
+                  <div className="text-blue-600 font-semibold mt-1">
+                    Avaliação #{(point.data.assessmentIndex as number) + 1}
+                  </div>
+                )}
               </div>
             )}
+            legends={[
+              {
+                anchor: "top-right",
+                direction: "column",
+                translateX: 0,
+                translateY: -50,
+                itemWidth: 150,
+                itemHeight: 20,
+                symbolSize: 12,
+                symbolShape: "circle",
+              },
+            ]}
           />
         )}
       </div>

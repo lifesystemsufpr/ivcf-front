@@ -3,19 +3,11 @@ import {
   ResponsiveScatterPlot,
   ResponsiveScatterPlotCanvas,
 } from "@nivo/scatterplot";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/core/components/ui/Card";
-import { Button } from "@/core/components/ui/Button";
+import { Card, CardContent, CardHeader } from "@/core/components/ui/Card";
 import { Typography } from "@/core/components/ui/Typography";
-import {
-  exportElementAsPdf,
-  exportElementAsPng,
-  nivoTheme,
-} from "../utils/transforms";
+import { useTheme } from "@/core/theme/ThemeContext";
+import { nivoTheme } from "../utils/transforms";
+import { Box } from "@/core/components/ui";
 
 type ComorbidityScatterProps = {
   data: {
@@ -31,10 +23,15 @@ type ComorbidityScatterProps = {
       date: string;
     }[];
   }[];
+  isCompact?: boolean;
 };
 
-export function ComorbidityScatter({ data }: ComorbidityScatterProps) {
+export function ComorbidityScatter({
+  data,
+  isCompact = false,
+}: ComorbidityScatterProps) {
   const chartRef = useRef<HTMLDivElement | null>(null);
+  const { theme } = useTheme();
   const useCanvas =
     data.reduce((acc, series) => acc + series.data.length, 0) > 5000;
 
@@ -43,95 +40,112 @@ export function ComorbidityScatter({ data }: ComorbidityScatterProps) {
     [useCanvas],
   );
 
-  const maxComorbidity = Math.max(
-    5,
-    ...data.flatMap((series) => series.data.map((d) => d.x)),
-  );
+  const maxAge = 100;
   const maxScore = Math.max(
-    20,
+    40,
     ...data.flatMap((series) => series.data.map((d) => d.y)),
   );
 
+  const sexPalette =
+    theme === "dark"
+      ? {
+          male: "#60a5fa",
+          female: "#f59e0b",
+        }
+      : {
+          male: "#2563eb",
+          female: "#ea580c",
+        };
+
   return (
-    <Card className="h-full">
-      <CardHeader className="flex flex-row items-start justify-between gap-4">
+    <Card className="group relative h-full overflow-hidden border border-border/70 bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+      <div className="absolute inset-x-0 top-0 h-1 bg-primary/70" />
+
+      <CardHeader
+        className={`flex items-start justify-between gap-4 pb-3 pt-6 ${
+          isCompact ? "flex-col" : "flex-row"
+        }`}
+      >
         <div>
-          <CardTitle>Comorbidades × fragilidade</CardTitle>
-          <Typography variant="small">
-            Correlação entre número de doenças crônicas e score total (tamanho
-            reflete idade).
+          <Typography
+            variant="caption"
+            className="text-primary font-medium uppercase mb-2"
+          >
+            Idade × fragilidade
           </Typography>
         </div>
-        <div className="flex gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() =>
-              exportElementAsPng(chartRef.current, "comorbidades-scatter")
-            }
-          >
-            PNG
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() =>
-              exportElementAsPdf(chartRef.current, "comorbidades-scatter")
-            }
-          >
-            PDF
-          </Button>
-        </div>
       </CardHeader>
-      <CardContent>
-        <div ref={chartRef} className="h-105">
+      <CardContent className="pt-0">
+        <div
+          ref={chartRef}
+          className={`rounded-xl border border-border/60 bg-muted/20 p-2 ${
+            isCompact ? "h-80" : "h-105"
+          }`}
+        >
           <ChartComponent
             data={data}
             theme={nivoTheme}
-            colors={(series) =>
-              data.find((d) => d.id === series.serieId)?.color ?? "#000000"
+            colors={(series) => {
+              const sexLabel = String(series.serieId).toLowerCase();
+              const isMale = sexLabel.startsWith("m");
+              return isMale ? sexPalette.male : sexPalette.female;
+            }}
+            margin={
+              isCompact
+                ? { top: 20, right: 20, bottom: 45, left: 50 }
+                : { top: 30, right: 40, bottom: 60, left: 70 }
             }
-            margin={{ top: 30, right: 40, bottom: 60, left: 70 }}
             blendMode="multiply"
-            nodeSize={({ data }) => data.size}
+            nodeSize={isCompact ? 8 : 10}
             axisBottom={{
-              legend: "Número de comorbidades crônicas",
-              legendOffset: 42,
+              legend: "Idade (anos)",
+              legendOffset: isCompact ? 32 : 42,
               legendPosition: "middle",
               tickSize: 6,
             }}
             axisLeft={{
               legend: "Score total IVCF-20",
-              legendOffset: -56,
+              legendOffset: isCompact ? -44 : -56,
               legendPosition: "middle",
               tickSize: 6,
             }}
             xScale={{
               type: "linear",
-              min: 0,
-              max: maxComorbidity + 1,
-              stacked: false,
+              min: 60,
+              max: maxAge,
             }}
-            yScale={{ type: "linear", min: 0, max: maxScore + 5 }}
-            legends={[
-              {
-                anchor: "bottom-right",
-                direction: "column",
-                translateX: 30,
-                translateY: 0,
-                itemWidth: 80,
-                itemHeight: 18,
-              },
-            ]}
+            yScale={{
+              type: "linear",
+              min: 0,
+              max: maxScore + 5,
+            }}
+            legends={
+              isCompact
+                ? []
+                : [
+                    {
+                      anchor: "bottom-right",
+                      direction: "column",
+                      translateX: 30,
+                      translateY: 0,
+                      itemWidth: 80,
+                      itemHeight: 18,
+                    },
+                  ]
+            }
             tooltip={({ node }) => (
-              <div className="text-sm">
+              <Box
+                display="flex"
+                direction="column"
+                align="center"
+                p={5}
+                className="w-35 rounded-lg border border-border/60 bg-background shadow-md"
+              >
                 <div className="font-semibold">Sexo: {node.data.sex}</div>
-                <div>Idade: {node.data.age} anos</div>
-                <div>Comorbidades: {node.data.x}</div>
+                <div>Idade: {node.data.x} anos</div>
                 <div>Score total: {node.data.y}</div>
                 <div>Risco: {node.data.riskLevel}</div>
-                <div>Data: {node.data.date}</div>
-              </div>
+              </Box>
             )}
             layers={["grid", "axes", "nodes", "mesh", "legends"]}
           />

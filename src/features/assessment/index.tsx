@@ -1,2 +1,4 @@
 export * from "./pages/AssessmentPage";
-export * from "./pages/AssessmentResultPage";
+export * from "./types";
+export * from "./components/AssesmentCard";
+export * from "./services/assessment.service";

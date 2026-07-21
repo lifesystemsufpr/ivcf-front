@@ -1,0 +1,48 @@
+import Filter from "../components/Filter";
+import AssesmentCard from "@/features/assessment/components/AssesmentCard";
+import useFetchAssessments, {
+  type AssessmentFilters,
+} from "../hooks/useFetchAssessments";
+import { Box, Separator, Typography } from "@/core/components/ui";
+import { useState } from "react";
+
+interface ParticipantAssessmentsScreenProps {
+  id: string;
+}
+
+export default function ParticipantAssessmentsScreen({
+  id,
+}: ParticipantAssessmentsScreenProps) {
+  const participantId = id;
+  const [filters, setFilters] = useState<AssessmentFilters>({});
+
+  const {
+    data: assessments,
+    error: errors,
+    isLoading,
+  } = useFetchAssessments(participantId, filters);
+
+  return (
+    <Box display="flex" direction="column" gap={6}>
+      <Filter onApply={setFilters} />
+
+      <Separator />
+      {isLoading && <Typography>Carregando avaliações...</Typography>}
+      {errors && <Typography color="accent">{errors.message}</Typography>}
+
+      {!isLoading && !errors && (!assessments || assessments.length === 0) ? (
+        <Typography>
+          Nenhuma avaliação encontrada para este paciente.
+        </Typography>
+      ) : (
+        assessments && (
+          <Box display="flex" direction="column" gap={3}>
+            {assessments.map((assessment) => (
+              <AssesmentCard key={assessment.id} assessment={assessment} />
+            ))}
+          </Box>
+        )
+      )}
+    </Box>
+  );
+}

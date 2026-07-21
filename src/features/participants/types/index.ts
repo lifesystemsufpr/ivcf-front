@@ -1,3 +1,5 @@
+import type { SystemRole } from "@/core/types";
+
 export type ParticipantDetailTabs = "details" | "indicators" | "assessments";
 export type Gender = "MALE" | "FEMALE" | "OTHER";
 
@@ -14,16 +16,73 @@ export interface Address {
 export interface Participant {
   id: string;
   fullName: string;
-  cpf: string;
   birthDate: string;
   address: Address;
   email: string;
-  phone: string;
   gender: Gender;
   height: number;
   weight: number;
-  password: string;
+  password?: string;
 
   updatedAt?: string;
   createdAt?: string;
+}
+
+export interface ParticipantRequest {
+  birthday: string;
+  scholarship: string;
+  socio_economic_level: string;
+  weight: number;
+  height: number;
+  zipCode: string;
+  street: string;
+  number: string;
+  complement?: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+  gender: Gender;
+  user: {
+    fullName: string;
+    email: string;
+    active: boolean;
+  };
+}
+
+export interface ParticipantResponse {
+  id: string;
+  birthday: string;
+  weight: number;
+  height: number;
+
+  zipCode: string;
+  street: string;
+  number: string;
+  complement?: string;
+
+  city: string;
+  state: string;
+  neighborhood: string;
+
+  active: boolean;
+
+  createdAt: string;
+  updatedAt: string;
+
+  email: string;
+  fullName: string;
+  fullName_normalized: string;
+
+  gender: Gender;
+  role: SystemRole;
+
+  hasRelations: boolean;
+}
+
+export interface CheckEmailResponse {
+  participantId: string | null;
+}
+
+export interface LinkParticipantRequest {
+  participantId: string;
 }

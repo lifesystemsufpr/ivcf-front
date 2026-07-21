@@ -10,4 +10,13 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    proxy: {
+      "/backend": {
+        target: "https://app.ivcf.com.br",
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
 });

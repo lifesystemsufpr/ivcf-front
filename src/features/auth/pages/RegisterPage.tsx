@@ -3,303 +3,224 @@ import {
   Button,
   Label,
   Separator,
-  Textarea,
   Input,
   Typography,
+  Checkbox,
+  Modal,
 } from "@/core/components/ui";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-type ProfileType = "participante" | "responsavel";
+import { useState } from "react";
+import type { RegisterPayload } from "../types";
+import { useRegisterAndLogin } from "../hooks/useRegisterAndLogin";
+import { toast } from "react-toastify";
+import { getErrorMessage } from "../utils/error";
+import { useScreenInfo } from "@/core/hooks/useScreenInfo";
+import Term from "../components/Term";
+import { useRegisterForm } from "../hooks/useRegisterForm";
 
 export default function RegisterPage() {
   const router = useNavigate();
-  const [profile, setProfile] = useState<ProfileType>("participante");
+  const { isMobile, isShortHeight } = useScreenInfo();
+  const [openTerms, setOpenTerms] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const useCompactLayout = isMobile || isShortHeight;
+
+  const { mutateAsync: registerAndLogin, isPending } = useRegisterAndLogin();
+
+  const { formData, errors, handleChange, validate, setErrors } =
+    useRegisterForm();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    router("/"); // Redireciona para a página inicial após o login
+
+    const isValid = validate();
+
+    if (!isValid) {
+      toast.error("Verifique os campos do formulário.");
+      return;
+    }
+
+    try {
+      const payload: RegisterPayload = {
+        speciality: formData.ocupacao,
+        user: {
+          fullName: formData.name,
+          email: formData.email,
+          password: formData.password,
+        },
+      };
+
+      await registerAndLogin(payload);
+
+      toast.success("Registro realizado com sucesso!");
+
+      router("/");
+    } catch (err) {
+      const errorMessage = getErrorMessage(err);
+
+      if (
+        errorMessage === "O e-mail já está em uso." ||
+        errorMessage === "O e-mail deve ser válido"
+      ) {
+        setErrors((prev) => ({
+          ...prev,
+          email: errorMessage,
+        }));
+      }
+
+      toast.error(errorMessage);
+    }
   };
 
   return (
-    <Box display="flex" justify="center" align="center">
+    <Box
+      display="flex"
+      justify="center"
+      align="center"
+      className="h-full w-full"
+    >
       <Box
-        className="w-full max-w-5xl overflow-hidden rounded-2xl border border-border/60 bg-background/80 shadow-2xl backdrop-blur"
+        className={`w-full max-w-2xl overflow-hidden border bg-background/80 backdrop-blur ${
+          useCompactLayout
+            ? "max-h-[calc(100dvh-1.5rem)] rounded-xl shadow-lg"
+            : "rounded-2xl shadow-2xl"
+        }`}
         display="flex"
         direction="column"
       >
-        <Box className="grid gap-8 p-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] md:p-10">
-          {/* Left - Profile selection */}
-          <Box className="relative" display="flex" direction="column" gap={20}>
-            <Box display="flex" direction="column" gap={10}>
-              <Typography variant="h2" className="text-foreground">
-                Escolha o perfil
-              </Typography>
-              <Typography variant="body" className="text-muted-foreground">
-                Selecione quem vai ser cadastrado para personalizar o
-                formulário.
-              </Typography>
-            </Box>
-
-            <Box className="flex flex-col gap-4">
-              <label className="group cursor-pointer">
-                <input
-                  type="radio"
-                  name="profile"
-                  value="participante"
-                  className="sr-only"
-                  checked={profile === "participante"}
-                  onChange={() => setProfile("participante")}
-                />
-                <Box
-                  className={`flex items-center gap-4 rounded-xl border p-4 transition ${
-                    profile === "participante"
-                      ? "border-primary/60 bg-primary/5 shadow-sm"
-                      : "border-border/70 bg-muted/20 hover:border-primary/40"
-                  }`}
-                >
-                  <Box
-                    className={`h-14 w-14 rounded-full border-2 transition ${
-                      profile === "participante"
-                        ? "border-primary bg-primary/20"
-                        : "border-border bg-background"
-                    }`}
-                    display="flex"
-                    justify="center"
-                    align="center"
-                  >
-                    <Box
-                      className={`h-6 w-6 rounded-full transition ${
-                        profile === "participante" ? "bg-primary" : "bg-muted"
-                      }`}
-                    />
-                  </Box>
-                  <Box display="flex" direction="column" gap={4}>
-                    <Typography variant="h4">Participante</Typography>
-                    <Typography variant="small">
-                      Cadastro completo com dados pessoais e medidas.
-                    </Typography>
-                  </Box>
-                </Box>
-              </label>
-
-              <label className="group cursor-pointer">
-                <input
-                  type="radio"
-                  name="profile"
-                  value="responsavel"
-                  className="sr-only"
-                  checked={profile === "responsavel"}
-                  onChange={() => setProfile("responsavel")}
-                />
-                <Box
-                  className={`flex items-center gap-4 rounded-xl border p-4 transition ${
-                    profile === "responsavel"
-                      ? "border-primary/60 bg-primary/5 shadow-sm"
-                      : "border-border/70 bg-muted/20 hover:border-primary/40"
-                  }`}
-                >
-                  <Box
-                    className={`h-14 w-14 rounded-full border-2 transition ${
-                      profile === "responsavel"
-                        ? "border-primary bg-primary/20"
-                        : "border-border bg-background"
-                    }`}
-                    display="flex"
-                    justify="center"
-                    align="center"
-                  >
-                    <Box
-                      className={`h-6 w-6 rounded-full transition ${
-                        profile === "responsavel" ? "bg-primary" : "bg-muted"
-                      }`}
-                    />
-                  </Box>
-                  <Box display="flex" direction="column" gap={4}>
-                    <Typography variant="h4">Responsavel</Typography>
-                    <Typography variant="small">
-                      Cadastro direto para quem acompanha o participante.
-                    </Typography>
-                  </Box>
-                </Box>
-              </label>
-            </Box>
-
+        <Box
+          className={useCompactLayout ? "overflow-y-auto p-4" : "p-6 md:p-10"}
+        >
+          {/* Header do Formulário */}
+          <Box display="flex" direction="column" gap={useCompactLayout ? 6 : 8}>
             <Box
-              className="hidden md:block"
               display="flex"
-              direction="column"
-              gap={12}
+              justify="space-between"
+              align={useCompactLayout ? "flex-start" : "center"}
+              className={useCompactLayout ? "flex-col gap-2" : ""}
             >
-              <Separator />
-              <Typography variant="small" className="text-muted-foreground">
-                Você pode alterar o perfil a qualquer momento antes de enviar.
+              <Typography
+                variant="h2"
+                className={`text-foreground ${useCompactLayout ? "text-2xl" : ""}`}
+              >
+                Cadastro de Responsável
               </Typography>
+              <a href="/login" className="text-sm text-primary hover:underline">
+                Já tem uma conta?
+              </a>
             </Box>
-          </Box>
-
-          {/* Right - Form */}
-          <Box className="rounded-xl border border-border/70 bg-background/90 p-6 shadow-lg">
-            <Box display="flex" direction="column" gap={8}>
-              <Box display="flex" justify="space-between" align="center">
-                <Typography variant="h2">Criar conta</Typography>
-                <a
-                  href="/login"
-                  className="text-sm text-primary hover:underline"
-                >
-                  Já tem uma conta?
-                </a>
-              </Box>
+            {!useCompactLayout && (
               <Typography variant="body" className="text-muted-foreground">
-                Preencha os campos abaixo para finalizar o cadastro.
+                Preencha os dados abaixo para criar sua conta de responsável e
+                gerenciar seus acompanhados.
+              </Typography>
+            )}
+          </Box>
+
+          <Separator className={useCompactLayout ? "my-4" : "my-6"} />
+
+          {/* Form - Somente campos de Responsável */}
+          <form
+            className={useCompactLayout ? "grid gap-4" : "grid gap-6"}
+            onSubmit={handleSubmit}
+          >
+            <Box className="grid gap-4 md:grid-cols-1">
+              <Box display="flex" direction="column" gap={6}>
+                <Label htmlFor="email">E-mail Profissional/Pessoal</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  errorMessage={errors.email}
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="seu@email.com"
+                  required
+                />
+              </Box>
+            </Box>
+
+            <Box className="grid gap-4 md:grid-cols-2">
+              <Box display="flex" direction="column" gap={6}>
+                <Label htmlFor="name">Nome Completo</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  errorMessage={errors.name}
+                  onChange={handleChange}
+                  placeholder="Seu nome completo"
+                  required
+                />
+              </Box>
+              <Box display="flex" direction="column" gap={6}>
+                <Label htmlFor="ocupacao">Ocupação / Vínculo</Label>
+                <Input
+                  id="ocupacao"
+                  name="ocupacao"
+                  value={formData.ocupacao}
+                  errorMessage={errors.ocupacao}
+                  onChange={handleChange}
+                  placeholder="Ex: Médico, Filho(a), Cuidador"
+                  required
+                />
+              </Box>
+            </Box>
+
+            <Box display="flex" direction="column" gap={6}>
+              <Label htmlFor="password">Senha de Acesso</Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                errorMessage={errors.password}
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Mínimo 6 caracteres"
+                minLength={6}
+                required
+              />
+            </Box>
+
+            <Box display="flex" align="center" gap={8} direction="row">
+              <Checkbox
+                id="terms"
+                checked={termsAccepted}
+                onChange={(e) => setTermsAccepted(e.target.checked)}
+              />
+              <Typography
+                variant="small"
+                className="text-muted-foreground cursor-pointer"
+                onClick={() => setOpenTerms(true)}
+              >
+                Li e concordo com os Termos de Uso e a Política de Privacidade.
               </Typography>
             </Box>
 
-            <Separator className="my-6" />
-
-            <form className="grid gap-4" onSubmit={handleSubmit}>
-              {profile === "participante" && (
-                <>
-                  <Box className="grid gap-4 md:grid-cols-2">
-                    <Box display="flex" direction="column" gap={6}>
-                      <Label htmlFor="name">Nome</Label>
-                      <Input
-                        id="name"
-                        name="name"
-                        placeholder="Nome completo"
-                      />
-                    </Box>
-                    <Box display="flex" direction="column" gap={6}>
-                      <Label htmlFor="cpf">CPF</Label>
-                      <Input id="cpf" name="cpf" placeholder="000.000.000-00" />
-                    </Box>
-                    <Box display="flex" direction="column" gap={6}>
-                      <Label htmlFor="birthdate">Data de nasc</Label>
-                      <Input id="birthdate" name="birthdate" type="date" />
-                    </Box>
-                    <Box display="flex" direction="column" gap={6}>
-                      <Label htmlFor="phone">Telefone</Label>
-                      <Input
-                        id="phone"
-                        name="phone"
-                        placeholder="(00) 00000-0000"
-                      />
-                    </Box>
-                  </Box>
-
-                  <Box display="flex" direction="column" gap={6}>
-                    <Label htmlFor="address">Endereco</Label>
-                    <Textarea
-                      id="address"
-                      name="address"
-                      placeholder="Rua, numero, bairro, cidade"
-                    />
-                  </Box>
-
-                  <Box className="grid gap-4 md:grid-cols-2">
-                    <Box display="flex" direction="column" gap={6}>
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        placeholder="seu@email.com"
-                      />
-                    </Box>
-                    <Box display="flex" direction="column" gap={6}>
-                      <Label htmlFor="sexo">Sexo</Label>
-                      <select
-                        id="sexo"
-                        name="sexo"
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                        defaultValue=""
-                      >
-                        <option value="" disabled>
-                          Selecione
-                        </option>
-                        <option value="f">Feminino</option>
-                        <option value="m">Masculino</option>
-                      </select>
-                    </Box>
-                  </Box>
-
-                  <Box className="grid gap-4 md:grid-cols-2">
-                    <Box display="flex" direction="column" gap={6}>
-                      <Label htmlFor="altura">Altura</Label>
-                      <Input id="altura" name="altura" placeholder="Ex: 1,70" />
-                    </Box>
-                    <Box display="flex" direction="column" gap={6}>
-                      <Label htmlFor="peso">Peso</Label>
-                      <Input id="peso" name="peso" placeholder="Ex: 70" />
-                    </Box>
-                  </Box>
-
-                  <Box display="flex" direction="column" gap={6}>
-                    <Label htmlFor="password">Senha</Label>
-                    <Input
-                      id="password"
-                      name="password"
-                      type="password"
-                      placeholder="Crie uma senha"
-                    />
-                  </Box>
-                </>
-              )}
-
-              {profile === "responsavel" && (
-                <>
-                  <Box className="grid gap-4 md:grid-cols-2">
-                    <Box display="flex" direction="column" gap={6}>
-                      <Label htmlFor="name">Nome</Label>
-                      <Input
-                        id="name"
-                        name="name"
-                        placeholder="Nome completo"
-                      />
-                    </Box>
-                    <Box display="flex" direction="column" gap={6}>
-                      <Label htmlFor="cpf">CPF</Label>
-                      <Input id="cpf" name="cpf" placeholder="000.000.000-00" />
-                    </Box>
-                  </Box>
-
-                  <Box className="grid gap-4 md:grid-cols-2">
-                    <Box display="flex" direction="column" gap={6}>
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        placeholder="seu@email.com"
-                      />
-                    </Box>
-                    <Box display="flex" direction="column" gap={6}>
-                      <Label htmlFor="ocupacao">Ocupacao</Label>
-                      <Input
-                        id="ocupacao"
-                        name="ocupacao"
-                        placeholder="Profissao ou cargo"
-                      />
-                    </Box>
-                  </Box>
-
-                  <Box display="flex" direction="column" gap={6}>
-                    <Label htmlFor="password">Senha</Label>
-                    <Input
-                      id="password"
-                      name="password"
-                      type="password"
-                      placeholder="Crie uma senha"
-                    />
-                  </Box>
-                </>
-              )}
-
-              <Button type="submit" variant="default" size="lg" fullWidth>
-                Registrar
+            <Box className="pt-2">
+              <Button
+                type="submit"
+                variant="default"
+                size="lg"
+                className="w-full"
+                disabled={isPending || !termsAccepted}
+              >
+                {isPending ? "Cadastrando..." : "Finalizar Cadastro"}
               </Button>
-            </form>
-          </Box>
+            </Box>
+          </form>
+
+          {openTerms && (
+            <Modal
+              open={openTerms}
+              onClose={() => setOpenTerms(false)}
+              hideCloseButton
+              size="xl"
+            >
+              <Term />
+            </Modal>
+          )}
         </Box>
       </Box>
     </Box>

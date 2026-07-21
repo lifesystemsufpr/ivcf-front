@@ -21,15 +21,19 @@ export const IVCF_DOMAIN_MAX: Record<DomainKey, number> = {
   comorbidities: 4,
 };
 
-export const DOMAIN_DEFINITIONS: { key: DomainKey; label: string }[] = [
-  { key: "age", label: "Idade" },
-  { key: "selfPerception", label: "Autopercepção" },
-  { key: "functionalCapacity", label: "Capacidade Funcional" },
-  { key: "cognition", label: "Cognição" },
-  { key: "mood", label: "Humor" },
-  { key: "mobility", label: "Mobilidade" },
-  { key: "communication", label: "Comunicação" },
-  { key: "comorbidities", label: "Comorbidades" },
+export const DOMAIN_DEFINITIONS: {
+  key: DomainKey;
+  label: string;
+  max: number;
+}[] = [
+  { key: "age", label: "Idade", max: 3 },
+  { key: "selfPerception", label: "Autopercepção", max: 1 },
+  { key: "functionalCapacity", label: "Atv. de Vida Diária", max: 10 },
+  { key: "cognition", label: "Cognição", max: 4 },
+  { key: "mood", label: "Humor", max: 4 },
+  { key: "mobility", label: "Mobilidade", max: 10 },
+  { key: "communication", label: "Comunicação", max: 4 },
+  { key: "comorbidities", label: "Comorbidades", max: 4 },
 ];
 
 export const classificationStyles: Record<
@@ -46,9 +50,19 @@ export const classificationStyles: Record<
     border: "border-yellow-500",
     text: "text-yellow-700",
   },
+  "Em Risco de Fragilização": {
+    bg: "bg-yellow-100",
+    border: "border-yellow-500",
+    text: "text-yellow-700",
+  },
   Robusto: {
     bg: "bg-green-100",
     border: "border-green-500",
     text: "text-green-700",
+  },
+  Todos: {
+    bg: "bg-gray-100",
+    border: "border-gray-500",
+    text: "text-gray-700",
   },
 };

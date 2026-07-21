@@ -12,15 +12,24 @@ export interface IVCF_DomainScores {
 
 export interface IVCF_Assessment {
   id: string;
-  date: string;
   totalScore: number;
   riskLevel: FrailtyClassification;
   domains: IVCF_DomainScores;
-  rawResponses: Record<string, any>;
+}
+
+/** Assessment with date attached (used when flattened from Daily_Assessment) */
+export interface IVCF_AssessmentWithDate extends IVCF_Assessment {
+  date: string;
+}
+
+export interface Daily_Assessment {
+  date: string;
+  hasMultipleAssessments: boolean;
+  assessments: IVCF_Assessment[];
 }
 
 export interface ParticipantEvolutionData {
   participantId: string;
   participantName: string;
-  assessments: IVCF_Assessment[];
+  dailyAssessments: Daily_Assessment[];
 }

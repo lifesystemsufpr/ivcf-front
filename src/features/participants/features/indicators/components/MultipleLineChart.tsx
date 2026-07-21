@@ -1,14 +1,14 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
-import { ResponsiveLine } from "@nivo/line";
-import type { IVCF_Assessment, IVCF_DomainScores } from "../types";
+import { useMemo, useState } from "react";
 import {
-  nivoTheme,
-  exportElementAsPng,
-  exportElementAsPdf,
-} from "@/features/dashboard/utils/transforms";
-import { Button } from "@/core/components/ui/Button";
+  ResponsiveLine,
+  type SliceTooltipProps,
+  type DefaultSeries,
+} from "@nivo/line";
+import type { IVCF_AssessmentWithDate, IVCF_DomainScores } from "../types";
+import { nivoTheme } from "@/features/dashboard/utils/transforms";
+import { Typography } from "@/core/components/ui/Typography";
 
 type DomainKey = keyof IVCF_DomainScores;
 
@@ -19,13 +19,31 @@ export type DomainDefinition = {
 };
 
 type MultipleLineChartProps = {
-  assessments: IVCF_Assessment[];
+  assessments: IVCF_AssessmentWithDate[];
   domains?: DomainDefinition[];
-  xLabel?: string;
-  yLabel?: string;
+  selectedDomainKeys?: DomainKey[];
   height?: number;
-  showExport?: boolean;
+  onSelectAssessment?: (id: string) => void;
 };
+
+// Maximum raw score for each domain
+const domainMaxScores: Record<DomainKey, number> = {
+  age: 3,
+  selfPerception: 1,
+  functionalCapacity: 10,
+  cognition: 4,
+  mood: 4,
+  mobility: 10,
+  communication: 4,
+  comorbidities: 4,
+};
+
+// Normalizes a raw score to a 0–10 scale based on the domain's max
+function normalizeScore(raw: number, domainKey: DomainKey): number {
+  const max = domainMaxScores[domainKey];
+  if (!max) return 0;
+  return parseFloat(((raw / max) * 10).toFixed(2));
+}
 
 const defaultDomains: DomainDefinition[] = [
   { key: "age", label: "Idade" },
@@ -39,35 +57,130 @@ const defaultDomains: DomainDefinition[] = [
 ];
 
 const colorPalette = [
-  "#2563eb",
-  "#7c3aed",
-  "#ea580c",
-  "#16a34a",
-  "#dc2626",
-  "#0d9488",
-  "#4f46e5",
-  "#ca8a04",
+  "#3B82F6",
+  "#8B5CF6",
+  "#F97316",
+  "#10B981",
+  "#EF4444",
+  "#14B8A6",
+  "#6366F1",
+  "#EAB308",
 ];
 
 function formatDateLabel(date: string) {
   return new Date(date).toLocaleDateString("pt-BR", {
+    month: "short",
+    year: "numeric",
     timeZone: "UTC",
   });
+}
+
+// Extended point data stored alongside each chart point
+type PointExtraData = {
+  assessmentId: string;
+  rawScore: number;
+  maxScore: number;
+};
+
+function SliceTooltip({ slice }: SliceTooltipProps<DefaultSeries>) {
+  return (
+    <div
+      style={{
+        background: "#fff",
+        border: "1px solid #e5e7eb",
+        borderRadius: 12,
+        padding: "12px 16px",
+        fontSize: 13,
+        boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
+        minWidth: 220,
+        whiteSpace: "nowrap",
+      }}
+    >
+      <div
+        style={{
+          fontWeight: 600,
+          fontSize: 11,
+          color: "#374151",
+          textTransform: "uppercase",
+          letterSpacing: "0.05em",
+          marginBottom: 8,
+        }}
+      >
+        {slice.points[0]?.data.xFormatted}
+      </div>
+      {slice.points.map((point) => {
+        const extra = point.data as unknown as PointExtraData &
+          Record<string, unknown>;
+        const normalizedScore = Number(point.data.y).toFixed(1);
+        const rawScore = extra.rawScore;
+        const maxScore = extra.maxScore;
+
+        return (
+          <div
+            key={point.id}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "4px 0",
+              borderBottom: "1px solid #f3f4f6",
+            }}
+          >
+            <span
+              style={{
+                display: "inline-block",
+                width: 10,
+                height: 10,
+                borderRadius: "50%",
+                backgroundColor: point.seriesColor,
+                flexShrink: 0,
+              }}
+            />
+            <span style={{ color: "#374151", flex: 1 }}>
+              {String(point.seriesId)}
+            </span>
+            <span
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-end",
+                gap: 1,
+              }}
+            >
+              <strong style={{ color: "#111827" }}>
+                {normalizedScore} / 10
+              </strong>
+              <span style={{ fontSize: 11, color: "#6b7280" }}>
+                {rawScore} de {maxScore} pts
+              </span>
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 export function MultipleLineChart({
   assessments,
   domains = defaultDomains,
-  xLabel = "Data da avaliação",
-  yLabel = "Pontuação por domínio",
+  selectedDomainKeys,
   height = 420,
-  showExport = false,
+  onSelectAssessment,
 }: MultipleLineChartProps) {
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [hiddenLabels, setHiddenLabels] = useState<Set<string>>(new Set());
 
-  const [selectedDomains, setSelectedDomains] = useState<string[]>(
-    domains.map((d) => d.label),
-  );
+  const toggleLabel = (label: string) => {
+    setHiddenLabels((prev) => {
+      const next = new Set(prev);
+      if (next.has(label)) {
+        next.delete(label);
+      } else {
+        next.add(label);
+      }
+      return next;
+    });
+  };
 
   const sortedAssessments = useMemo(
     () =>
@@ -86,95 +199,97 @@ export function MultipleLineChart({
     return map;
   }, [domains]);
 
+  const activeDomains = useMemo(() => {
+    if (!selectedDomainKeys) return domains;
+    return domains.filter((d) => selectedDomainKeys.includes(d.key));
+  }, [domains, selectedDomainKeys]);
+
+  const visibleDomains = useMemo(
+    () => activeDomains.filter((d) => !hiddenLabels.has(d.label)),
+    [activeDomains, hiddenLabels],
+  );
+
   const series = useMemo(() => {
-    return domains
-      .filter((d) => selectedDomains.includes(d.label))
-      .map((domain) => ({
-        id: domain.label,
-        color: colorsByLabel[domain.label],
-        data: sortedAssessments.map((assessment) => ({
+    return visibleDomains.map((domain) => ({
+      id: domain.label,
+      color: colorsByLabel[domain.label],
+      data: sortedAssessments.map((assessment) => {
+        const rawScore = assessment.domains[domain.key] ?? 0;
+        const maxScore = domainMaxScores[domain.key];
+        return {
           x: formatDateLabel(assessment.date),
-          y: assessment.domains[domain.key] ?? 0,
-        })),
-      }));
-  }, [domains, sortedAssessments, selectedDomains, colorsByLabel]);
+          // Y axis uses the normalized 0–10 value
+          y: normalizeScore(rawScore, domain.key),
+          // Extra data surfaced in the tooltip
+          assessmentId: assessment.id,
+          rawScore,
+          maxScore,
+        };
+      }),
+    }));
+  }, [visibleDomains, sortedAssessments, colorsByLabel]);
 
   const hasData = series.some((s) => s.data.length > 0);
-
-  const toggleDomain = (label: string) => {
-    setSelectedDomains((prev) =>
-      prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label],
-    );
-  };
-
-  const selectAll = () => {
-    setSelectedDomains(domains.map((d) => d.label));
-  };
-
-  const clearAll = () => {
-    setSelectedDomains([]);
-  };
+  const chartHeight = Math.max(height - 108, 240);
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        {showExport && (
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() =>
-                exportElementAsPng(containerRef.current, "ivcf-dominios")
-              }
-            >
-              PNG
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() =>
-                exportElementAsPdf(containerRef.current, "ivcf-dominios")
-              }
-            >
-              PDF
-            </Button>
-          </div>
-        )}
-      </div>
-
-      {/* Domain Selector */}
-      <div className="flex flex-wrap items-center gap-3 rounded-lg border p-3">
-        <div className="flex gap-2">
-          <Button size="lg" variant="outline" onClick={selectAll}>
-            Selecionar todos
-          </Button>
-          <Button size="lg" variant="outline" onClick={clearAll}>
-            Limpar
-          </Button>
+    <div className="w-full rounded-lg bg-gray-200 p-5" style={{ height }}>
+      <div className="mb-3 space-y-2">
+        <div>
+          <Typography variant="small" className="text-muted-foreground">
+            Evolução por domínio
+          </Typography>
+          <h3 className="text-lg font-semibold text-gray-900">
+            Comparativo das avaliações por domínio
+          </h3>
         </div>
 
-        {domains.map((domain) => (
-          <label
-            key={domain.label}
-            className="flex cursor-pointer items-center gap-2 text-sm"
-          >
-            <input
-              type="checkbox"
-              checked={selectedDomains.includes(domain.label)}
-              onChange={() => toggleDomain(domain.label)}
-            />
-            <span
-              className="h-3 w-3 rounded-full"
-              style={{ backgroundColor: colorsByLabel[domain.label] }}
-            />
-            {domain.label}
-          </label>
-        ))}
+        <p className="text-sm text-gray-600">
+          A pontuação é normalizada para uma escala de 0 a 10. Clique nos
+          domínios para mostrar ou ocultar cada linha.
+        </p>
+
+        <div className="flex flex-wrap gap-2">
+          {activeDomains.map((domain) => {
+            const isVisible = !hiddenLabels.has(domain.label);
+            const color = colorsByLabel[domain.label];
+            return (
+              <button
+                key={domain.key}
+                onClick={() => toggleLabel(domain.label)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "3px 10px",
+                  borderRadius: 9999,
+                  border: `1.5px solid ${isVisible ? color : "#d1d5db"}`,
+                  backgroundColor: isVisible ? `${color}18` : "transparent",
+                  cursor: "pointer",
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: isVisible ? color : "#9ca3af",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                <span
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: "50%",
+                    backgroundColor: isVisible ? color : "#d1d5db",
+                    flexShrink: 0,
+                    transition: "background-color 0.15s ease",
+                  }}
+                />
+                {domain.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Chart */}
-      <div ref={containerRef} style={{ height }} className="w-full">
+      <div style={{ height: chartHeight }}>
         {!hasData ? (
           <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
             Sem dados para exibir.
@@ -182,55 +297,57 @@ export function MultipleLineChart({
         ) : (
           <ResponsiveLine
             data={series}
-            theme={nivoTheme}
-            margin={{ top: 30, right: 30, bottom: 90, left: 70 }}
+            theme={{
+              ...nivoTheme,
+              background: "transparent",
+              crosshair: {
+                line: {
+                  stroke: "#94a3b8",
+                  strokeWidth: 1,
+                  strokeDasharray: "6 4",
+                },
+              },
+            }}
+            margin={{ top: 10, right: 30, bottom: 70, left: 70 }}
             xScale={{ type: "point" }}
-            yScale={{ type: "linear", min: 0, max: "auto", stacked: false }}
+            // Fixed 0–10 scale on Y axis
+            yScale={{ type: "linear", min: 0, max: 10, stacked: false }}
+            yFormat=".1f"
+            curve="monotoneX"
             enableGridX={false}
             enableGridY
-            lineWidth={3.5}
-            enablePoints
-            pointSize={9}
-            pointBorderWidth={2}
-            pointBorderColor={{ from: "serieColor" }}
+            gridYValues={[0, 2, 4, 6, 8, 10]}
+            lineWidth={2.5}
+            enablePoints={false}
             enableArea
             areaOpacity={0.08}
-            useMesh
+            enableSlices="x"
+            sliceTooltip={SliceTooltip}
             colors={({ id }) => colorsByLabel[id as string]}
+            onClick={(item) => {
+              if ("points" in item) return;
+              const assessmentId = (item.data as unknown as PointExtraData)
+                .assessmentId;
+              if (assessmentId) {
+                onSelectAssessment?.(assessmentId);
+              }
+            }}
             axisBottom={{
-              tickRotation: -25,
-              legend: xLabel,
+              tickRotation: 0,
+              tickPadding: 10,
+              legend: "Data da avaliação",
+              legendOffset: 46,
               legendPosition: "middle",
-              legendOffset: 60,
             }}
             axisLeft={{
-              legend: yLabel,
+              tickSize: 0,
+              tickPadding: 12,
+              tickValues: [0, 2, 4, 6, 8, 10],
+              format: (v) => `${v}`,
+              legend: "Pontuação normalizada (0–10)",
+              legendOffset: -56,
               legendPosition: "middle",
-              legendOffset: -55,
             }}
-            tooltip={({ point }) => (
-              <div className="rounded-md border bg-white p-3 shadow-md text-sm">
-                <div
-                  className="font-semibold"
-                  style={{ color: point.seriesColor }}
-                >
-                  {point.seriesId}
-                </div>
-                <div>Data: {point.data.xFormatted}</div>
-                <div>Score: {point.data.yFormatted}</div>
-              </div>
-            )}
-            legends={[
-              {
-                anchor: "bottom",
-                direction: "row",
-                translateY: 55,
-                itemWidth: 110,
-                itemHeight: 20,
-                symbolSize: 12,
-                symbolShape: "circle",
-              },
-            ]}
           />
         )}
       </div>

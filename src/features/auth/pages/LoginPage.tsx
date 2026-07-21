@@ -1,24 +1,53 @@
 import {
   Box,
   Button,
+  Input,
   Label,
   Separator,
   Typography,
 } from "@/core/components/ui";
+import { clientRoutes } from "@/core/configs/client.routes";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useLogin } from "../hooks/useLogin";
+import type { ApiError } from "@/core/services/client.service";
+import { toast } from "react-toastify";
 
 export default function LoginPage() {
   const router = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const { mutateAsync: login, isPending } = useLogin();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    router("/");
+    try {
+      await login({ email, password });
+      router("/");
+    } catch (err) {
+      const message =
+        (err as ApiError).message || "Não foi possível fazer login.";
+      toast.error(message, {
+        position: "top-center",
+        autoClose: 2500,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "light",
+      });
+    }
   };
 
   return (
-    <Box display="flex" justify="center" align="center">
+    <Box
+      display="flex"
+      justify="center"
+      align="center"
+      className="h-full min-w-[85%]"
+    >
       <Box
-        className="w-full max-w-md rounded-xl shadow-lg p-6 border"
+        className="w-full max-w-2xl rounded-xl shadow-2xl p-6 border"
         display="flex"
         direction="column"
         gap={24}
@@ -36,40 +65,54 @@ export default function LoginPage() {
           </Box>
           <Separator />
           <Typography variant="body" className="text-muted-foreground">
-            Digite seu CPF e senha para acessar sua conta.
+            Digite seu Email e senha para acessar sua conta.
           </Typography>
         </Box>
 
         {/* Form Fields */}
-        <Box display="flex" direction="column" gap={16}>
+        <Box
+          display="flex"
+          direction="column"
+          gap={16}
+          onSubmit={handleSubmit}
+          as="form"
+        >
           <Box display="flex" direction="column" gap={6}>
-            <Label htmlFor="cpf">CPF</Label>
-            <input
-              type="text"
-              id="cpf"
-              name="cpf"
-              placeholder="000.000.000-00"
-              className="w-full h-11 px-3 rounded-md border border-border bg-background text-sm
-                         focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
-                         transition"
+            <Label htmlFor="email">Email</Label>
+            <Input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="seu.email@exemplo.com"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              required
             />
           </Box>
 
           <Box display="flex" direction="column" gap={6}>
             <Label htmlFor="password">Senha</Label>
-            <input
+            <Input
               type="password"
               id="password"
               name="password"
               placeholder="Digite sua senha"
-              className="w-full h-11 px-3 rounded-md border border-border bg-background text-sm
-                         focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
-                         transition"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleSubmit(e);
+                }
+              }}
+              required
             />
           </Box>
 
           <Box display="flex" justify="flex-end">
-            <a href="#" className="text-sm text-primary hover:underline">
+            <a
+              href={clientRoutes.AUTH.FORGOT_PASSWORD}
+              className="text-sm text-primary hover:underline"
+            >
               Esqueci minha senha
             </a>
           </Box>
@@ -82,8 +125,9 @@ export default function LoginPage() {
           size="lg"
           className="w-full"
           onClick={handleSubmit}
+          disabled={isPending}
         >
-          Entrar
+          {isPending ? "Entrando..." : "Entrar"}
         </Button>
       </Box>
     </Box>

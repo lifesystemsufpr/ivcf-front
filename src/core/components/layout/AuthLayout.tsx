@@ -1,27 +1,42 @@
 // core/components/layout/AuthLayout.tsx
 import { Outlet } from "react-router-dom";
-import { Box } from "../ui";
 
 export default function AuthLayout() {
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col">
-      {/* Topo Azul com Logo */}
-      <Box
-        className="bg-primary h-64 flex flex-col items-center justify-center p-6 text-white"
-        direction="column"
-      >
-        <img src="/logo-ivcf.png" alt="IVCF-20" className="h-20 mb-2" />
-        <p className="text-sm font-light opacity-90">
-          Avaliação Clínica e Funcional Simplificada
-        </p>
-      </Box>
+    <div className="flex flex-col lg:flex-row w-screen h-screen overflow-hidden dark:bg-gray-900">
+      {/* MOBILE */}
+      <div className="flex lg:hidden flex-col h-full">
+        {/* HEADER MOBILE */}
+        <div className="flex flex-col items-center pt-8  px-4 shrink-0">
+          <img width={110} height={14} src="/logo_new.png" alt="Logo" />
+        </div>
 
-      {/* Card de Login que "sobe" no azul */}
-      <main className="flex-1 -mt-10 px-4">
-        <div className="max-w-md mx-auto bg-white rounded-t-[2.5rem] shadow-xl p-8 min-h-[calc(100vh-16rem)]">
+        {/* CONTENT */}
+        <div className="overflow-y-auto flex flex-1 items-start justify-center px-5">
           <Outlet />
         </div>
-      </main>
+
+        {/* FOOTER MOBILE */}
+        <div className="mt-auto py-4 text-center text-xs text-gray-400 dark:text-white/40 shrink-0 border-t border-gray-100 dark:border-white/5">
+          Desenvolvido por Life Systems
+        </div>
+      </div>
+
+      {/* DESKTOP */}
+      <div className="hidden lg:flex lg:w-1/2 h-full items-center justify-center">
+        <Outlet />
+      </div>
+
+      <div className="hidden lg:grid lg:w-1/2 h-full bg-primary items-center">
+        <div className="relative flex items-center justify-center z-10">
+          <div className="flex flex-col items-center max-w-xs">
+            <img width={331} height={48} src="/logo.png" alt="Logo" />
+            <p className="mt-3 text-center text-gray-400 dark:text-white/60">
+              IVCF-20 Digital: Inteligência para o cuidado da fragilidade.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

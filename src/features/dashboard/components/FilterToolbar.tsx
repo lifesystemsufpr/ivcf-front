@@ -1,28 +1,21 @@
-import { type ChangeEvent } from "react";
+import { type ChangeEvent, useEffect, useRef, useState } from "react";
 import { Box } from "@/core/components/ui/Box";
 import { Button } from "@/core/components/ui/Button";
 import { Input } from "@/core/components/ui/Input";
 import { Label } from "@/core/components/ui/Label";
-import { Typography } from "@/core/components/ui/Typography";
-import type {
-  AggregationDimension,
-  FragilityFilters,
-  PatientFragility,
-} from "../types";
-import { exportCsv } from "../utils/transforms";
+import type { AggregationDimension, FragilityFilters } from "../types";
 
 type FilterToolbarProps = {
   filters: FragilityFilters;
-  setFilter: (
-    key: keyof FragilityFilters,
-    value: FragilityFilters[keyof FragilityFilters],
+  setFilter: <K extends keyof FragilityFilters>(
+    key: K,
+    value: FragilityFilters[K],
   ) => void;
   stratification: AggregationDimension;
   setStratification: (value: AggregationDimension) => void;
   trendBySex: boolean;
   setTrendBySex: (value: boolean) => void;
   ageBounds: { min: number; max: number };
-  filteredData: PatientFragility[];
 };
 
 export function FilterToolbar({
@@ -30,27 +23,88 @@ export function FilterToolbar({
   setFilter,
   stratification,
   setStratification,
-  trendBySex,
-  setTrendBySex,
   ageBounds,
-  filteredData,
 }: FilterToolbarProps) {
-  const handleAgeChange = (e: ChangeEvent<HTMLInputElement>, index: 0 | 1) => {
+  // 1. Estados Locais para inputs de texto/data (Buffer)
+  const skipAgeSyncRef = useRef(false);
+  const [localAge, setLocalAge] = useState<[number, number]>(
+    filters.ageRange ?? [ageBounds.min, ageBounds.max],
+  );
+  const [localPeriod, setLocalPeriod] = useState({
+    start: filters.period?.start ?? "",
+    end: filters.period?.end ?? "",
+  });
+
+  useEffect(() => {
+    setLocalAge(filters.ageRange ?? [ageBounds.min, ageBounds.max]);
+    setLocalPeriod({
+      start: filters.period?.start ?? "",
+      end: filters.period?.end ?? "",
+    });
+  }, [filters.ageRange, filters.period, ageBounds]);
+
+  useEffect(() => {
+    if (skipAgeSyncRef.current) {
+      skipAgeSyncRef.current = false;
+      return;
+    }
+
+    const handler = setTimeout(() => {
+      if (JSON.stringify(localAge) !== JSON.stringify(filters.ageRange)) {
+        setFilter("ageRange", localAge);
+      }
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [localAge, setFilter, filters.ageRange]);
+
+  // 4. Efeito de Debounce para Período
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (JSON.stringify(localPeriod) !== JSON.stringify(filters.period)) {
+        setFilter("period", localPeriod);
+      }
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [localPeriod, setFilter, filters.period]);
+
+  const handleAgeInputChange = (
+    e: ChangeEvent<HTMLInputElement>,
+    index: 0 | 1,
+  ) => {
     const value = Number(e.target.value);
-    const current = filters.ageRange ?? [ageBounds.min, ageBounds.max];
-    const next: [number, number] =
-      index === 0 ? [value, current[1]] : [current[0], value];
-    setFilter("ageRange", next);
+    setLocalAge((prev) => {
+      const next: [number, number] = [...prev];
+      next[index] = value;
+      return next;
+    });
+  };
+
+  const handleClearFilters = () => {
+    skipAgeSyncRef.current = true;
+    setFilter("ageRange", undefined);
+    setFilter("period", undefined);
+    setFilter("sex", "all");
+    setLocalAge([ageBounds.min, ageBounds.max]);
+    setLocalPeriod({ start: "", end: "" });
+  };
+
+  const handlePeriodInputChange = (
+    e: ChangeEvent<HTMLInputElement>,
+    key: "start" | "end",
+  ) => {
+    setLocalPeriod((prev) => ({ ...prev, [key]: e.target.value }));
   };
 
   return (
-    <Box className="rounded-lg border bg-card p-4 shadow-sm">
+    <Box className="group relative overflow-hidden rounded-lg border border-border/70 bg-card p-4 shadow-sm transition-all duration-300">
+      <div className="absolute inset-x-0 top-0 h-0.5 bg-muted" />
       <div className="flex flex-wrap items-end gap-4">
+        {/* Sexo (Sem debounce, pois é clique único) */}
         <Box className="space-y-1" display="flex" direction="column">
           <Label htmlFor="sexo">Sexo</Label>
           <select
             id="sexo"
-            className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+            className="h-10 rounded-md border border-input bg-background px-3 text-sm focus:ring-2 focus:ring-primary"
             value={filters.sex ?? "all"}
             onChange={(e) =>
               setFilter("sex", e.target.value as FragilityFilters["sex"])
@@ -62,16 +116,19 @@ export function FilterToolbar({
           </select>
         </Box>
 
+        {/* Idade com Debounce */}
         <Box className="space-y-1" display="flex" direction="column">
-          <Label>Idade (mín - máx)</Label>
+          <Label>
+            Idade ({ageBounds.min} - {ageBounds.max})
+          </Label>
           <Box display="flex" align="center" gap={2}>
             <Input
               type="number"
               className="w-20"
               min={ageBounds.min}
               max={ageBounds.max}
-              value={(filters.ageRange ?? [ageBounds.min, ageBounds.max])[0]}
-              onChange={(e) => handleAgeChange(e, 0)}
+              value={localAge[0]}
+              onChange={(e) => handleAgeInputChange(e, 0)}
             />
             <span className="text-sm text-muted-foreground">até</span>
             <Input
@@ -79,39 +136,30 @@ export function FilterToolbar({
               className="w-20"
               min={ageBounds.min}
               max={ageBounds.max}
-              value={(filters.ageRange ?? [ageBounds.min, ageBounds.max])[1]}
-              onChange={(e) => handleAgeChange(e, 1)}
+              value={localAge[1]}
+              onChange={(e) => handleAgeInputChange(e, 1)}
             />
           </Box>
         </Box>
 
+        {/* Período com Debounce */}
         <Box className="space-y-1" display="flex" direction="column">
-          <Label>Período</Label>
+          <Label>Período de coleta</Label>
           <Box display="flex" align="center" gap={2}>
             <Input
               type="date"
-              value={filters.period?.start ?? ""}
-              onChange={(e) =>
-                setFilter("period", {
-                  ...(filters.period ?? {}),
-                  start: e.target.value,
-                })
-              }
+              value={localPeriod.start}
+              onChange={(e) => handlePeriodInputChange(e, "start")}
             />
-            <span className="text-sm text-muted-foreground">até</span>
             <Input
               type="date"
-              value={filters.period?.end ?? ""}
-              onChange={(e) =>
-                setFilter("period", {
-                  ...(filters.period ?? {}),
-                  end: e.target.value,
-                })
-              }
+              value={localPeriod.end}
+              onChange={(e) => handlePeriodInputChange(e, "end")}
             />
           </Box>
         </Box>
 
+        {/* Estratificação */}
         <Box className="space-y-1" display="flex" direction="column">
           <Label htmlFor="estratificacao">Estratificar por</Label>
           <select
@@ -123,53 +171,17 @@ export function FilterToolbar({
             }
           >
             <option value="sex">Sexo</option>
-            <option value="ageGroup">Faixa etária</option>
+            <option value="ageGroup">Faixa Etária</option>
           </select>
         </Box>
 
-        <Box className="space-y-1" display="flex" direction="column">
-          <Label>Modo linha temporal</Label>
-          <div className="flex items-center gap-2">
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                className="h-4 w-4"
-                checked={trendBySex}
-                onChange={(e) => setTrendBySex(e.target.checked)}
-              />
-              <span>Separar por sexo</span>
-            </label>
-          </div>
-        </Box>
-
+        {/* Ações */}
         <div className="flex flex-1 justify-end gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setFilter("ageRange", undefined)}
-          >
-            Reset idade
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setFilter("period", undefined)}
-          >
-            Reset período
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => exportCsv(filteredData, "ivcf_fragilidade_filtrado")}
-          >
-            Exportar CSV
+          <Button variant="default" size="sm" onClick={handleClearFilters}>
+            Limpar
           </Button>
         </div>
       </div>
-      <Typography variant="caption" className="mt-2 block">
-        Dica clínica: mantenha a mesma escala de scores entre gráficos para
-        leitura consistente.
-      </Typography>
     </Box>
   );
 }
