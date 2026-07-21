@@ -5,9 +5,9 @@ export default function AuthLayout() {
   return (
     <div className="flex flex-col lg:flex-row w-screen h-screen overflow-hidden dark:bg-gray-900">
       {/* MOBILE */}
-      <div className="flex lg:hidden flex-col h-full">
+      <div className="flex flex-1 flex-col h-full">
         {/* HEADER MOBILE */}
-        <div className="flex flex-col items-center pt-8  px-4 shrink-0">
+        <div className="lg:hidden flex flex-col items-center pt-8  px-4 shrink-0">
           <img width={110} height={14} src="/logo_new.png" alt="Logo" />
         </div>
 
@@ -16,15 +16,9 @@ export default function AuthLayout() {
           <Outlet />
         </div>
 
-        {/* FOOTER MOBILE */}
         <div className="mt-auto py-4 text-center text-xs text-gray-400 dark:text-white/40 shrink-0 border-t border-gray-100 dark:border-white/5">
           Desenvolvido por Life Systems
         </div>
-      </div>
-
-      {/* DESKTOP */}
-      <div className="hidden lg:flex lg:w-1/2 h-full items-center justify-center">
-        <Outlet />
       </div>
 
       <div className="hidden lg:grid lg:w-1/2 h-full bg-primary items-center">
