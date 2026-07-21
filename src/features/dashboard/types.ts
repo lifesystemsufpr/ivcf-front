@@ -54,6 +54,7 @@ export interface ScatterSerieData {
   sex: string;
   riskLevel: string;
   date: string;
+  participantId?: string;
 }
 export interface ScatterSerie {
   id: string;

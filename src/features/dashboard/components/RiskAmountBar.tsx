@@ -1,4 +1,4 @@
-import { ResponsiveBar } from "@nivo/bar";
+import { BarItem, ResponsiveBar } from "@nivo/bar";
 import { nivoTheme, riskColorMap } from "../utils/transforms";
 import type { RiskBarDatum } from "../types";
 import { Card, CardContent } from "@/core/components/ui/Card";
@@ -226,6 +226,11 @@ export function RiskAmountBar({
               "legends",
               "annotations",
             ]}
+            barComponent={(props) => (
+              <g style={{ cursor: "pointer" }}>
+                <BarItem {...props} />
+              </g>
+            )}
             tooltip={({ data }) => (
               <Box
                 display="flex"
