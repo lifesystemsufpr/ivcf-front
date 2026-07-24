@@ -86,6 +86,16 @@ export interface FragilityDashboardResponse {
   };
 }
 
+export interface DetailChartResponse {
+  participantId: string;
+  participantName: string;
+  age: number;
+  healthProfessionalName: string;
+  score: number;
+  classification: string;
+  date: string;
+}
+
 export type AggregationDimension = "sex" | "ageGroup";
 
 export type FragilityFilters = {

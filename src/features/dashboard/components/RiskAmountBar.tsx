@@ -9,12 +9,14 @@ type RiskAmountBarProps = {
   data: RiskBarDatum[];
   total: number;
   isCompact?: boolean;
+  onBarClick?: (datum: RiskBarDatum) => void;
 };
 
 export function RiskAmountBar({
   data,
   total,
   isCompact = false,
+  onBarClick,
 }: RiskAmountBarProps) {
   const dataWithPercentages = data.map((item) => ({
     ...item,
@@ -216,6 +218,7 @@ export function RiskAmountBar({
             label={({ data }) => `${data.percentage}%`}
             labelSkipHeight={16}
             labelTextColor="#ffffff"
+            onClick={(bar) => onBarClick?.(bar.data as RiskBarDatum)}
             layers={[
               riskBackgroundLayer,
               "grid",
