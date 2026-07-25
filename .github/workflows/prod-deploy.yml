@@ -1,12 +1,12 @@
-name: CI/CD Dev Deploy
+name: CI/CD Prod Deploy
 
 on:
   push:
-    branches: [dev]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
   deploy:
     uses: ./.github/workflows/build.yml
     with:
-      environment: dev
+      environment: prod
