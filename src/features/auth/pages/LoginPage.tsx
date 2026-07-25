@@ -12,11 +12,13 @@ import { useState } from "react";
 import { useLogin } from "../hooks/useLogin";
 import type { ApiError } from "@/core/services/client.service";
 import { toast } from "react-toastify";
+import { Eye, EyeClosed } from "lucide-react";
 
 export default function LoginPage() {
   const router = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const { mutateAsync: login, isPending } = useLogin();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -93,10 +95,23 @@ export default function LoginPage() {
           <Box display="flex" direction="column" gap={6}>
             <Label htmlFor="password">Senha</Label>
             <Input
-              type="password"
+              type={showPassword ? "text" : "password"}
               id="password"
               name="password"
               placeholder="Digite sua senha"
+              rightElement={
+                showPassword ? (
+                  <EyeClosed
+                    className="cursor-pointer"
+                    onClick={() => setShowPassword(false)}
+                  />
+                ) : (
+                  <Eye
+                    className="cursor-pointer"
+                    onClick={() => setShowPassword(true)}
+                  />
+                )
+              }
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               onKeyDown={(e) => {
