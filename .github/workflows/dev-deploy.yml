@@ -10,3 +10,10 @@ jobs:
     uses: ./.github/workflows/build.yml
     with:
       environment: dev
+    secrets:
+      DEPLOY_ENV_FILE: ${{ secrets.DEV_ENV_FILE }}
+      DEPLOY_SSH_HOST: ${{ secrets.DEV_SSH_HOST }}
+      DEPLOY_SSH_USERNAME: ${{ secrets.DEV_SSH_USERNAME }}
+      DEPLOY_SSH_KEY: ${{ secrets.DEV_SSH_KEY }}
+      DEPLOY_SSH_PORT: 22
+      DEPLOY_PATH: /var/www/ivcf-web
