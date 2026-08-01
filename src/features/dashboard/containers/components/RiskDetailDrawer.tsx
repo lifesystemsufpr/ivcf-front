@@ -97,7 +97,9 @@ export function RiskDetailDrawer({
       onClose={onClose}
       anchor="right"
       size="lg"
-      title={classification ? `Classificação: ${classification}` : "Detalhamento"}
+      title={
+        classification ? `Classificação: ${classification}` : "Detalhamento"
+      }
       description={
         classification
           ? `${total} paciente${total === 1 ? "" : "s"} nesta classificação`

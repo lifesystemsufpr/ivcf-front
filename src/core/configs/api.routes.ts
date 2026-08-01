@@ -18,6 +18,13 @@ export const apiRoutes = {
       `${API_URL_BASE}/participant/check-email/${email}`,
   },
 
+  HISTORICO_BASES: {
+    LIST: ({ id }: { id: string }) =>
+      `${API_URL_BASE}/participants/${id}/historico-bases`,
+    CREATE: ({ id }: { id: string }) =>
+      `${API_URL_BASE}/participants/${id}/historico-bases`,
+  },
+
   PROFESSIONALS: {
     LINK_PARTICIPANT: `${API_URL_BASE}/health-professional/link-participant`,
   },
