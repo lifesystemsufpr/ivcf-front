@@ -36,6 +36,8 @@ export function HistoricoBaseCard({
   selected,
   onClick,
 }: HistoricoBaseCardProps) {
+  if (base.isCurrentUserOwner) return null;
+
   return (
     <Card
       className={cn(

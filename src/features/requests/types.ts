@@ -32,7 +32,7 @@ export interface ShareRequestItem {
 }
 
 export interface ListShareRequestsResponse extends SuccessResponse<
-  ListShareRequestsQuery[]
+  ShareRequestItem[]
 > {}
 
 export interface CreateShareRequestDto {

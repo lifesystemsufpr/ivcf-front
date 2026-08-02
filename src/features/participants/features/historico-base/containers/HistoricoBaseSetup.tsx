@@ -3,13 +3,13 @@ import { toast } from "react-toastify";
 import { Box, Button, Typography } from "@/core/components/ui";
 import { getErrorMessage } from "@/core/utils";
 import { FilePlus2, ListChecks } from "lucide-react";
+import { useMutationShareRequest } from "@/features/requests/hooks/useMutationShareRequest";
 import { useMutationHistoricoBase } from "../hooks/useMutationHistoricoBase";
 import { HistoricoBaseList } from "./HistoricoBaseList";
-import type { Base, CreateBaseRequest } from "../types";
 
 interface HistoricoBaseSetupProps {
   participantId: string;
-  onBaseCreated?: (base: Base) => void;
+  onBaseCreated?: () => void;
 }
 
 export function HistoricoBaseSetup({
@@ -20,6 +20,9 @@ export function HistoricoBaseSetup({
   const [selectedBaseIds, setSelectedBaseIds] = useState<string[]>([]);
 
   const createBase = useMutationHistoricoBase(participantId);
+  const createShareRequest = useMutationShareRequest();
+
+  const isPending = createBase.isPending || createShareRequest.isPending;
 
   const toggleList = () => {
     setIsListVisible((visible) => {
@@ -36,32 +39,42 @@ export function HistoricoBaseSetup({
     );
   };
 
-  const createWith = (payload: CreateBaseRequest, successMessage: string) => {
-    createBase.mutate(payload, {
-      onSuccess: (base) => {
-        toast.success(successMessage);
-        setSelectedBaseIds([]);
-        setIsListVisible(false);
-        onBaseCreated?.(base);
-      },
-      onError: (error) => {
-        toast.error(
-          getErrorMessage(error, "Erro ao criar a base. Tente novamente."),
-        );
-      },
-    });
+  const finish = (successMessage: string) => {
+    toast.success(successMessage);
+    setSelectedBaseIds([]);
+    setIsListVisible(false);
+    onBaseCreated?.();
   };
 
   const handleCreateFromScratch = () => {
-    createWith({ origin: "FROM_SCRATCH" }, "Base criada do zero com sucesso.");
+    createBase.mutate(
+      { origin: "FROM_SCRATCH" },
+      {
+        onSuccess: () => finish("Base criada do zero com sucesso."),
+        onError: (error) =>
+          toast.error(
+            getErrorMessage(error, "Erro ao criar a base. Tente novamente."),
+          ),
+      },
+    );
   };
 
-  const handleCopySelectedBases = () => {
+  const handleRequestSelectedBases = () => {
     if (selectedBaseIds.length === 0) return;
 
-    createWith(
-      { origin: "COPIED", sourceBaseIds: selectedBaseIds },
-      "Base criada a partir das bases selecionadas.",
+    createShareRequest.mutate(
+      { participantId, sourceHistoricoBaseIds: selectedBaseIds },
+      {
+        onSuccess: () =>
+          finish("Solicitação enviada ao dono das bases selecionadas."),
+        onError: (error) =>
+          toast.error(
+            getErrorMessage(
+              error,
+              "Erro ao solicitar as bases. Tente novamente.",
+            ),
+          ),
+      },
     );
   };
 
@@ -75,7 +88,7 @@ export function HistoricoBaseSetup({
           variant="outline"
           leftIcon={<ListChecks size={16} />}
           onClick={toggleList}
-          disabled={createBase.isPending}
+          disabled={isPending}
         >
           {isListVisible ? "Ocultar bases existentes" : "Ver bases existentes"}
         </Button>
@@ -86,7 +99,7 @@ export function HistoricoBaseSetup({
           leftIcon={<FilePlus2 size={16} />}
           onClick={handleCreateFromScratch}
           loading={createBase.isPending}
-          disabled={createBase.isPending}
+          disabled={isPending}
         >
           Criar base do zero
         </Button>
@@ -95,7 +108,7 @@ export function HistoricoBaseSetup({
       {isListVisible && (
         <Box display="flex" direction="column" gap={12}>
           <Typography variant="caption" className="text-gray-500">
-            Selecione as bases que deseja aproveitar para este participante.
+            Selecione as bases que deseja solicitar ao profissional responsável.
           </Typography>
 
           <HistoricoBaseList
@@ -122,11 +135,11 @@ export function HistoricoBaseSetup({
 
               <Button
                 type="button"
-                onClick={handleCopySelectedBases}
-                loading={createBase.isPending}
-                disabled={createBase.isPending}
+                onClick={handleRequestSelectedBases}
+                loading={createShareRequest.isPending}
+                disabled={isPending}
               >
-                Criar base com a seleção
+                Solicitar acesso à seleção
               </Button>
             </Box>
           )}
