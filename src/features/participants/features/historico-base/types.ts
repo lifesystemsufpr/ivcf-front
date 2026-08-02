@@ -18,4 +18,10 @@ export interface BaseOwner {
   specialty: string;
 }
 
-export type BaseOrigin = "FROM_SCRATCH";
+export type BaseOrigin = "FROM_SCRATCH" | "COPIED";
+
+export interface CreateBaseRequest {
+  origin: BaseOrigin;
+  /** Bases usadas como fonte quando origin e COPIED. */
+  sourceBaseIds?: string[];
+}

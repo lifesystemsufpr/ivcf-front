@@ -22,3 +22,4 @@ export * from "./tabs";
 export * from "./table";
 export * from "./Tooltip";
 export * from "./Checkbox";
+export * from "./Grid";
