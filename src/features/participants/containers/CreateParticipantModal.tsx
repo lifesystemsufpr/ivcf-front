@@ -43,6 +43,7 @@ export function CreateParticipantModal({
           onVerifyEmail={verifyEmail}
           isCheckingEmail={isCheckingEmail}
           existingParticipantId={existingParticipantId}
+          onSuccess={handleClose}
         />
       ) : (
         <ParticipantForm

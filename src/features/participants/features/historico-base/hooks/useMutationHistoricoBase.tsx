@@ -11,7 +11,8 @@ import type { Base, CreateBaseRequest } from "../types";
  */
 export function useMutationHistoricoBase(participantId: string) {
   const queryClient = useQueryClient();
-  const queryKey = ["historico-bases", participantId];
+  const queryKeyHistoricoBases = ["historico-bases", participantId];
+  const queryKeyParticipant = ["participants"];
 
   return useMutation({
     mutationFn: (data: CreateBaseRequest) =>
@@ -20,7 +21,8 @@ export function useMutationHistoricoBase(participantId: string) {
         data,
       ),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey: queryKeyHistoricoBases });
+      queryClient.invalidateQueries({ queryKey: queryKeyParticipant });
     },
   });
 }

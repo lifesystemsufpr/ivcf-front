@@ -7,6 +7,7 @@ interface ParticipantEmailCheckStepProps {
   onVerifyEmail: () => void;
   isCheckingEmail: boolean;
   existingParticipantId: string | null;
+  onSuccess?: () => void;
 }
 
 export function ParticipantEmailCheckStep({
@@ -15,6 +16,7 @@ export function ParticipantEmailCheckStep({
   onVerifyEmail,
   isCheckingEmail,
   existingParticipantId,
+  onSuccess,
 }: ParticipantEmailCheckStepProps) {
   return (
     <Box display="flex" direction="column" gap={4}>
@@ -53,7 +55,10 @@ export function ParticipantEmailCheckStep({
             Participante já cadastrado
           </Typography>
 
-          <HistoricoBaseSetup participantId={existingParticipantId} />
+          <HistoricoBaseSetup
+            participantId={existingParticipantId}
+            onBaseCreated={onSuccess}
+          />
         </Alert>
       )}
     </Box>
