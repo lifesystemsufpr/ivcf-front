@@ -19,16 +19,23 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [limitExceeded, setLimitExceeded] = useState(false);
   const { mutateAsync: login, isPending } = useLogin();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLimitExceeded(false);
+
     try {
       await login({ email, password });
       router("/");
     } catch (err) {
       const message =
         (err as ApiError).message || "Não foi possível fazer login.";
+
+      if ((err as ApiError).status === 429) {
+        setLimitExceeded(true);
+      }
       toast.error(message, {
         position: "top-center",
         autoClose: 2500,
@@ -122,6 +129,14 @@ export default function LoginPage() {
               required
             />
           </Box>
+
+          {limitExceeded && (
+            <Box display="flex" direction="column" gap={4}>
+              <Typography variant="small" className="text-red-400">
+                Muitas tentativas de login. Tente novamente mais tarde.
+              </Typography>
+            </Box>
+          )}
 
           <Box display="flex" justify="flex-end">
             <a
