@@ -81,6 +81,9 @@ export interface ParticipantResponse {
 
 export interface CheckEmailResponse {
   participantId: string | null;
+  hasActiveBases: boolean;
+  hasBaseWithProfessional: boolean;
+  baseActive: boolean;
 }
 
 export interface LinkParticipantRequest {

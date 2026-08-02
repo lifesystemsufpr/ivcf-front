@@ -17,6 +17,8 @@ export function CreateParticipantModal({
     setEmail,
     step,
     existingParticipantId,
+    baseActive,
+    hasBaseWithProfessional,
     formInitialValues,
     isCheckingEmail,
     verifyEmail,
@@ -43,6 +45,8 @@ export function CreateParticipantModal({
           onVerifyEmail={verifyEmail}
           isCheckingEmail={isCheckingEmail}
           existingParticipantId={existingParticipantId}
+          hasBaseWithProfessional={hasBaseWithProfessional}
+          baseActive={baseActive}
           onSuccess={handleClose}
         />
       ) : (

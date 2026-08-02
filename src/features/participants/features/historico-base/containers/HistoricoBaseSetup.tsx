@@ -9,11 +9,13 @@ import { HistoricoBaseList } from "./HistoricoBaseList";
 
 interface HistoricoBaseSetupProps {
   participantId: string;
+  hasBaseWithProfessional: boolean;
   onBaseCreated?: () => void;
 }
 
 export function HistoricoBaseSetup({
   participantId,
+  hasBaseWithProfessional,
   onBaseCreated,
 }: HistoricoBaseSetupProps) {
   const [isListVisible, setIsListVisible] = useState(false);
@@ -50,7 +52,12 @@ export function HistoricoBaseSetup({
     createBase.mutate(
       { origin: "FROM_SCRATCH" },
       {
-        onSuccess: () => finish("Base criada do zero com sucesso."),
+        onSuccess: () =>
+          finish(
+            hasBaseWithProfessional
+              ? "Base existente re-vinculada."
+              : "Base criada com sucesso.",
+          ),
         onError: (error) =>
           toast.error(
             getErrorMessage(error, "Erro ao criar a base. Tente novamente."),
@@ -101,7 +108,9 @@ export function HistoricoBaseSetup({
           loading={createBase.isPending}
           disabled={isPending}
         >
-          Criar base do zero
+          {hasBaseWithProfessional
+            ? "Usar base existente"
+            : "Criar base do zero"}
         </Button>
       </div>
 

@@ -7,6 +7,8 @@ interface ParticipantEmailCheckStepProps {
   onVerifyEmail: () => void;
   isCheckingEmail: boolean;
   existingParticipantId: string | null;
+  hasBaseWithProfessional: boolean;
+  baseActive: boolean;
   onSuccess?: () => void;
 }
 
@@ -16,6 +18,8 @@ export function ParticipantEmailCheckStep({
   onVerifyEmail,
   isCheckingEmail,
   existingParticipantId,
+  hasBaseWithProfessional,
+  baseActive,
   onSuccess,
 }: ParticipantEmailCheckStepProps) {
   return (
@@ -55,10 +59,23 @@ export function ParticipantEmailCheckStep({
             Participante já cadastrado
           </Typography>
 
-          <HistoricoBaseSetup
-            participantId={existingParticipantId}
-            onBaseCreated={onSuccess}
-          />
+          {baseActive ? (
+            <Typography variant="body">
+              Você já possui uma base ativa com este participante.
+            </Typography>
+          ) : (
+            <Box>
+              <Typography variant="body">
+                Você possui uma base inativa com este participante.
+              </Typography>
+
+              <HistoricoBaseSetup
+                participantId={existingParticipantId}
+                onBaseCreated={onSuccess}
+                hasBaseWithProfessional={hasBaseWithProfessional}
+              />
+            </Box>
+          )}
         </Alert>
       )}
     </Box>

@@ -19,6 +19,8 @@ export function useCreateParticipantFlow({
   const [existingParticipantId, setExistingParticipantId] = useState<
     string | null
   >(null);
+  const [hasBaseWithProfessional, setHasBaseWithProfessional] = useState(false);
+  const [baseActive, setBaseActive] = useState(false);
 
   const checkEmail = useCheckParticipantEmail();
   const linkParticipant = useLinkParticipantToProfessional();
@@ -55,6 +57,8 @@ export function useCreateParticipantFlow({
       onSuccess: (response) => {
         setCheckedEmail(normalizedEmail);
         setExistingParticipantId(response?.participantId ?? null);
+        setHasBaseWithProfessional(response?.hasBaseWithProfessional ?? false);
+        setBaseActive(response?.baseActive ?? false);
       },
       onError: (error) => {
         toast.error(
@@ -98,6 +102,8 @@ export function useCreateParticipantFlow({
     setEmail,
     step,
     existingParticipantId,
+    hasBaseWithProfessional,
+    baseActive,
     formInitialValues,
     isCheckingEmail: checkEmail.isPending,
     isLinkingParticipant: linkParticipant.isPending,
