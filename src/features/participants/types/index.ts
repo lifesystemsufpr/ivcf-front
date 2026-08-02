@@ -1,6 +1,10 @@
 import type { SystemRole } from "@/core/types";
 
-export type ParticipantDetailTabs = "details" | "indicators" | "assessments";
+export type ParticipantDetailTabs =
+  | "details"
+  | "indicators"
+  | "assessments"
+  | "other-bases";
 export type Gender = "MALE" | "FEMALE" | "OTHER";
 
 export interface Address {

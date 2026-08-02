@@ -2,8 +2,13 @@ import { Grid, Typography } from "@/core/components/ui";
 import { useListHistoricoBases } from "../hooks/useListHistoricoBases";
 import { HistoricoBaseCard } from "../components/HistoricoBaseCard";
 
+/** "own" = bases do profissional logado, "others" = bases dos demais. */
+type HistoricoBaseOwnership = "all" | "own" | "others";
+
 interface HistoricoBaseListProps {
   participantId: string;
+  ownership?: HistoricoBaseOwnership;
+  emptyMessage?: string;
   selectable?: boolean;
   selectedBaseIds?: string[];
   onToggleBase?: (baseId: string) => void;
@@ -11,6 +16,8 @@ interface HistoricoBaseListProps {
 
 export function HistoricoBaseList({
   participantId,
+  ownership = "all",
+  emptyMessage = "Nenhuma base encontrada para este participante.",
   selectable,
   selectedBaseIds = [],
   onToggleBase,
@@ -31,17 +38,23 @@ export function HistoricoBaseList({
     );
   }
 
-  if (data.bases.length === 0) {
+  const bases = data.bases.filter((base) => {
+    if (ownership === "own") return base.isCurrentUserOwner;
+    if (ownership === "others") return !base.isCurrentUserOwner;
+    return true;
+  });
+
+  if (bases.length === 0) {
     return (
       <Typography variant="body" color="secondary">
-        Nenhuma base encontrada para este participante.
+        {emptyMessage}
       </Typography>
     );
   }
 
   return (
     <Grid container spacing={12} className="mt-4 w-full">
-      {data.bases.map((base) => (
+      {bases.map((base) => (
         <Grid item xs={12} sm={6} key={base.id}>
           <HistoricoBaseCard
             base={base}
