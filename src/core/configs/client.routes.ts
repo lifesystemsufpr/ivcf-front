@@ -15,6 +15,10 @@ export const clientRoutes = {
     DETAILS: ({ id }: { id: string }) => `/participants/${id}`,
   },
 
+  SHARE_REQUESTS: {
+    LIST: "/share-requests",
+  },
+
   IVCF: {
     LIST: "/ivcf",
     INSTRUCTIONS: "/ivcf/new/instructions",
