@@ -18,6 +18,24 @@ export const apiRoutes = {
       `${API_URL_BASE}/participant/check-email/${email}`,
   },
 
+  HISTORICO_BASES: {
+    LIST: ({ id }: { id: string }) =>
+      `${API_URL_BASE}/participants/${id}/historico-bases`,
+    CREATE: ({ id }: { id: string }) =>
+      `${API_URL_BASE}/participants/${id}/historico-bases`,
+  },
+
+  SHARE_REQUESTS: {
+    LIST: `${API_URL_BASE}/share-requests`,
+    REQUEST_BASES: `${API_URL_BASE}/share-requests`,
+    APPROVE: ({ id }: { id: string }) =>
+      `${API_URL_BASE}/share-requests/${id}/approve`,
+    REJECT: ({ id }: { id: string }) =>
+      `${API_URL_BASE}/share-requests/${id}/reject`,
+    CANCEL: ({ id }: { id: string }) =>
+      `${API_URL_BASE}/share-requests/${id}/cancel`,
+  },
+
   PROFESSIONALS: {
     LINK_PARTICIPANT: `${API_URL_BASE}/health-professional/link-participant`,
   },

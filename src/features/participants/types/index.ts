@@ -1,6 +1,10 @@
 import type { SystemRole } from "@/core/types";
 
-export type ParticipantDetailTabs = "details" | "indicators" | "assessments";
+export type ParticipantDetailTabs =
+  | "details"
+  | "indicators"
+  | "assessments"
+  | "other-bases";
 export type Gender = "MALE" | "FEMALE" | "OTHER";
 
 export interface Address {
@@ -81,6 +85,9 @@ export interface ParticipantResponse {
 
 export interface CheckEmailResponse {
   participantId: string | null;
+  hasActiveBases: boolean;
+  hasBaseWithProfessional: boolean;
+  baseActive: boolean;
 }
 
 export interface LinkParticipantRequest {

@@ -83,9 +83,6 @@ export class ParticipantsService {
       );
       return resp;
     } catch (error) {
-      if ((error as ApiError)?.status === 404) {
-        return { participantId: null };
-      }
       throw error;
     }
   }
