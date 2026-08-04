@@ -61,6 +61,13 @@ export function useCreateParticipantFlow({
         setBaseActive(response?.baseActive ?? false);
       },
       onError: (error) => {
+        if((error as any).status === 404) {
+          setCheckedEmail(normalizedEmail)
+          setExistingParticipantId(null)
+          setHasBaseWithProfessional(false)
+          setBaseActive(false)
+          return;
+        }
         toast.error(
           getErrorMessage(error, "Erro ao verificar e-mail. Tente novamente."),
         );
