@@ -15,6 +15,7 @@ import { useMemo, useState } from "react";
 import ParticipantDetailContent from "../components/ParticipantDetailContent";
 import type { ParticipantDetailTabs } from "../types";
 import { ParticipantDashboard } from "../features/indicators";
+import { OtherBasesPanel } from "../features/historico-base";
 import ParticipantAssessmentsScreen from "../features/assessments/screen/ParticipantAssessmentsScreen";
 import { useFetchParticipant } from "../hooks/useFetchParticipant";
 import { parseParticipantResponse } from "../utils";
@@ -58,6 +59,7 @@ export function PatientDetailPage() {
           <Tab value="details">Detalhes</Tab>
           <Tab value="indicators">Indicadores</Tab>
           <Tab value="assessments">Avaliações</Tab>
+          <Tab value="other-bases">Outras Bases</Tab>
         </TabList>
 
         <TabPanel value="details">
@@ -68,6 +70,9 @@ export function PatientDetailPage() {
         </TabPanel>
         <TabPanel value="assessments">
           <ParticipantAssessmentsScreen id={participant.id} />
+        </TabPanel>
+        <TabPanel value="other-bases">
+          <OtherBasesPanel participantId={participant.id} />
         </TabPanel>
       </Tabs>
     </Box>

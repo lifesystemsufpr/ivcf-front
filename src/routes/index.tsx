@@ -24,6 +24,11 @@ const PatientDetailPage = lazy(() =>
     default: module.PatientDetailPage,
   })),
 );
+const ShareRequestsListPage = lazy(() =>
+  import("@/features/requests").then((module) => ({
+    default: module.ShareRequestsListPage,
+  })),
+);
 const AssessmentPage = lazy(() =>
   import("@/features/assessment/pages/AssessmentPage").then((module) => ({
     default: module.AssessmentPage,
@@ -72,6 +77,10 @@ export function AppRoutes() {
             <Route
               path={clientRoutes.PARTICIPANTS.DETAILS({ id: ":id" })}
               element={<PatientDetailPage />}
+            />
+            <Route
+              path={clientRoutes.SHARE_REQUESTS.LIST}
+              element={<ShareRequestsListPage />}
             />
             <Route path={clientRoutes.IVCF.LIST} element={<AssessmentPage />} />
             <Route element={<CreateAssessmentLayout />}>

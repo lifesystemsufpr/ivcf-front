@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { clientRoutes } from "../configs/client.routes";
-import { Home, Users2, ClipboardList } from "lucide-react";
+import { Home, Users2, ClipboardList, Share2 } from "lucide-react";
 import { startTransition, useMemo, type ComponentType } from "react";
 import { cn } from "../utils";
 
@@ -18,6 +18,11 @@ const NAV_ITEMS: NavItem[] = [
     icon: Users2,
   },
   { label: "Avaliações", path: clientRoutes.IVCF.LIST, icon: ClipboardList },
+  {
+    label: "Solicitações",
+    path: clientRoutes.SHARE_REQUESTS.LIST,
+    icon: Share2,
+  },
 ];
 
 type NavBarProps = {

@@ -1,0 +1,94 @@
+name: Build and deploy
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: GitHub Environment associated with the deployment
+        required: true
+        type: string
+      deploy-path:
+        description: Destination directory on the deployment server
+        required: true
+        type: string
+      ssh-port:
+        description: SSH server port
+        required: true
+        type: number
+    secrets:
+      DEPLOY_ENV_FILE:
+        required: true
+      DEPLOY_SSH_HOST:
+        required: true
+      DEPLOY_SSH_USERNAME:
+        required: true
+      DEPLOY_SSH_KEY:
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-deploy:
+    name: Build and deploy (${{ inputs.environment }})
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Create .env file
+        env:
+          ENV_FILE: ${{ secrets.DEPLOY_ENV_FILE }}
+        run: printf '%s' "$ENV_FILE" > .env
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Validate deployment configuration
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.DEPLOY_SSH_HOST }}
+          SSH_USERNAME: ${{ secrets.DEPLOY_SSH_USERNAME }}
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          SSH_PORT: ${{ inputs.ssh-port }}
+          DEPLOY_PATH: ${{ inputs.deploy-path }}
+        run: |
+          missing=()
+
+          for variable in SSH_HOST SSH_USERNAME SSH_KEY SSH_PORT DEPLOY_PATH; do
+            if [ -z "${!variable}" ]; then
+              missing+=("$variable")
+            fi
+          done
+
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "::error::Missing repository secrets for '${{ inputs.environment }}': ${missing[*]}"
+            exit 1
+          fi
+
+          if ! grep -q -- "PRIVATE KEY-----" <<< "$SSH_KEY"; then
+            echo "::error::SSH_KEY does not contain a complete private SSH key"
+            exit 1
+          fi
+
+      - name: Deploy via SSH
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_SSH_HOST }}
+          username: ${{ secrets.DEPLOY_SSH_USERNAME }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ inputs.ssh-port }}
+          source: dist/*
+          target: ${{ inputs.deploy-path }}
+          strip_components: 1

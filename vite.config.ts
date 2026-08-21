@@ -13,7 +13,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/backend": {
-        target: "https://app.ivcf.com.br",
+        target: "https://dev.ivcf.com.br",
         changeOrigin: true,
         secure: false,
       },

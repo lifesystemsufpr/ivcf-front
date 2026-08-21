@@ -4,7 +4,7 @@ import { FilterToolbar } from "../components/FilterToolbar";
 import { SummaryStats } from "../components/SummaryStats";
 import { DomainHeatmap } from "../components/DomainHeatmap";
 import { RiskPyramid } from "../components/RiskPyramid";
-import { RiskAmountBar } from "../components/RiskAmountBar";
+import { RiskAmountBarContainer } from "../containers";
 import { ComorbidityScatter } from "../components/ComorbidityScatter";
 import { DomainDrilldownBars } from "../components/DomainDrilldownBars";
 import { useDashboard } from "../contexts/DashboardContext";
@@ -65,7 +65,7 @@ export default function HomePage() {
       <SummaryStats summary={summary} />
 
       <div className="grid gap-6 xl:grid-cols-2">
-        <RiskAmountBar
+        <RiskAmountBarContainer
           data={charts.riskBar}
           total={summary.totalEvaluated}
           isCompact={isCompact}

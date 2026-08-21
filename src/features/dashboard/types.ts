@@ -54,6 +54,7 @@ export interface ScatterSerieData {
   sex: string;
   riskLevel: string;
   date: string;
+  participantId?: string;
 }
 export interface ScatterSerie {
   id: string;
@@ -83,6 +84,16 @@ export interface FragilityDashboardResponse {
   metadata: {
     ageBounds: { min: number; max: number };
   };
+}
+
+export interface DetailChartResponse {
+  participantId: string;
+  participantName: string;
+  age: number;
+  healthProfessionalName: string;
+  score: number;
+  classification: string;
+  date: string;
 }
 
 export type AggregationDimension = "sex" | "ageGroup";

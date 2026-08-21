@@ -5,6 +5,16 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// O client HTTP rejeita com um objeto ApiError simples, e nao com uma instancia
+// de Error, entao os dois formatos precisam ser tratados aqui.
+export function getErrorMessage(error: unknown, fallback: string) {
+  if (typeof error === "object" && error !== null && "message" in error) {
+    const { message } = error as { message?: unknown };
+    if (typeof message === "string" && message.trim()) return message;
+  }
+  return fallback;
+}
+
 export function formatDateTime(dateString: string) {
   const options: Intl.DateTimeFormatOptions = {
     year: "numeric",
