@@ -20,11 +20,17 @@ export type ApiError = {
   data?: unknown;
 };
 
-const isAbsoluteUrl = (path: string) => path.startsWith("http");
+const isAbsoluteUrl = (path: string) => /^https?:\/\//i.test(path);
 
 const buildUrl = (path: string, query?: RequestOptions["query"]) => {
-  const base = isAbsoluteUrl(path) ? path : `${API_URL_BASE}${path}`;
-  const url = new URL(base);
+  const alreadyIncludesBase =
+    !isAbsoluteUrl(API_URL_BASE) &&
+    (path === API_URL_BASE || path.startsWith(`${API_URL_BASE}/`));
+  const target =
+    isAbsoluteUrl(path) || alreadyIncludesBase
+      ? path
+      : `${API_URL_BASE}${path.startsWith("/") ? path : `/${path}`}`;
+  const url = new URL(target, window.location.origin);
 
   if (query) {
     Object.entries(query).forEach(([key, value]) => {

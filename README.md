@@ -1,5 +1,29 @@
 # React + TypeScript + Vite
 
+## Deploy com Docker
+
+O frontend é compilado pelo Vite, servido por Nginx no container e publicado somente em `127.0.0.1:8081` na VPS. O gateway do `lifesystems-infra` encaminha a raiz do domínio para esse container e mantém `/ivcf-api` reservado ao backend.
+
+O workflow `.github/workflows/deploy.yaml` publica a imagem no GHCR e implanta na VPS. `chore/prod` usa o GitHub Environment `prod`; `dev` usa `dev`.
+
+Configure em cada GitHub Environment:
+
+- secret `ENV_PROD_FILE`, baseado em `.env.prod.example`;
+- secrets `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, `VPS_HOST_FINGERPRINT`, `VPS_SSH_PORT` e `VPS_APP_PATH`;
+- secrets `GHCR_USER` e `GHCR_PAT`, com permissão para baixar a imagem privada;
+- variável `VITE_API_URL`, normalmente `/ivcf-api`.
+
+O valor de `VITE_API_URL` é incorporado ao bundle durante o build; alterá-lo exige gerar uma nova imagem. Para desenvolvimento local, copie `.env.example` para `.env`.
+
+Prepare uma vez o diretório configurado em `VPS_APP_PATH`:
+
+```sh
+sudo mkdir -p /opt/ivcf-front
+sudo chown "$USER":"$USER" /opt/ivcf-front
+```
+
+Depois de subir o frontend, atualize o `lifesystems-infra` e valide `GET /`, `GET /healthz` e `GET /ivcf-api/status` pelo gateway.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:

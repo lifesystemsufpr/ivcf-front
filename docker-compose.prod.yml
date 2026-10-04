@@ -1,0 +1,10 @@
+services:
+  frontend:
+    image: ${FRONTEND_IMAGE:?Informe FRONTEND_IMAGE}:${IMAGE_TAG:?Informe IMAGE_TAG}
+    restart: unless-stopped
+    init: true
+    ports:
+      - "${FRONTEND_BIND_ADDRESS:-127.0.0.1}:${FRONTEND_PORT:-8081}:8080"
+    stop_grace_period: 15s
+    security_opt:
+      - no-new-privileges:true
